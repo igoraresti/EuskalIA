@@ -1,0 +1,99 @@
+import axios from 'axios';
+
+// IMPORTANT: Replace with your actual server IP when testing on physical device
+// For local simulation on Chrome, localhost works.
+const BASE_URL = 'http://localhost:5235/api';
+
+export const apiService = {
+    getLessons: async () => {
+        try {
+            const response = await axios.get(`${BASE_URL}/lessons`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching lessons:', error);
+            return [];
+        }
+    },
+
+    getLesson: async (id: number) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/lessons/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error(`Error fetching lesson ${id}:`, error);
+            return null;
+        }
+    },
+
+    getUserProgress: async (userId: number) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/users/${userId}/progress`);
+            return response.data;
+        } catch (error) {
+            console.error(`Error fetching progress for user ${userId}:`, error);
+            return null;
+        }
+    },
+
+    addXP: async (userId: number, xp: number, lessonTitle?: string) => {
+        try {
+            const response = await axios.post(`${BASE_URL}/users/${userId}/xp`, { xp, lessonTitle }, {
+                headers: { 'Content-Type': 'application/json' }
+            });
+            return response.data;
+        } catch (error) {
+            console.error(`Error adding XP for user ${userId}:`, error);
+            return null;
+        }
+    },
+
+    getUser: async (userId: number) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/users/${userId}`);
+            return response.data;
+        } catch (error) {
+            console.error(`Error fetching user ${userId}:`, error);
+            return null;
+        }
+    },
+
+    updateProfile: async (userId: number, data: any) => {
+        try {
+            const response = await axios.put(`${BASE_URL}/users/${userId}/profile`, data);
+            return response.data;
+        } catch (error) {
+            console.error(`Error updating profile for user ${userId}:`, error);
+            return null;
+        }
+    },
+
+    deleteAccount: async (userId: number) => {
+        try {
+            const response = await axios.delete(`${BASE_URL}/users/${userId}`);
+            return response.data;
+        } catch (error) {
+            console.error(`Error deleting account for user ${userId}:`, error);
+            return null;
+        }
+    },
+
+    getWorldLeaderboard: async (period: string) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/leaderboard/world?period=${period}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching world leaderboard:', error);
+            return [];
+        }
+    },
+
+    getUserLeaderboard: async (userId: number, period: string) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/leaderboard/me/${userId}?period=${period}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching user leaderboard:', error);
+            return [];
+        }
+    }
+};
