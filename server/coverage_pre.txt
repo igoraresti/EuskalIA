@@ -1,6 +1,7 @@
   Determining projects to restore...
   All projects are up-to-date for restore.
   EuskalIA.Server -> /Users/igoraresti/EuskalIA/server/EuskalIA.Server/bin/Debug/net9.0/EuskalIA.Server.dll
+/Users/igoraresti/EuskalIA/server/EuskalIA.Tests/UnitTest1.cs(196,33): warning CS8602: Dereference of a possibly null reference. [/Users/igoraresti/EuskalIA/server/EuskalIA.Tests/EuskalIA.Tests.csproj]
   EuskalIA.Tests -> /Users/igoraresti/EuskalIA/server/EuskalIA.Tests/bin/Debug/net9.0/EuskalIA.Tests.dll
   [coverlet] _mapping file name: 'CoverletSourceRootsMapping_EuskalIA.Tests'
 Test run for /Users/igoraresti/EuskalIA/server/EuskalIA.Tests/bin/Debug/net9.0/EuskalIA.Tests.dll (.NETCoreApp,Version=v9.0)
@@ -9,22 +10,22 @@ VSTest version 17.13.0 (x64)
 Starting test execution, please wait...
 A total of 1 test files matched the specified pattern.
 
-Passed!  - Failed:     0, Passed:    15, Skipped:     0, Total:    15, Duration: 2 s - EuskalIA.Tests.dll (net9.0)
+Passed!  - Failed:     0, Passed:    20, Skipped:     0, Total:    20, Duration: 2 s - EuskalIA.Tests.dll (net9.0)
   [coverlet] 
   Calculating coverage result...
    Generating report '/Users/igoraresti/EuskalIA/server/EuskalIA.Tests/coverage.json'
 
-+-----------------+------+--------+--------+
-| Module          | Line | Branch | Method |
-+-----------------+------+--------+--------+
-| EuskalIA.Server | 100% | 97.05% | 100%   |
-+-----------------+------+--------+--------+
++-----------------+--------+--------+--------+
+| Module          | Line   | Branch | Method |
++-----------------+--------+--------+--------+
+| EuskalIA.Server | 98.09% | 82.69% | 100%   |
++-----------------+--------+--------+--------+
 
-+---------+------+--------+--------+
-|         | Line | Branch | Method |
-+---------+------+--------+--------+
-| Total   | 100% | 97.05% | 100%   |
-+---------+------+--------+--------+
-| Average | 100% | 97.05% | 100%   |
-+---------+------+--------+--------+
++---------+--------+--------+--------+
+|         | Line   | Branch | Method |
++---------+--------+--------+--------+
+| Total   | 98.09% | 82.69% | 100%   |
++---------+--------+--------+--------+
+| Average | 98.09% | 82.69% | 100%   |
++---------+--------+--------+--------+
 

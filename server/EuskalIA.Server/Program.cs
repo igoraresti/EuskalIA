@@ -14,6 +14,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // AI Service
 builder.Services.AddScoped<IAIService, MockAIService>();
+builder.Services.AddScoped<IEncryptionService, EncryptionService>();
 
 // CORS
 builder.Services.AddCors(options =>

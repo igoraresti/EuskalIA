@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EuskalIA.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bf3700a9c17c4a8a32d9bb861ead657f95258779")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a49b042c71f095f33490fa06c176c77f5f63b2b2")]
 [assembly: System.Reflection.AssemblyProductAttribute("EuskalIA.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EuskalIA.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -7,9 +7,11 @@ namespace EuskalIA.Server.Models
     public class User
     {
         public int Id { get; set; }
-        public string Username { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public string Username { get; set; } = string.Empty; // Full Name
+        public string Email { get; set; } = string.Empty; // Encrypted
+        public string Nickname { get; set; } = string.Empty; // Encrypted
+        public string Password { get; set; } = string.Empty; // Encrypted
+        public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
         
         [JsonIgnore]
         public Progress? Progress { get; set; }
@@ -25,6 +27,8 @@ namespace EuskalIA.Server.Models
         public int Streak { get; set; }
         public int Level { get; set; }
         public int Txanponak { get; set; }
+        public DateTime LastLessonDate { get; set; } = DateTime.MinValue;
+        public string LastLessonTitle { get; set; } = string.Empty;
         
         [JsonIgnore]
         public User? User { get; set; }

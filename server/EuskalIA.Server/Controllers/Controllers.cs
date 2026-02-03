@@ -12,11 +12,13 @@ namespace EuskalIA.Server.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IAIService _aiService;
+        private readonly IEncryptionService _encryptionService;
 
-        public LessonsController(AppDbContext context, IAIService aiService)
+        public LessonsController(AppDbContext context, IAIService aiService, IEncryptionService encryptionService)
         {
             _context = context;
             _aiService = aiService;
+            _encryptionService = encryptionService;
         }
 
         [HttpGet]
@@ -51,31 +53,34 @@ namespace EuskalIA.Server.Controllers
                 var random = new Random();
                 var basqueNames = new[] { "Aitor", "Ane", "Iker", "Maite", "Jon", "Amaia", "Gorka", "Nerea", "Koldo", "Itziar", "Mikel", "Eider", "Unai", "Nagore", "Xabier", "Olatz", "Andoni", "Belen", "Josu", "Arantza" };
 
-                for (int i = 0; i < basqueNames.Length; i++)
+                foreach (var name in basqueNames)
                 {
-                    var user = new User { Username = basqueNames[i], Email = $"{basqueNames[i].ToLower()}@euskalia.eus" };
+                    var user = new User 
+                    { 
+                        Username = name, 
+                        Email = _encryptionService.Encrypt($"{name.ToLower()}@euskalia.eus"),
+                        Nickname = _encryptionService.Encrypt(name.ToLower()),
+                        Password = _encryptionService.Encrypt("password123"),
+                        JoinedAt = DateTime.UtcNow.AddDays(-random.Next(30, 365))
+                    };
                     _context.Users.Add(user);
-                }
-                await _context.SaveChangesAsync();
-
-                var users = await _context.Users.ToListAsync();
-                foreach (var u in users)
-                {
-                    if (await _context.Progresses.AnyAsync(p => p.UserId == u.Id)) continue;
+                    await _context.SaveChangesAsync();
 
                     var progress = new Progress
                     {
-                        UserId = u.Id,
+                        UserId = user.Id,
                         XP = random.Next(100, 5000),
                         WeeklyXP = random.Next(0, 500),
                         MonthlyXP = random.Next(0, 1500),
                         Streak = random.Next(0, 30),
                         Level = random.Next(1, 10),
-                        Txanponak = random.Next(50, 1000)
+                        Txanponak = random.Next(50, 1000),
+                        LastLessonDate = DateTime.Now.AddDays(-random.Next(1, 7)),
+                        LastLessonTitle = "La Comida"
                     };
                     _context.Progresses.Add(progress);
+                    await _context.SaveChangesAsync();
                 }
-                await _context.SaveChangesAsync();
             }
 
             return await _context.Lessons.Include(l => l.Exercises).ToListAsync();
@@ -110,47 +115,132 @@ namespace EuskalIA.Server.Controllers
     public class UsersController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IEncryptionService _encryptionService;
 
-        public UsersController(AppDbContext context)
+        public UsersController(AppDbContext context, IEncryptionService encryptionService)
         {
             _context = context;
+            _encryptionService = encryptionService;
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<User>> GetUser(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
+
+            // Decrypt for response
+            return new User 
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Nickname = _encryptionService.Decrypt(user.Nickname),
+                Email = _encryptionService.Decrypt(user.Email),
+                JoinedAt = user.JoinedAt
+            };
         }
 
         [HttpGet("{id}/progress")]
         public async Task<ActionResult<Progress>> GetProgress(int id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _context.Users.Include(u => u.Progress).FirstOrDefaultAsync(u => u.Id == id);
             if (user == null)
             {
-                // Create user if not exists for ID 1 (MVP shortcut)
-                user = new User { Id = id, Username = "Usuario", Email = "test@euskalia.com" };
-                _context.Users.Add(user);
-                await _context.SaveChangesAsync();
+                if (id == 1)
+                {
+                    user = new User 
+                    { 
+                        Username = "Igor Aresti", 
+                        Nickname = _encryptionService.Encrypt("igoraresti"),
+                        Email = _encryptionService.Encrypt("igor@euskalia.eus"),
+                        Password = _encryptionService.Encrypt("1234"),
+                        JoinedAt = DateTime.UtcNow.AddMonths(-2)
+                    };
+                    _context.Users.Add(user);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    return NotFound();
+                }
             }
 
-            var progress = await _context.Progresses.FirstOrDefaultAsync(p => p.UserId == id);
-            if (progress == null)
+            if (user.Progress == null)
             {
-                // Create initial progress if not exists
-                progress = new Progress { UserId = id, XP = 0, Level = 1, Streak = 0, Txanponak = 100 };
+                var progress = new Progress 
+                { 
+                    UserId = user.Id, 
+                    XP = 0, 
+                    Level = 1, 
+                    Streak = 0, 
+                    Txanponak = 100,
+                    LastLessonDate = DateTime.Now.AddDays(-1),
+                    LastLessonTitle = "Saludos"
+                };
                 _context.Progresses.Add(progress);
                 await _context.SaveChangesAsync();
+                user.Progress = progress;
             }
-            return progress;
+            return user.Progress;
         }
 
         [HttpPost("{id}/xp")]
-        public async Task<IActionResult> AddXP(int id, [FromBody] int xp)
+        public async Task<IActionResult> AddXP(int id, [FromBody] XPUpdateDto update)
         {
             var progress = await _context.Progresses.FirstOrDefaultAsync(p => p.UserId == id);
             if (progress == null) return NotFound();
 
-            progress.XP += xp;
+            progress.XP += update.XP;
+            progress.WeeklyXP += update.XP;
+            progress.MonthlyXP += update.XP;
+            progress.LastLessonDate = DateTime.Now;
+            progress.LastLessonTitle = update.LessonTitle ?? progress.LastLessonTitle;
+
             // Simple level logic
             progress.Level = (progress.XP / 1000) + 1;
             
             await _context.SaveChangesAsync();
             return Ok(progress);
         }
+
+        [HttpPut("{id}/profile")]
+        public async Task<IActionResult> UpdateProfile(int id, [FromBody] ProfileUpdateDto profile)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
+
+            if (!string.IsNullOrEmpty(profile.Username)) user.Username = profile.Username;
+            if (!string.IsNullOrEmpty(profile.Email)) user.Email = _encryptionService.Encrypt(profile.Email);
+            if (!string.IsNullOrEmpty(profile.Nickname)) user.Nickname = _encryptionService.Encrypt(profile.Nickname);
+            if (!string.IsNullOrEmpty(profile.Password)) user.Password = _encryptionService.Encrypt(profile.Password);
+
+            await _context.SaveChangesAsync();
+            return Ok(new { Message = "Perfil actualizado con éxito" });
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAccount(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+            return Ok(new { Message = "Cuenta eliminada" });
+        }
+    }
+
+    public class XPUpdateDto
+    {
+        public int XP { get; set; }
+        public string? LessonTitle { get; set; }
+    }
+
+    public class ProfileUpdateDto
+    {
+        public string? Username { get; set; }
+        public string? Email { get; set; }
+        public string? Nickname { get; set; }
+        public string? Password { get; set; }
     }
 }
