@@ -67,9 +67,19 @@ export const apiService = {
         }
     },
 
-    deleteAccount: async (userId: number) => {
+    requestDeletion: async (userId: number) => {
         try {
-            const response = await axios.delete(`${BASE_URL}/users/${userId}`);
+            const response = await axios.post(`${BASE_URL}/users/${userId}/request-deletion`);
+            return response.data;
+        } catch (error) {
+            console.error(`Error requesting deletion for user ${userId}:`, error);
+            return null;
+        }
+    },
+
+    deleteAccount: async (userId: number, code: string) => {
+        try {
+            const response = await axios.delete(`${BASE_URL}/users/${userId}?code=${code}`);
             return response.data;
         } catch (error) {
             console.error(`Error deleting account for user ${userId}:`, error);

@@ -10,6 +10,11 @@ export const ProfileScreen = ({ navigation }: any) => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
+    // Deletion states
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [verificationCode, setVerificationCode] = useState('');
+    const [isVerifying, setIsVerifying] = useState(false);
+
     // Form states
     const [username, setUsername] = useState('');
     const [nickname, setNickname] = useState('');
@@ -54,22 +59,71 @@ export const ProfileScreen = ({ navigation }: any) => {
         setSaving(false);
     };
 
-    const handleDelete = () => {
+    const handleLogout = () => {
         Alert.alert(
-            'Eliminar Cuenta',
-            '¿Estás seguro? Esta acción no se puede deshacer.',
+            'Cerrar Sesión',
+            '¿Realmente quieres cerrar sesión?',
             [
                 { text: 'Cancelar', style: 'cancel' },
                 {
-                    text: 'Eliminar',
+                    text: 'Cerrar Sesión',
                     style: 'destructive',
-                    onPress: async () => {
-                        const success = await apiService.deleteAccount(1);
-                        if (success) navigation.navigate('Onboarding');
+                    onPress: () => {
+                        navigation.reset({
+                            index: 0,
+                            routes: [{ name: 'Onboarding' }],
+                        });
                     }
                 }
             ]
         );
+    };
+
+    const handleRequestDelete = () => {
+        Alert.alert(
+            'Eliminar Cuenta',
+            '¿Estás seguro? Esta acción enviará un código de confirmación a tu correo.',
+            [
+                { text: 'Cancelar', style: 'cancel' },
+                {
+                    text: 'Continuar',
+                    onPress: async () => {
+                        const success = await apiService.requestDeletion(1);
+                        if (success) {
+                            setShowDeleteModal(true);
+                        } else {
+                            Alert.alert('Error', 'No se pudo procesar la solicitud.');
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
+    const handleVerifyDelete = async () => {
+        if (verificationCode.length !== 6) {
+            Alert.alert('Error', 'El código debe tener 6 dígitos.');
+            return;
+        }
+
+        setIsVerifying(true);
+        const success = await apiService.deleteAccount(1, verificationCode);
+        setIsVerifying(false);
+
+        if (success) {
+            setShowDeleteModal(false);
+            Alert.alert('Cuenta Eliminada', 'Tu cuenta ha sido eliminada correctamente.', [
+                {
+                    text: 'OK',
+                    onPress: () => navigation.reset({
+                        index: 0,
+                        routes: [{ name: 'Onboarding' }],
+                    })
+                }
+            ]);
+        } else {
+            Alert.alert('Error', 'Código incorrecto o expirado.');
+        }
     };
 
     if (loading) {
@@ -119,86 +173,120 @@ export const ProfileScreen = ({ navigation }: any) => {
                     </View>
                 </View>
 
+                {/* Verification View for Deletion */}
+                {showDeleteModal && (
+                    <View style={styles.formSection}>
+                        <Text style={[styles.formTitle, { color: COLORS.error }]}>Confirmar Eliminación</Text>
+                        <Text style={styles.label}>Introduce el código de 6 dígitos enviado a tu correo:</Text>
+                        <View style={[styles.inputWrapper, { marginTop: 10 }]}>
+                            <TextInput
+                                style={[styles.input, { textAlign: 'center', fontSize: 24, letterSpacing: 8 }]}
+                                value={verificationCode}
+                                onChangeText={setVerificationCode}
+                                placeholder="000000"
+                                keyboardType="number-pad"
+                                maxLength={6}
+                            />
+                        </View>
+                        <TouchableOpacity
+                            style={[styles.saveButton, { backgroundColor: COLORS.error, marginTop: 20 }]}
+                            onPress={handleVerifyDelete}
+                            disabled={isVerifying}
+                        >
+                            {isVerifying ? <ActivityIndicator color={COLORS.white} /> : (
+                                <Text style={styles.saveButtonText}>Confirmar y Eliminar</Text>
+                            )}
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{ alignSelf: 'center', marginTop: 15 }}
+                            onPress={() => setShowDeleteModal(false)}
+                        >
+                            <Text style={{ color: COLORS.textSecondary }}>Cancelar</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+
                 {/* Edit Form */}
-                <View style={styles.formSection}>
-                    <Text style={styles.formTitle}>Editar Información</Text>
+                {!showDeleteModal && (
+                    <View style={styles.formSection}>
+                        <Text style={styles.formTitle}>Editar Información</Text>
 
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Nombre Completo</Text>
-                        <View style={styles.inputWrapper}>
-                            <User color={COLORS.textSecondary} size={20} />
-                            <TextInput
-                                style={styles.input}
-                                value={username}
-                                onChangeText={setUsername}
-                                placeholder="Tu nombre"
-                            />
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Nombre Completo</Text>
+                            <View style={styles.inputWrapper}>
+                                <User color={COLORS.textSecondary} size={20} />
+                                <TextInput
+                                    style={styles.input}
+                                    value={username}
+                                    onChangeText={setUsername}
+                                    placeholder="Tu nombre"
+                                />
+                            </View>
                         </View>
-                    </View>
 
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Nombre de Usuario (Nick)</Text>
-                        <View style={styles.inputWrapper}>
-                            <Text style={styles.atSymbol}>@</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={nickname}
-                                onChangeText={setNickname}
-                                placeholder="tu_nick"
-                            />
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Nombre de Usuario (Nick)</Text>
+                            <View style={styles.inputWrapper}>
+                                <Text style={styles.atSymbol}>@</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    value={nickname}
+                                    onChangeText={setNickname}
+                                    placeholder="tu_nick"
+                                />
+                            </View>
                         </View>
-                    </View>
 
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Correo Electrónico</Text>
-                        <View style={styles.inputWrapper}>
-                            <Mail color={COLORS.textSecondary} size={20} />
-                            <TextInput
-                                style={styles.input}
-                                value={email}
-                                onChangeText={setEmail}
-                                placeholder="correo@ejemplo.com"
-                                keyboardType="email-address"
-                            />
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Correo Electrónico</Text>
+                            <View style={styles.inputWrapper}>
+                                <Mail color={COLORS.textSecondary} size={20} />
+                                <TextInput
+                                    style={styles.input}
+                                    value={email}
+                                    onChangeText={setEmail}
+                                    placeholder="correo@ejemplo.com"
+                                    keyboardType="email-address"
+                                />
+                            </View>
                         </View>
-                    </View>
 
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Nueva Contraseña</Text>
-                        <View style={styles.inputWrapper}>
-                            <Lock color={COLORS.textSecondary} size={20} />
-                            <TextInput
-                                style={styles.input}
-                                value={password}
-                                onChangeText={setPassword}
-                                placeholder="••••••••"
-                                secureTextEntry
-                            />
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Nueva Contraseña</Text>
+                            <View style={styles.inputWrapper}>
+                                <Lock color={COLORS.textSecondary} size={20} />
+                                <TextInput
+                                    style={styles.input}
+                                    value={password}
+                                    onChangeText={setPassword}
+                                    placeholder="••••••••"
+                                    secureTextEntry
+                                />
+                            </View>
                         </View>
-                    </View>
 
-                    <TouchableOpacity
-                        style={styles.saveButton}
-                        onPress={handleUpdate}
-                        disabled={saving}
-                    >
-                        {saving ? <ActivityIndicator color={COLORS.white} /> : (
-                            <>
-                                <Save color={COLORS.white} size={20} />
-                                <Text style={styles.saveButtonText}>Guardar Cambios</Text>
-                            </>
-                        )}
-                    </TouchableOpacity>
-                </View>
+                        <TouchableOpacity
+                            style={styles.saveButton}
+                            onPress={handleUpdate}
+                            disabled={saving}
+                        >
+                            {saving ? <ActivityIndicator color={COLORS.white} /> : (
+                                <>
+                                    <Save color={COLORS.white} size={20} />
+                                    <Text style={styles.saveButtonText}>Guardar Cambios</Text>
+                                </>
+                            )}
+                        </TouchableOpacity>
+                    </View>
 
                 {/* Danger Zone */}
                 <View style={styles.dangerZone}>
-                    <TouchableOpacity style={styles.logoutButton}>
+                    <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
                         <LogOut color={COLORS.textSecondary} size={20} />
                         <Text style={styles.logoutText}>Cerrar Sesión</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+                    <TouchableOpacity style={styles.deleteButton} onPress={handleRequestDelete}>
                         <Trash2 color={COLORS.error} size={20} />
                         <Text style={styles.deleteText}>Eliminar Cuenta</Text>
                     </TouchableOpacity>

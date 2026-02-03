@@ -218,15 +218,42 @@ namespace EuskalIA.Server.Controllers
             return Ok(new { Message = "Perfil actualizado con éxito" });
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAccount(int id)
+        [HttpPost("{id}/request-deletion")]
+        public async Task<IActionResult> RequestDeletion(int id)
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null) return NotFound();
 
+            var random = new Random();
+            var code = random.Next(100000, 999999).ToString();
+            user.DeletionCode = code;
+            user.CodeExpiration = DateTime.UtcNow.AddMinutes(15);
+            await _context.SaveChangesAsync();
+
+            // Simulate sending email by logging to console
+            Console.WriteLine("**************************************************");
+            Console.WriteLine($"[EMAIL SIMULATION] To: {user.Email}");
+            Console.WriteLine($"[EMAIL SIMULATION] Subject: Confirm Account Deletion");
+            Console.WriteLine($"[EMAIL SIMULATION] Your verification code is: {code}");
+            Console.WriteLine("**************************************************");
+
+            return Ok(new { message = "Verification code generated and sent." });
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAccount(int id, [FromQuery] string? code)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
+
+            if (string.IsNullOrEmpty(code) || user.DeletionCode != code || user.CodeExpiration < DateTime.UtcNow)
+            {
+                return BadRequest(new { message = "Invalid or expired verification code." });
+            }
+
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
-            return Ok(new { Message = "Cuenta eliminada" });
+            return Ok(new { message = "Account deleted successfully." });
         }
     }
 
