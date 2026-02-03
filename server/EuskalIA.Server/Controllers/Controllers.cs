@@ -45,6 +45,39 @@ namespace EuskalIA.Server.Controllers
                 await _context.SaveChangesAsync();
             }
 
+            // Seed users and progress for leaderboard if few users exist
+            if (await _context.Users.CountAsync() < 5)
+            {
+                var random = new Random();
+                var basqueNames = new[] { "Aitor", "Ane", "Iker", "Maite", "Jon", "Amaia", "Gorka", "Nerea", "Koldo", "Itziar", "Mikel", "Eider", "Unai", "Nagore", "Xabier", "Olatz", "Andoni", "Belen", "Josu", "Arantza" };
+
+                for (int i = 0; i < basqueNames.Length; i++)
+                {
+                    var user = new User { Username = basqueNames[i], Email = $"{basqueNames[i].ToLower()}@euskalia.eus" };
+                    _context.Users.Add(user);
+                }
+                await _context.SaveChangesAsync();
+
+                var users = await _context.Users.ToListAsync();
+                foreach (var u in users)
+                {
+                    if (await _context.Progresses.AnyAsync(p => p.UserId == u.Id)) continue;
+
+                    var progress = new Progress
+                    {
+                        UserId = u.Id,
+                        XP = random.Next(100, 5000),
+                        WeeklyXP = random.Next(0, 500),
+                        MonthlyXP = random.Next(0, 1500),
+                        Streak = random.Next(0, 30),
+                        Level = random.Next(1, 10),
+                        Txanponak = random.Next(50, 1000)
+                    };
+                    _context.Progresses.Add(progress);
+                }
+                await _context.SaveChangesAsync();
+            }
+
             return await _context.Lessons.Include(l => l.Exercises).ToListAsync();
         }
 

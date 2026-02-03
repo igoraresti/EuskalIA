@@ -20,6 +20,8 @@ namespace EuskalIA.Server.Models
         public int Id { get; set; }
         public int UserId { get; set; }
         public int XP { get; set; }
+        public int WeeklyXP { get; set; }
+        public int MonthlyXP { get; set; }
         public int Streak { get; set; }
         public int Level { get; set; }
         public int Txanponak { get; set; }
