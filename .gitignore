@@ -1,7 +1,29 @@
-app/node_modules/
+# User Specific
 Especificaciones.txt
+*.txt
+
+# Build Folders
 **/bin/
 **/obj/
+
+# Databases
+*.db
 *.db-shm
 *.db-wal
 server/EuskalIA.Server/euskalia.db
+
+# Testing
+**/TestResults/
+**/coverage.json
+**/*.txt
+
+# Dependencies
+app/node_modules/
+node_env/
+
+# IDEs
+.vscode/
+.idea/
+*.user
+*.userosscache
+*.sln.docstates
