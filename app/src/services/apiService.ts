@@ -1,8 +1,7 @@
 import axios from 'axios';
+import { CONFIG } from '../config';
 
-// IMPORTANT: Replace with your actual server IP when testing on physical device
-// For local simulation on Chrome, localhost works.
-const BASE_URL = 'http://localhost:5235/api';
+const BASE_URL = CONFIG.BASE_URL;
 
 export const apiService = {
     getLessons: async () => {

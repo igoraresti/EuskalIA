@@ -43,8 +43,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowAll");
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection(); // Disabled for initial public IP testing without SSL
 app.UseAuthorization();
 app.MapControllers();
 
-app.Run();
+// Bind to all interfaces (0.0.0.0) so it's accessible externally
+app.Run("http://0.0.0.0:5235");

@@ -278,6 +278,7 @@ export const ProfileScreen = ({ navigation }: any) => {
                             )}
                         </TouchableOpacity>
                     </View>
+                )}
 
                 {/* Danger Zone */}
                 <View style={styles.dangerZone}>

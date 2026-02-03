@@ -1,6 +1,7 @@
 # User Specific
 Especificaciones.txt
 *.txt
+DEPLOYMENT_GUIDE.md
 
 # Build Folders
 **/bin/
