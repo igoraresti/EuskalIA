@@ -25,13 +25,23 @@ namespace EuskalIA.Server.Controllers
             // Seed some data if empty
             if (!await _context.Lessons.AnyAsync())
             {
-                var lesson = new Lesson { Title = "Saludos", Topic = "Saludos", Level = 1 };
-                _context.Lessons.Add(lesson);
+                var lessons = new List<Lesson>
+                {
+                    new Lesson { Title = "Saludos", Topic = "Saludos", Level = 1 },
+                    new Lesson { Title = "La Comida", Topic = "Comida", Level = 1 },
+                    new Lesson { Title = "En el Bar", Topic = "Bar", Level = 1 },
+                    new Lesson { Title = "Viajes", Topic = "Viajes", Level = 1 }
+                };
+                
+                _context.Lessons.AddRange(lessons);
                 await _context.SaveChangesAsync();
                 
-                var exercises = await _aiService.GenerateExercisesAsync(lesson.Topic, 3);
-                foreach(var ex in exercises) ex.LessonId = lesson.Id;
-                _context.Exercises.AddRange(exercises);
+                foreach (var l in lessons)
+                {
+                    var exercises = await _aiService.GenerateExercisesAsync(l.Topic, 3);
+                    foreach(var ex in exercises) ex.LessonId = l.Id;
+                    _context.Exercises.AddRange(exercises);
+                }
                 await _context.SaveChangesAsync();
             }
 
@@ -76,6 +86,15 @@ namespace EuskalIA.Server.Controllers
         [HttpGet("{id}/progress")]
         public async Task<ActionResult<Progress>> GetProgress(int id)
         {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                // Create user if not exists for ID 1 (MVP shortcut)
+                user = new User { Id = id, Username = "Usuario", Email = "test@euskalia.com" };
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+            }
+
             var progress = await _context.Progresses.FirstOrDefaultAsync(p => p.UserId == id);
             if (progress == null)
             {

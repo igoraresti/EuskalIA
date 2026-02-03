@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace EuskalIA.Server.Models
 {
@@ -9,6 +10,8 @@ namespace EuskalIA.Server.Models
         public string Username { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        
+        [JsonIgnore]
         public Progress? Progress { get; set; }
     }
 
@@ -20,6 +23,8 @@ namespace EuskalIA.Server.Models
         public int Streak { get; set; }
         public int Level { get; set; }
         public int Txanponak { get; set; }
+        
+        [JsonIgnore]
         public User? User { get; set; }
     }
 
@@ -40,6 +45,8 @@ namespace EuskalIA.Server.Models
         public string Question { get; set; } = string.Empty;
         public string CorrectAnswer { get; set; } = string.Empty;
         public string OptionsJson { get; set; } = string.Empty; // JSON array of options
+        
+        [JsonIgnore]
         public Lesson? Lesson { get; set; }
     }
 }
