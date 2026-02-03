@@ -1,0 +1,5 @@
+node_env/
+server/EuskalIA.Server/bin/
+server/EuskalIA.Server/obj/
+app/node_modules/
+Especificaciones.txt
