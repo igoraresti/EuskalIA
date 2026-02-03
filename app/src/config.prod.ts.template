@@ -1,0 +1,4 @@
+export const CONFIG = {
+    // REPLACE with your public server IP for production APKs
+    BASE_URL: 'http://185.254.207.41:5235/api', 
+};

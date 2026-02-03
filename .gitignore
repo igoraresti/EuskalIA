@@ -2,6 +2,8 @@
 Especificaciones.txt
 *.txt
 DEPLOYMENT_GUIDE.md
+app/src/config.ts
+app/src/config.prod.ts
 
 # Build Folders
 **/bin/
