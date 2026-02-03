@@ -13,7 +13,8 @@ Euskal IA es una plataforma moderna de aprendizaje del idioma euskera, inspirada
 
 - `/app`: Código fuente de la aplicación móvil (Expo).
 - `/server`: Código fuente del servidor .NET API.
-- `run_server.bat`: Script de inicio rápido para Windows.
+- `start.bat`: Script de inicio unificado para Windows.
+- `start.sh`: Script de inicio unificado para Mac/Linux.
 
 ## Requisitos Previos
 
