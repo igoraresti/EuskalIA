@@ -2,6 +2,9 @@
 
 # Euskal IA Unified Start Script (Mac/Linux)
 
+# Add node_env to PATH
+export PATH="$(pwd)/node_env/bin:$PATH"
+
 echo "--- Limpiando puertos ---"
 # Kill processes on backend port 5235 and frontend port 8081
 lsof -ti:5235 | xargs kill -9 2>/dev/null
