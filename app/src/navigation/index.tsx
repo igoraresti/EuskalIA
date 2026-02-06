@@ -2,6 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
+import { LoginScreen } from '../screens/LoginScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { LessonScreen } from '../screens/LessonScreen';
 import { AIChatScreen } from '../screens/AIChatScreen';
@@ -11,8 +12,23 @@ import { ProfileScreen } from '../screens/ProfileScreen';
 const Stack = createNativeStackNavigator();
 
 export const AppNavigation = () => {
+    const linking = {
+        prefixes: ['http://localhost:19006', 'exp://', 'euskalia://'],
+        config: {
+            screens: {
+                Onboarding: '',
+                Login: 'login',
+                Home: 'home',
+                Lesson: 'lesson',
+                AIChat: 'chat',
+                Leaderboard: 'leaderboard',
+                Profile: 'profile',
+            },
+        },
+    };
+
     return (
-        <NavigationContainer>
+        <NavigationContainer linking={linking}>
             <Stack.Navigator
                 initialRouteName="Onboarding"
                 screenOptions={{
@@ -21,6 +37,7 @@ export const AppNavigation = () => {
                 }}
             >
                 <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+                <Stack.Screen name="Login" component={LoginScreen} />
                 <Stack.Screen name="Home" component={HomeScreen} />
                 <Stack.Screen name="Lesson" component={LessonScreen} />
                 <Stack.Screen name="AIChat" component={AIChatScreen} />

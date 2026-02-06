@@ -33,7 +33,22 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var encryptionService = scope.ServiceProvider.GetRequiredService<IEncryptionService>();
     db.Database.EnsureCreated();
+
+    if (!db.Users.Any())
+    {
+        var user = new EuskalIA.Server.Models.User
+        {
+            Username = "igoraresti",
+            Nickname = encryptionService.Encrypt("igoraresti"),
+            Email = encryptionService.Encrypt("igor@euskalia.eus"),
+            Password = encryptionService.Encrypt("1234"),
+            JoinedAt = DateTime.UtcNow.AddMonths(-2)
+        };
+        db.Users.Add(user);
+        db.SaveChanges();
+    }
 }
 
 // Configure the HTTP request pipeline.

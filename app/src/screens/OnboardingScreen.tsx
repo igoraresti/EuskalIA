@@ -28,7 +28,7 @@ export const OnboardingScreen = ({ navigation }: any) => {
                     <Button
                         title="Ya tengo cuenta"
                         variant="outline"
-                        onPress={() => { }}
+                        onPress={() => navigation.navigate('Login')}
                         style={styles.button}
                     />
                 </View>

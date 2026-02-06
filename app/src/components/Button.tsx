@@ -8,6 +8,7 @@ interface ButtonProps {
     variant?: 'primary' | 'secondary' | 'outline';
     style?: ViewStyle;
     textStyle?: TextStyle;
+    disabled?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -15,7 +16,8 @@ export const Button: React.FC<ButtonProps> = ({
     onPress,
     variant = 'primary',
     style,
-    textStyle
+    textStyle,
+    disabled
 }) => {
     const getButtonStyle = () => {
         switch (variant) {
@@ -34,11 +36,12 @@ export const Button: React.FC<ButtonProps> = ({
 
     return (
         <TouchableOpacity
-            style={[styles.base, getButtonStyle(), style]}
+            style={[styles.base, getButtonStyle(), style, disabled && styles.disabled]}
             onPress={onPress}
             activeOpacity={0.8}
+            disabled={disabled}
         >
-            <Text style={[styles.baseText, getTextStyle(), textStyle]}>{title}</Text>
+            <Text style={[styles.baseText, getTextStyle(), textStyle, disabled && styles.disabledText]}>{title}</Text>
         </TouchableOpacity>
     );
 };
@@ -77,4 +80,10 @@ const styles = StyleSheet.create({
     outlineText: {
         color: COLORS.primary,
     },
+    disabled: {
+        opacity: 0.5,
+    },
+    disabledText: {
+        color: '#666',
+    }
 });

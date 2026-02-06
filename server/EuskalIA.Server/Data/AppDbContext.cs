@@ -11,6 +11,7 @@ namespace EuskalIA.Server.Data
         public DbSet<Progress> Progresses { get; set; }
         public DbSet<Lesson> Lessons { get; set; }
         public DbSet<Exercise> Exercises { get; set; }
+        public DbSet<LessonProgress> LessonProgresses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

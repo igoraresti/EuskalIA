@@ -4,6 +4,7 @@ using EuskalIA.Server.Data;
 using EuskalIA.Server.Models;
 using EuskalIA.Server.DTOs;
 using EuskalIA.Server.Services;
+using System.Linq;
 
 namespace EuskalIA.Server.Controllers
 {
@@ -37,29 +38,54 @@ namespace EuskalIA.Server.Controllers
             };
         }
 
+        [HttpPost("login")]
+        public async Task<ActionResult<User>> Login([FromBody] LoginDto loginDto)
+        {
+            // Naive implementation: fetch all users and check (since we need to decrypt to check)
+            // In a real app, we would hash passwords one-way and query by hash or username.
+            // Given the current encryption service, we can encrypt the input username to find the user?
+            // No, the username is plain text in the model, but password/email/nickname are encrypted.
+            
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == loginDto.Username);
+            if (user == null) return Unauthorized(new { message = "Usuario o contraseña incorrectos" });
+
+            var decryptedPassword = _encryptionService.Decrypt(user.Password);
+            if (decryptedPassword != loginDto.Password) 
+                return Unauthorized(new { message = "Usuario o contraseña incorrectos" });
+
+            // Return user details similar to GetUser
+            return Ok(new User 
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Nickname = _encryptionService.Decrypt(user.Nickname),
+                Email = _encryptionService.Decrypt(user.Email),
+                JoinedAt = user.JoinedAt
+            });
+        }
+
         [HttpGet("{id}/progress")]
-        public async Task<ActionResult<Progress>> GetProgress(int id)
+        public async Task<ActionResult<object>> GetProgress(int id)
         {
             var user = await _context.Users.Include(u => u.Progress).FirstOrDefaultAsync(u => u.Id == id);
-            if (user == null)
+            
+            // Auto-create dummy user 1 if missing (legacy logic preserved)
+            if (user == null && id == 1)
             {
-                if (id == 1)
-                {
-                    user = new User 
-                    { 
-                        Username = "Igor Aresti", 
-                        Nickname = _encryptionService.Encrypt("igoraresti"),
-                        Email = _encryptionService.Encrypt("igor@euskalia.eus"),
-                        Password = _encryptionService.Encrypt("1234"),
-                        JoinedAt = DateTime.UtcNow.AddMonths(-2)
-                    };
-                    _context.Users.Add(user);
-                    await _context.SaveChangesAsync();
-                }
-                else
-                {
-                    return NotFound();
-                }
+                user = new User 
+                { 
+                    Username = "Igor Aresti", 
+                    Nickname = _encryptionService.Encrypt("igoraresti"),
+                    Email = _encryptionService.Encrypt("igor@euskalia.eus"),
+                    Password = _encryptionService.Encrypt("1234"),
+                    JoinedAt = DateTime.UtcNow.AddMonths(-2)
+                };
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+            }
+            else if (user == null)
+            {
+                return NotFound();
             }
 
             if (user.Progress == null)
@@ -78,7 +104,24 @@ namespace EuskalIA.Server.Controllers
                 await _context.SaveChangesAsync();
                 user.Progress = progress;
             }
-            return user.Progress;
+
+            // Get Lesson Progresses
+            var lessonProgresses = await _context.LessonProgresses
+                .Where(lp => lp.UserId == user.Id)
+                .Select(lp => new 
+                { 
+                    lp.LessonId,
+                    LessonTitle = _context.Lessons.FirstOrDefault(l => l.Id == lp.LessonId).Title,
+                    lp.CorrectAnswers,
+                    lp.TotalQuestions
+                })
+                .ToListAsync();
+
+            return Ok(new 
+            {
+                user.Progress,
+                LessonScores = lessonProgresses
+            });
         }
 
         [HttpPost("{id}/xp")]

@@ -3,9 +3,11 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Tex
 import { COLORS, SPACING, TYPOGRAPHY } from '../theme';
 import { User, Mail, Lock, Calendar, BookOpen, Trash2, LogOut, Save, ChevronLeft } from 'lucide-react-native';
 import { apiService } from '../services/apiService';
+import { useAuth } from '../context/AuthContext';
 
 export const ProfileScreen = ({ navigation }: any) => {
-    const [user, setUser] = useState<any>(null);
+    const { user: authUser, logout, updateUser } = useAuth();
+    const [user, setUser] = useState<any>(null); // Local user state for form
     const [progress, setProgress] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -22,37 +24,58 @@ export const ProfileScreen = ({ navigation }: any) => {
     const [password, setPassword] = useState('');
 
     useEffect(() => {
+        if (!authUser) return;
+
         const loadProfile = async () => {
             setLoading(true);
-            const [userData, progressData] = await Promise.all([
-                apiService.getUser(1),
-                apiService.getUserProgress(1)
-            ]);
+            try {
+                // Fetch fresh data
+                const [userData, progressData] = await Promise.all([
+                    apiService.getUser(authUser.id),
+                    apiService.getUserProgress(authUser.id)
+                ]);
 
-            if (userData) {
-                setUser(userData);
-                setUsername(userData.username || '');
-                setNickname(userData.nickname || '');
-                setEmail(userData.email || '');
+                if (userData) {
+                    setUser(userData);
+                    setUsername(userData.username || '');
+                    setNickname(userData.nickname || '');
+                    setEmail(userData.email || '');
+                    // updateUser(userData); // Removed to prevent infinite loop
+                }
+
+                if (progressData) {
+                    // Handle new structure
+                    if (progressData.progress) {
+                        setProgress(progressData.progress);
+                    } else {
+                        setProgress(progressData);
+                    }
+                }
+            } catch (err) {
+                console.error("Error loading profile", err);
             }
-            if (progressData) setProgress(progressData);
             setLoading(false);
         };
         loadProfile();
-    }, []);
+    }, [authUser]);
 
     const handleUpdate = async () => {
+        if (!user) return;
         setSaving(true);
-        const result = await apiService.updateProfile(1, {
+        const result = await apiService.updateProfile(user.id, {
             username,
             nickname,
-            email,
-            password: password || undefined // Only send if not empty
+            // email, // Email not updatable via this form as per requirements
+            password: password || undefined
         });
 
-        if (result) {
+        if (result && !result.error) {
             Alert.alert('Éxito', 'Perfil actualizado correctamente');
             setPassword('');
+            // Update local state and context
+            const updatedUser = { ...user, username, nickname };
+            setUser(updatedUser);
+            updateUser(updatedUser);
         } else {
             Alert.alert('Error', 'No se pudo actualizar el perfil');
         }
@@ -60,23 +83,34 @@ export const ProfileScreen = ({ navigation }: any) => {
     };
 
     const handleLogout = () => {
-        Alert.alert(
-            'Cerrar Sesión',
-            '¿Realmente quieres cerrar sesión?',
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                {
-                    text: 'Cerrar Sesión',
-                    style: 'destructive',
-                    onPress: () => {
-                        navigation.reset({
-                            index: 0,
-                            routes: [{ name: 'Onboarding' }],
-                        });
+        if (typeof window !== 'undefined' && window.alert && window.confirm) {
+            if (window.confirm('¿Realmente quieres cerrar sesión?')) {
+                logout();
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'Onboarding' }],
+                });
+            }
+        } else {
+            Alert.alert(
+                'Cerrar Sesión',
+                '¿Realmente quieres cerrar sesión?',
+                [
+                    { text: 'Cancelar', style: 'cancel' },
+                    {
+                        text: 'Cerrar Sesión',
+                        style: 'destructive',
+                        onPress: () => {
+                            logout();
+                            navigation.reset({
+                                index: 0,
+                                routes: [{ name: 'Onboarding' }],
+                            });
+                        }
                     }
-                }
-            ]
-        );
+                ]
+            );
+        }
     };
 
     const handleRequestDelete = () => {
@@ -137,7 +171,16 @@ export const ProfileScreen = ({ navigation }: any) => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                <TouchableOpacity
+                    onPress={() => {
+                        if (navigation.canGoBack()) {
+                            navigation.goBack();
+                        } else {
+                            navigation.navigate('Home');
+                        }
+                    }}
+                    style={styles.backButton}
+                >
                     <ChevronLeft color={COLORS.primary} size={28} />
                 </TouchableOpacity>
                 <Text style={TYPOGRAPHY.h2}>Mi Perfil</Text>
@@ -242,11 +285,10 @@ export const ProfileScreen = ({ navigation }: any) => {
                             <View style={styles.inputWrapper}>
                                 <Mail color={COLORS.textSecondary} size={20} />
                                 <TextInput
-                                    style={styles.input}
-                                    value={email}
-                                    onChangeText={setEmail}
                                     placeholder="correo@ejemplo.com"
                                     keyboardType="email-address"
+                                    editable={false}
+                                    style={[styles.input, { color: COLORS.textSecondary }]}
                                 />
                             </View>
                         </View>

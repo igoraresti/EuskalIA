@@ -4,6 +4,22 @@ import { CONFIG } from '../config';
 const BASE_URL = CONFIG.BASE_URL;
 
 export const apiService = {
+    login: async (loginDto: any) => {
+        try {
+            const response = await axios.post(`${BASE_URL}/users/login`, loginDto);
+            return response.data;
+        } catch (error: any) {
+            console.error('Error logging in:', error);
+            // Return error object to handle it in UI
+            if (error.response) {
+                return { error: error.response.data.message || 'Error en el servidor' };
+            } else if (error.request) {
+                return { error: 'No se pudo conectar con el servidor. Verifica tu conexión.' };
+            }
+            return { error: 'Error desconocido' };
+        }
+    },
+
     getLessons: async () => {
         try {
             const response = await axios.get(`${BASE_URL}/lessons`);

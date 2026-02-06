@@ -3,30 +3,44 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Act
 import { COLORS, SPACING, TYPOGRAPHY } from '../theme';
 import { BookOpen, Trophy, MessageCircle, User as UserIcon } from 'lucide-react-native';
 import { apiService } from '../services/apiService';
+import { useAuth } from '../context/AuthContext';
 
 export const HomeScreen = ({ navigation }: any) => {
+    const { user } = useAuth();
     const [lessons, setLessons] = useState<any[]>([]);
     const [progress, setProgress] = useState<any>(null);
-    const [user, setUser] = useState<any>(null);
+    const [lessonScores, setLessonScores] = useState<any[]>([]); // New state for lesson scores
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
+            if (!user) return; // Wait for user
+
             setLoading(true);
-            const [lessonsData, progressData, userData] = await Promise.all([
-                apiService.getLessons(),
-                apiService.getUserProgress(1), // Assuming user ID 1 for now
-                apiService.getUser(1)
-            ]);
-            setLessons(lessonsData);
-            setProgress(progressData);
-            setUser(userData);
+            try {
+                const [lessonsData, progressData] = await Promise.all([
+                    apiService.getLessons(),
+                    apiService.getUserProgress(user.id)
+                ]);
+
+                setLessons(lessonsData);
+                // Handle new progress structure { progress: {}, lessonScores: [] }
+                // OR legacy structure if fetch fails or backend plain object
+                if (progressData && progressData.progress) {
+                    setProgress(progressData.progress);
+                    setLessonScores(progressData.lessonScores || []);
+                } else {
+                    setProgress(progressData); // Fallback or direct object if backend changed back
+                }
+            } catch (err) {
+                console.error("Error fetching home data", err);
+            }
             setLoading(false);
         };
         fetchData();
-    }, []);
+    }, [user]); // Depend on user
 
-    if (loading) {
+    if (loading || !user) {
         return (
             <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={COLORS.primary} />
@@ -34,12 +48,17 @@ export const HomeScreen = ({ navigation }: any) => {
         );
     }
 
+    const getLessonScore = (lessonId: number) => {
+        const score = lessonScores.find(s => s.lessonId === lessonId);
+        return score ? `${score.correctAnswers}/${score.totalQuestions}` : null;
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
                 <View style={styles.headerLeft}>
-                    <Text style={styles.userName}>{user?.username || 'Usuario'}</Text>
+                    <Text style={styles.userName}>{user.username || 'Usuario'}</Text>
                     <View style={styles.statsRow}>
                         <View style={styles.stat}>
                             <Text style={styles.statIcon}>🔥</Text>
@@ -83,6 +102,9 @@ export const HomeScreen = ({ navigation }: any) => {
                                 <BookOpen color={COLORS.white} size={28} />
                             </View>
                             <Text style={styles.lessonTitle}>{lesson.title}</Text>
+                            {getLessonScore(lesson.id) && (
+                                <Text style={styles.scoreText}>{getLessonScore(lesson.id)}</Text>
+                            )}
                         </TouchableOpacity>
                     ))}
                 </View>
@@ -196,5 +218,11 @@ const styles = StyleSheet.create({
     },
     tabItem: {
         padding: 10,
+    },
+    scoreText: {
+        fontSize: 10,
+        color: COLORS.primary,
+        fontWeight: 'bold',
+        marginTop: 2,
     }
 });
