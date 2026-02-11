@@ -1,31 +1,34 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TextInput, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator, Platform } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { COLORS, SPACING, TYPOGRAPHY } from '../theme';
 import { Button } from '../components/Button';
 import { useAuth } from '../context/AuthContext';
 import { ChevronLeft } from 'lucide-react-native';
+import { LanguageSelector } from '../components/LanguageSelector';
 
 export const LoginScreen = ({ navigation }: any) => {
+    const { t, i18n } = useTranslation();
     const { login } = useAuth();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
 
+    // Remove the forced 'es' useEffect as it resets user selection
+
     const handleLogin = async () => {
         if (!username || !password) {
-            const msg = 'Por favor introduce usuario y contraseña';
-            if (typeof window !== 'undefined' && window.alert) {
+            const msg = t('login.errors.allFieldsRequired');
+            if (Platform.OS === 'web' && typeof window !== 'undefined' && window.alert) {
                 window.alert(msg);
             } else {
-                Alert.alert('Error', msg);
+                Alert.alert(t('common.error'), msg);
             }
             return;
         }
 
         setLoading(true);
-        console.log('Attempting login with:', username);
         const result = await login(username, password);
-        console.log('Login result:', result);
         setLoading(false);
 
         if (result.success) {
@@ -34,11 +37,13 @@ export const LoginScreen = ({ navigation }: any) => {
                 routes: [{ name: 'Home' }],
             });
         } else {
-            const msg = result.error || 'Usuario o contraseña incorrectos';
-            if (typeof window !== 'undefined' && window.alert) {
+            // Use translation key for credentials error if backend generic message is returned in Spanish
+            const msg = result.error && !result.error.includes(' ') ? t(`login.errors.${result.error}`) : t('login.errors.invalidCredentials');
+
+            if (Platform.OS === 'web' && typeof window !== 'undefined' && window.alert) {
                 window.alert(msg);
             } else {
-                Alert.alert('Error', msg);
+                Alert.alert(t('common.error'), msg);
             }
         }
     };
@@ -49,36 +54,37 @@ export const LoginScreen = ({ navigation }: any) => {
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                     <ChevronLeft color={COLORS.primary} size={28} />
                 </TouchableOpacity>
+                <LanguageSelector compact />
             </View>
 
             <View style={styles.content}>
-                <Text style={[TYPOGRAPHY.h1, styles.title]}>Bienvenido</Text>
+                <Text style={[TYPOGRAPHY.h1, styles.title]}>{t('login.title')}</Text>
 
                 <View style={styles.form}>
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Usuario</Text>
+                        <Text style={styles.label}>{t('login.username')}</Text>
                         <TextInput
                             style={styles.input}
                             value={username}
                             onChangeText={setUsername}
-                            placeholder="Introduce tu usuario"
+                            placeholder={t('login.username')}
                             autoCapitalize="none"
                         />
                     </View>
 
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Contraseña</Text>
+                        <Text style={styles.label}>{t('login.password')}</Text>
                         <TextInput
                             style={styles.input}
                             value={password}
                             onChangeText={setPassword}
-                            placeholder="Introduce tu contraseña"
+                            placeholder={t('login.password')}
                             secureTextEntry
                         />
                     </View>
 
                     <Button
-                        title={loading ? "Entrando..." : "Entrar"}
+                        title={loading ? t('common.loading') : t('login.loginButton')}
                         onPress={handleLogin}
                         style={styles.button}
                         disabled={loading}
@@ -96,6 +102,9 @@ const styles = StyleSheet.create({
     },
     header: {
         padding: SPACING.md,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
     },
     backButton: {
         padding: 4,

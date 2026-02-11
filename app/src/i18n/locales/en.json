@@ -1,0 +1,153 @@
+{
+    "common": {
+        "appName": "Euskal IA",
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "save": "Save",
+        "delete": "Delete",
+        "edit": "Edit",
+        "close": "Close",
+        "back": "Back",
+        "user": "User"
+    },
+    "languages": {
+        "es": "Español",
+        "en": "English",
+        "pl": "Polski",
+        "eu": "Euskera",
+        "fr": "Français"
+    },
+    "onboarding": {
+        "title": "Euskal IA",
+        "subtitle": "Learn Basque in an intelligent and fun way. The power of AI in your hands.",
+        "getStarted": "Get Started",
+        "alreadyHaveAccount": "Already have an account"
+    },
+    "login": {
+        "title": "Log In",
+        "username": "Username",
+        "password": "Password",
+        "loginButton": "Log In",
+        "noAccount": "Don't have an account?",
+        "register": "Register here",
+        "errors": {
+            "invalidCredentials": "Invalid username or password",
+            "unverifiedEmail": "Please verify your email before logging in",
+            "serverError": "Server error",
+            "connectionError": "Could not connect to server. Check your connection.",
+            "unknownError": "Unknown error"
+        }
+    },
+    "register": {
+        "title": "Create Account",
+        "name": "Name",
+        "email": "Email",
+        "password": "Password",
+        "registerButton": "Register",
+        "successTitle": "Email sent!",
+        "successMessage": "We've sent a verification link to your email. Please check your inbox.",
+        "errors": {
+            "allFieldsRequired": "All fields are required",
+            "invalidEmail": "Invalid email format",
+            "passwordTooShort": "Password must be at least 6 characters",
+            "usernameTaken": "Username is already taken",
+            "emailTaken": "Email is already registered",
+            "serverError": "Server error",
+            "connectionError": "Could not connect to server. Check your connection.",
+            "unknownError": "Unknown error"
+        }
+    },
+    "registrationSuccess": {
+        "title": "Account Verified!",
+        "message": "Your account has been successfully verified. You can now log in and start learning Basque.",
+        "loginButton": "Go to Log In"
+    },
+    "home": {
+        "title": "Home",
+        "welcome": "Welcome back!",
+        "continueLesson": "Continue Lesson",
+        "startLesson": "Start Lesson",
+        "lessonsCompleted": "Lessons completed",
+        "totalXP": "Total XP",
+        "unit": "Unit",
+        "basics": "Basics"
+    },
+    "lessons": {
+        "title": "Lessons",
+        "completed": "Completed",
+        "locked": "Locked",
+        "start": "Start",
+        "continue": "Continue",
+        "xpEarned": "XP earned"
+    },
+    "lesson": {
+        "question": "Question",
+        "yourAnswer": "Your answer",
+        "submit": "Submit",
+        "next": "Next",
+        "finish": "Finish",
+        "correct": "Correct!",
+        "incorrect": "Incorrect",
+        "lessonComplete": "Lesson Complete!",
+        "xpEarned": "XP earned",
+        "backToHome": "Back to Home"
+    },
+    "leaderboard": {
+        "title": "Leaderboard",
+        "world": "World",
+        "friends": "Friends",
+        "you": "You",
+        "rank": "Rank",
+        "username": "Username",
+        "xp": "XP",
+        "level": "Level",
+        "myRank": "My Rank",
+        "worldRank": "World Rank",
+        "noData": "No data",
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "monthly": "Monthly",
+        "allTime": "All Time"
+    },
+    "profile": {
+        "title": "Profile",
+        "editProfile": "Edit Profile",
+        "nickname": "Nickname",
+        "email": "Email",
+        "joinedAt": "Member since",
+        "language": "Language",
+        "changeLanguage": "Change language",
+        "logout": "Log Out",
+        "deleteAccount": "Delete Account",
+        "saveChanges": "Save Changes",
+        "confirmLogout": "Do you really want to log out?",
+        "confirmDelete": "Are you sure you want to delete your account? This action cannot be undone.",
+        "deleteInstructions": "You will receive a verification code in your email. Enter it below to confirm deletion.",
+        "verificationCode": "Verification code",
+        "errors": {
+            "updateFailed": "Failed to update profile",
+            "deleteFailed": "Failed to delete account",
+            "invalidCode": "Invalid verification code"
+        },
+        "success": {
+            "profileUpdated": "Profile updated successfully",
+            "languageUpdated": "Language updated successfully",
+            "accountDeleted": "Account deleted successfully"
+        }
+    },
+    "chat": {
+        "title": "AI Tutor",
+        "welcome": "Hello! I am your AI tutor. How can I help you today?",
+        "placeholder": "Type a message...",
+        "aiResponsePlaceholder": "I understand. I am here to help you practice and learn."
+    },
+    "navigation": {
+        "home": "Home",
+        "lessons": "Lessons",
+        "leaderboard": "Leaderboard",
+        "profile": "Profile"
+    }
+}

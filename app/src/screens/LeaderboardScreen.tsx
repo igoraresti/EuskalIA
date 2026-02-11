@@ -1,29 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { COLORS, SPACING, TYPOGRAPHY } from '../theme';
 import { Trophy, ChevronLeft, Award } from 'lucide-react-native';
 import { apiService } from '../services/apiService';
-
-const PERIODS = [
-    { id: 'week', label: 'Semanal' },
-    { id: 'month', label: 'Mensual' },
-    { id: 'all', label: 'Histórico' }
-];
+import { useAuth } from '../context/AuthContext';
 
 export const LeaderboardScreen = ({ navigation }: any) => {
+    const { t } = useTranslation();
+    const { user } = useAuth();
     const [period, setPeriod] = useState('week');
     const [viewMode, setViewMode] = useState('world'); // 'world' or 'me'
     const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const currentUserId = 1; // Assuming user ID 1 for now
+
+    const PERIODS = [
+        { id: 'week', label: t('leaderboard.weekly') },
+        { id: 'month', label: t('leaderboard.monthly') },
+        { id: 'all', label: t('leaderboard.allTime') }
+    ];
 
     const fetchData = async () => {
+        if (!user) return;
         setLoading(true);
         let rankingData = [];
         if (viewMode === 'world') {
             rankingData = await apiService.getWorldLeaderboard(period);
         } else {
-            rankingData = await apiService.getUserLeaderboard(currentUserId, period);
+            rankingData = await apiService.getUserLeaderboard(user.id, period);
         }
         setData(rankingData);
         setLoading(false);
@@ -31,11 +35,11 @@ export const LeaderboardScreen = ({ navigation }: any) => {
 
     useEffect(() => {
         fetchData();
-    }, [period, viewMode]);
+    }, [period, viewMode, user]);
 
     const renderItem = ({ item, index }: { item: any; index: number }) => {
         const rank = viewMode === 'world' ? index + 1 : item.rank;
-        const isMe = item.userId === currentUserId;
+        const isMe = user && item.userId === user.id;
 
         return (
             <View style={[styles.rankingItem, isMe && styles.meItem]}>
@@ -48,7 +52,7 @@ export const LeaderboardScreen = ({ navigation }: any) => {
 
                 <View style={styles.userInfo}>
                     <Text style={[styles.username, isMe && styles.meText]}>{item.username}</Text>
-                    <Text style={styles.levelText}>Nivel {item.level}</Text>
+                    <Text style={styles.levelText}>{t('leaderboard.level')} {item.level}</Text>
                 </View>
 
                 <View style={styles.xpContainer}>
@@ -64,7 +68,7 @@ export const LeaderboardScreen = ({ navigation }: any) => {
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <ChevronLeft color={COLORS.text} size={28} />
                 </TouchableOpacity>
-                <Text style={TYPOGRAPHY.h2}>Clasificación</Text>
+                <Text style={TYPOGRAPHY.h2}>{t('leaderboard.title')}</Text>
                 <View style={{ width: 28 }} />
             </View>
 
@@ -73,13 +77,13 @@ export const LeaderboardScreen = ({ navigation }: any) => {
                     style={[styles.viewBtn, viewMode === 'me' && styles.activeViewBtn]}
                     onPress={() => setViewMode('me')}
                 >
-                    <Text style={[styles.viewBtnText, viewMode === 'me' && styles.activeViewBtnText]}>Mi clasificación</Text>
+                    <Text style={[styles.viewBtnText, viewMode === 'me' && styles.activeViewBtnText]}>{t('leaderboard.myRank')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={[styles.viewBtn, viewMode === 'world' && styles.activeViewBtn]}
                     onPress={() => setViewMode('world')}
                 >
-                    <Text style={[styles.viewBtnText, viewMode === 'world' && styles.activeViewBtnText]}>Clasificación mundial</Text>
+                    <Text style={[styles.viewBtnText, viewMode === 'world' && styles.activeViewBtnText]}>{t('leaderboard.worldRank')}</Text>
                 </TouchableOpacity>
             </View>
 
@@ -108,7 +112,7 @@ export const LeaderboardScreen = ({ navigation }: any) => {
                     ListEmptyComponent={
                         <View style={styles.emptyState}>
                             <Award size={48} color="#CCC" />
-                            <Text style={styles.emptyText}>No hay datos disponibles</Text>
+                            <Text style={styles.emptyText}>{t('leaderboard.noData')}</Text>
                         </View>
                     }
                 />

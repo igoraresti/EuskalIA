@@ -46,7 +46,8 @@ using (var scope = app.Services.CreateScope())
             Email = encryptionService.Encrypt("igor@euskalia.eus"),
             Password = encryptionService.Encrypt("1234"),
             JoinedAt = DateTime.UtcNow.AddMonths(-2),
-            IsVerified = true // Existing user is pre-verified
+            IsVerified = true, // Existing user is pre-verified
+            Language = "es" // Default language
         };
         db.Users.Add(user);
         db.SaveChanges();

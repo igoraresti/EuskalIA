@@ -12,5 +12,8 @@ namespace EuskalIA.Server.DTOs
         
         [JsonPropertyName("password")]
         public string Password { get; set; } = string.Empty;
+        
+        [JsonPropertyName("language")]
+        public string? Language { get; set; } = "es"; // Default: Spanish
     }
 }

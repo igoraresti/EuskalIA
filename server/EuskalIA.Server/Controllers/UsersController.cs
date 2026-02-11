@@ -36,7 +36,8 @@ namespace EuskalIA.Server.Controllers
                 Username = user.Username,
                 Nickname = _encryptionService.Decrypt(user.Nickname),
                 Email = _encryptionService.Decrypt(user.Email),
-                JoinedAt = user.JoinedAt
+                JoinedAt = user.JoinedAt,
+                Language = user.Language
             };
         }
 
@@ -66,7 +67,8 @@ namespace EuskalIA.Server.Controllers
                 Username = user.Username,
                 Nickname = _encryptionService.Decrypt(user.Nickname),
                 Email = _encryptionService.Decrypt(user.Email),
-                JoinedAt = user.JoinedAt
+                JoinedAt = user.JoinedAt,
+                Language = user.Language
             });
         }
 
@@ -253,7 +255,8 @@ namespace EuskalIA.Server.Controllers
                 JoinedAt = DateTime.UtcNow,
                 IsVerified = false,
                 VerificationToken = verificationToken,
-                TokenExpiration = DateTime.UtcNow.AddHours(24)
+                TokenExpiration = DateTime.UtcNow.AddHours(24),
+                Language = registerDto.Language ?? "es" // Use provided language or default to Spanish
             };
 
             _context.Users.Add(newUser);
@@ -294,6 +297,28 @@ namespace EuskalIA.Server.Controllers
 
             // Redirect to frontend success page
             return Redirect("http://localhost:8081/registro-exitoso");
+        }
+
+        [HttpPut("{id}/language")]
+        public async Task<IActionResult> UpdateLanguage(int id, [FromBody] UpdateLanguageDto updateLanguageDto)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound(new { message = "Usuario no encontrado" });
+            }
+
+            // Validate language
+            var validLanguages = new[] { "es", "en", "pl", "eu", "fr" };
+            if (!validLanguages.Contains(updateLanguageDto.Language))
+            {
+                return BadRequest(new { message = "Idioma no válido" });
+            }
+
+            user.Language = updateLanguageDto.Language;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Idioma actualizado correctamente", language = user.Language });
         }
     }
 }

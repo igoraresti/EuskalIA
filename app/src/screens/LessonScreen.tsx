@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Animated, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { COLORS, SPACING, TYPOGRAPHY } from '../theme';
 import { X, CheckCircle2, AlertCircle } from 'lucide-react-native';
 import { Button } from '../components/Button';
 import { apiService } from '../services/apiService';
+import { useAuth } from '../context/AuthContext';
 
 export const LessonScreen = ({ navigation, route }: any) => {
+    const { t } = useTranslation();
+    const { user } = useAuth();
     const { lessonId } = route.params;
     const [lesson, setLesson] = useState<any>(null);
     const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
@@ -40,7 +44,9 @@ export const LessonScreen = ({ navigation, route }: any) => {
             setIsChecked(false);
         } else {
             // Lesson completed! Add XP
-            await apiService.addXP(1, 10); // user 1, 10 XP
+            if (user) {
+                await apiService.addXP(user.id, 10);
+            }
             navigation.navigate('Home');
         }
     };
@@ -56,8 +62,8 @@ export const LessonScreen = ({ navigation, route }: any) => {
     if (!lesson || lesson.exercises.length === 0) {
         return (
             <View style={styles.loadingContainer}>
-                <Text>No hay ejercicios disponibles para esta lección.</Text>
-                <Button title="Volver" onPress={() => navigation.goBack()} style={{ marginTop: 20 }} />
+                <Text>{t('lesson.noExercises')}</Text>
+                <Button title={t('common.back')} onPress={() => navigation.goBack()} style={{ marginTop: 20 }} />
             </View>
         );
     }
@@ -110,17 +116,17 @@ export const LessonScreen = ({ navigation, route }: any) => {
                         {isCorrect ? <CheckCircle2 color={COLORS.success} size={32} /> : <AlertCircle color={COLORS.secondary} size={32} />}
                         <View style={styles.feedbackTextWrapper}>
                             <Text style={[styles.feedbackTitle, !isCorrect && { color: COLORS.secondary }]}>
-                                {isCorrect ? '¡Buen trabajo!' : 'Casi...'}
+                                {isCorrect ? t('lesson.goodJob') : t('lesson.almost')}
                             </Text>
                             <Text style={[styles.feedbackTranslation, !isCorrect && { color: COLORS.secondary }]}>
-                                {isCorrect ? '¡Respuesta correcta!' : `La respuesta correcta era: ${currentExercise.correctAnswer}`}
+                                {isCorrect ? t('lesson.correctAnswer') : `${t('lesson.correctWas')}: ${currentExercise.correctAnswer}`}
                             </Text>
                         </View>
                     </View>
                 ) : null}
 
                 <Button
-                    title={isChecked ? "Continuar" : "Comprobar"}
+                    title={isChecked ? t('common.continue') : t('lesson.check')}
                     onPress={isChecked ? handleContinue : handleCheck}
                     variant={selectedOption === null ? 'outline' : 'primary'}
                     style={styles.checkButton}

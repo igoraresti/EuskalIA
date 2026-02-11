@@ -122,7 +122,7 @@ export const apiService = {
         }
     },
 
-    register: async (registerDto: { username: string; email: string; password: string }) => {
+    register: async (registerDto: { username: string; email: string; password: string; language?: string }) => {
         try {
             const response = await axios.post(`${BASE_URL}/users/register`, registerDto);
             return response.data;
@@ -132,6 +132,19 @@ export const apiService = {
                 return { error: error.response.data.message || 'Error en el servidor' };
             } else if (error.request) {
                 return { error: 'No se pudo conectar con el servidor. Verifica tu conexión.' };
+            }
+            return { error: 'Error desconocido' };
+        }
+    },
+
+    updateLanguage: async (userId: number, language: string) => {
+        try {
+            const response = await axios.put(`${BASE_URL}/users/${userId}/language`, { language });
+            return response.data;
+        } catch (error: any) {
+            console.error(`Error updating language for user ${userId}:`, error);
+            if (error.response) {
+                return { error: error.response.data.message || 'Error al actualizar el idioma' };
             }
             return { error: 'Error desconocido' };
         }

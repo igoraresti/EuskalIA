@@ -1,0 +1,153 @@
+{
+    "common": {
+        "appName": "Euskal IA",
+        "loading": "Chargement...",
+        "error": "Erreur",
+        "success": "Succès",
+        "cancel": "Annuler",
+        "confirm": "Confirmer",
+        "save": "Enregistrer",
+        "delete": "Supprimer",
+        "edit": "Modifier",
+        "close": "Fermer",
+        "back": "Retour",
+        "user": "Utilisateur"
+    },
+    "languages": {
+        "es": "Español",
+        "en": "English",
+        "pl": "Polski",
+        "eu": "Euskera",
+        "fr": "Français"
+    },
+    "onboarding": {
+        "title": "Euskal IA",
+        "subtitle": "Apprenez le basque de manière intelligente et amusante. La puissance de l'IA entre vos mains.",
+        "getStarted": "Commencer",
+        "alreadyHaveAccount": "J'ai déjà un compte"
+    },
+    "login": {
+        "title": "Se connecter",
+        "username": "Nom d'utilisateur",
+        "password": "Mot de passe",
+        "loginButton": "Se connecter",
+        "noAccount": "Vous n'avez pas de compte?",
+        "register": "Inscrivez-vous ici",
+        "errors": {
+            "invalidCredentials": "Nom d'utilisateur ou mot de passe incorrect",
+            "unverifiedEmail": "Veuillez vérifier votre e-mail avant de vous connecter",
+            "serverError": "Erreur du serveur",
+            "connectionError": "Impossible de se connecter au serveur. Vérifiez votre connexion.",
+            "unknownError": "Erreur inconnue"
+        }
+    },
+    "register": {
+        "title": "Créer un compte",
+        "name": "Nom",
+        "email": "E-mail",
+        "password": "Mot de passe",
+        "registerButton": "S'inscrire",
+        "successTitle": "E-mail envoyé!",
+        "successMessage": "Nous avons envoyé un lien de vérification à votre e-mail. Veuillez vérifier votre boîte de réception.",
+        "errors": {
+            "allFieldsRequired": "Tous les champs sont obligatoires",
+            "invalidEmail": "Format d'e-mail invalide",
+            "passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères",
+            "usernameTaken": "Le nom d'utilisateur est déjà pris",
+            "emailTaken": "L'e-mail est déjà enregistré",
+            "serverError": "Erreur du serveur",
+            "connectionError": "Impossible de se connecter au serveur. Vérifiez votre connexion.",
+            "unknownError": "Erreur inconnue"
+        }
+    },
+    "registrationSuccess": {
+        "title": "Compte vérifié!",
+        "message": "Votre compte a été vérifié avec succès. Vous pouvez maintenant vous connecter et commencer à apprendre le basque.",
+        "loginButton": "Aller à la connexion"
+    },
+    "home": {
+        "title": "Accueil",
+        "welcome": "Bon retour!",
+        "continueLesson": "Continuer la leçon",
+        "startLesson": "Commencer la leçon",
+        "lessonsCompleted": "Leçons terminées",
+        "totalXP": "XP total",
+        "unit": "Unité",
+        "basics": "Bases"
+    },
+    "lessons": {
+        "title": "Leçons",
+        "completed": "Terminée",
+        "locked": "Verrouillée",
+        "start": "Commencer",
+        "continue": "Continuer",
+        "xpEarned": "XP gagnés"
+    },
+    "lesson": {
+        "question": "Question",
+        "yourAnswer": "Votre réponse",
+        "submit": "Soumettre",
+        "next": "Suivant",
+        "finish": "Terminer",
+        "correct": "Correct!",
+        "incorrect": "Incorrect",
+        "lessonComplete": "Leçon terminée!",
+        "xpEarned": "XP gagnés",
+        "backToHome": "Retour à l'accueil"
+    },
+    "leaderboard": {
+        "title": "Classement",
+        "world": "Monde",
+        "friends": "Amis",
+        "you": "Vous",
+        "rank": "Rang",
+        "username": "Utilisateur",
+        "xp": "XP",
+        "level": "Niveau",
+        "myRank": "Mon rang",
+        "worldRank": "Classement mondial",
+        "noData": "Pas de données",
+        "daily": "Quotidien",
+        "weekly": "Hebdomadaire",
+        "monthly": "Mensuel",
+        "allTime": "Tout le temps"
+    },
+    "profile": {
+        "title": "Profil",
+        "editProfile": "Modifier le profil",
+        "nickname": "Surnom",
+        "email": "E-mail",
+        "joinedAt": "Membre depuis",
+        "language": "Langue",
+        "changeLanguage": "Changer de langue",
+        "logout": "Se déconnecter",
+        "deleteAccount": "Supprimer le compte",
+        "saveChanges": "Enregistrer les modifications",
+        "confirmLogout": "Voulez-vous vraiment vous déconnecter?",
+        "confirmDelete": "Êtes-vous sûr de vouloir supprimer votre compte? Cette action ne peut pas être annulée.",
+        "deleteInstructions": "Vous recevrez un code de vérification dans votre e-mail. Entrez-le ci-dessous pour confirmer la suppression.",
+        "verificationCode": "Code de vérification",
+        "errors": {
+            "updateFailed": "Échec de la mise à jour du profil",
+            "deleteFailed": "Échec de la suppression du compte",
+            "invalidCode": "Code de vérification invalide"
+        },
+        "success": {
+            "profileUpdated": "Profil mis à jour avec succès",
+            "languageUpdated": "Langue mise à jour avec succès",
+            "accountDeleted": "Compte supprimé avec succès"
+        }
+    },
+    "chat": {
+        "title": "Tuteur IA",
+        "welcome": "Bonjour ! Je suis votre tuteur IA. Comment puis-je vous aider aujourd'hui ?",
+        "placeholder": "Écrivez un message...",
+        "aiResponsePlaceholder": "Je comprends. Je suis là pour vous aider à pratiquer et à apprendre."
+    },
+    "navigation": {
+        "home": "Accueil",
+        "lessons": "Leçons",
+        "leaderboard": "Classement",
+        "profile": "Profil"
+    }
+}

@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { COLORS, SPACING, TYPOGRAPHY } from '../theme';
 import { BookOpen, Trophy, MessageCircle, User as UserIcon } from 'lucide-react-native';
 import { apiService } from '../services/apiService';
 import { useAuth } from '../context/AuthContext';
 
 export const HomeScreen = ({ navigation }: any) => {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const [lessons, setLessons] = useState<any[]>([]);
     const [progress, setProgress] = useState<any>(null);
-    const [lessonScores, setLessonScores] = useState<any[]>([]); // New state for lesson scores
+    const [lessonScores, setLessonScores] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
-            if (!user) return; // Wait for user
+            if (!user) return;
 
             setLoading(true);
             try {
@@ -24,13 +26,11 @@ export const HomeScreen = ({ navigation }: any) => {
                 ]);
 
                 setLessons(lessonsData);
-                // Handle new progress structure { progress: {}, lessonScores: [] }
-                // OR legacy structure if fetch fails or backend plain object
                 if (progressData && progressData.progress) {
                     setProgress(progressData.progress);
                     setLessonScores(progressData.lessonScores || []);
                 } else {
-                    setProgress(progressData); // Fallback or direct object if backend changed back
+                    setProgress(progressData);
                 }
             } catch (err) {
                 console.error("Error fetching home data", err);
@@ -38,7 +38,7 @@ export const HomeScreen = ({ navigation }: any) => {
             setLoading(false);
         };
         fetchData();
-    }, [user]); // Depend on user
+    }, [user]);
 
     if (loading || !user) {
         return (
@@ -58,7 +58,7 @@ export const HomeScreen = ({ navigation }: any) => {
             {/* Header */}
             <View style={styles.header}>
                 <View style={styles.headerLeft}>
-                    <Text style={styles.userName}>{user.username || 'Usuario'}</Text>
+                    <Text style={styles.userName}>{user.username || t('common.user')}</Text>
                     <View style={styles.statsRow}>
                         <View style={styles.stat}>
                             <Text style={styles.statIcon}>🔥</Text>
@@ -83,7 +83,9 @@ export const HomeScreen = ({ navigation }: any) => {
             </View>
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
-                <Text style={[TYPOGRAPHY.h2, styles.sectionTitle]}>Unidad 1: Conceptos Básicos</Text>
+                <Text style={[TYPOGRAPHY.h2, styles.sectionTitle]}>
+                    {t('home.unit')} 1: {t('home.basics')}
+                </Text>
 
                 <View style={styles.pathContainer}>
                     {lessons.map((lesson: any, index: number) => (
@@ -112,9 +114,15 @@ export const HomeScreen = ({ navigation }: any) => {
 
             {/* Bottom Tabs Placeholder */}
             <View style={styles.tabBar}>
-                <TouchableOpacity style={styles.tabItem}><BookOpen color={COLORS.primary} /></TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('AIChat')}><MessageCircle color={COLORS.textSecondary} /></TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('Leaderboard')}><Trophy color={COLORS.textSecondary} /></TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem}>
+                    <BookOpen color={COLORS.primary} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('AIChat')}>
+                    <MessageCircle color={COLORS.textSecondary} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('Leaderboard')}>
+                    <Trophy color={COLORS.textSecondary} />
+                </TouchableOpacity>
             </View>
         </SafeAreaView>
     );

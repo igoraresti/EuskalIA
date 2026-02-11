@@ -18,6 +18,9 @@ namespace EuskalIA.Server.Models
         public string? VerificationToken { get; set; }
         public DateTime? TokenExpiration { get; set; }
         
+        // Language preference
+        public string Language { get; set; } = "es"; // Default: Spanish
+        
         // Navigation property
         public Progress? Progress { get; set; }
     }

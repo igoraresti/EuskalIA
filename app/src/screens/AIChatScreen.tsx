@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { COLORS, SPACING, TYPOGRAPHY } from '../theme';
 import { Send, ArrowLeft } from 'lucide-react-native';
 
 export const AIChatScreen = ({ navigation }: any) => {
+    const { t } = useTranslation();
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([
-        { id: 1, text: 'Kaixo! Soy tu tutor de IA. ¿En qué puedo ayudarte hoy?', sender: 'ai' },
-        { id: 2, text: 'Quisiera practicar saludos en euskera.', sender: 'user' },
-        { id: 3, text: '¡Excelente! "Kaixo" es Hola. ¿Sabes cómo se dice "Buenos días"?', sender: 'ai' },
+        { id: 1, text: t('chat.welcome'), sender: 'ai' },
     ]);
 
     const handleSend = () => {
@@ -17,7 +17,7 @@ export const AIChatScreen = ({ navigation }: any) => {
             setMessage('');
             // Simulate IA response
             setTimeout(() => {
-                setMessages(prev => [...prev, { id: Date.now() + 1, text: '¡Muy bien! "Egun on" es correcto.', sender: 'ai' }]);
+                setMessages(prev => [...prev, { id: Date.now() + 1, text: t('chat.aiResponsePlaceholder'), sender: 'ai' }]);
             }, 1000);
         }
     };
@@ -28,7 +28,7 @@ export const AIChatScreen = ({ navigation }: any) => {
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <ArrowLeft color={COLORS.primary} size={28} />
                 </TouchableOpacity>
-                <Text style={[TYPOGRAPHY.h2, styles.title]}>Tutor IA</Text>
+                <Text style={[TYPOGRAPHY.h2, styles.title]}>{t('chat.title')}</Text>
                 <View style={{ width: 28 }} />
             </View>
 
@@ -58,7 +58,7 @@ export const AIChatScreen = ({ navigation }: any) => {
                 <View style={styles.inputContainer}>
                     <TextInput
                         style={styles.input}
-                        placeholder="Escribe en euskera..."
+                        placeholder={t('chat.placeholder')}
                         value={message}
                         onChangeText={setMessage}
                     />

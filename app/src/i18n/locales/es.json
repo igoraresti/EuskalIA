@@ -1,0 +1,153 @@
+{
+    "common": {
+        "appName": "Euskal IA",
+        "loading": "Cargando...",
+        "error": "Error",
+        "success": "Éxito",
+        "cancel": "Cancelar",
+        "confirm": "Confirmar",
+        "save": "Guardar",
+        "delete": "Eliminar",
+        "edit": "Editar",
+        "close": "Cerrar",
+        "back": "Volver",
+        "user": "Usuario"
+    },
+    "languages": {
+        "es": "Español",
+        "en": "English",
+        "pl": "Polski",
+        "eu": "Euskera",
+        "fr": "Français"
+    },
+    "onboarding": {
+        "title": "Euskal IA",
+        "subtitle": "Aprende euskera de forma inteligente y divertida. El poder de la IA en tus manos.",
+        "getStarted": "Empezar ahora",
+        "alreadyHaveAccount": "Ya tengo cuenta"
+    },
+    "login": {
+        "title": "Iniciar Sesión",
+        "username": "Nombre de usuario",
+        "password": "Contraseña",
+        "loginButton": "Iniciar Sesión",
+        "noAccount": "¿No tienes cuenta?",
+        "register": "Regístrate aquí",
+        "errors": {
+            "invalidCredentials": "Usuario o contraseña incorrectos",
+            "unverifiedEmail": "Por favor verifica tu correo electrónico antes de iniciar sesión",
+            "serverError": "Error en el servidor",
+            "connectionError": "No se pudo conectar con el servidor. Verifica tu conexión.",
+            "unknownError": "Error desconocido"
+        }
+    },
+    "register": {
+        "title": "Crear Cuenta",
+        "name": "Nombre",
+        "email": "Correo electrónico",
+        "password": "Contraseña",
+        "registerButton": "Registrarse",
+        "successTitle": "¡Correo enviado!",
+        "successMessage": "Hemos enviado un enlace de verificación a tu correo electrónico. Por favor revisa tu bandeja de entrada.",
+        "errors": {
+            "allFieldsRequired": "Todos los campos son obligatorios",
+            "invalidEmail": "Formato de email inválido",
+            "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
+            "usernameTaken": "El nombre de usuario ya está en uso",
+            "emailTaken": "El correo electrónico ya está registrado",
+            "serverError": "Error en el servidor",
+            "connectionError": "No se pudo conectar con el servidor. Verifica tu conexión.",
+            "unknownError": "Error desconocido"
+        }
+    },
+    "registrationSuccess": {
+        "title": "¡Cuenta Verificada!",
+        "message": "Tu cuenta ha sido verificada exitosamente. Ya puedes iniciar sesión y comenzar a aprender euskera.",
+        "loginButton": "Ir a Iniciar Sesión"
+    },
+    "home": {
+        "title": "Inicio",
+        "welcome": "¡Bienvenido de nuevo!",
+        "continueLesson": "Continuar Lección",
+        "startLesson": "Comenzar Lección",
+        "lessonsCompleted": "Lecciones completadas",
+        "totalXP": "XP Total",
+        "unit": "Unidad",
+        "basics": "Básicos"
+    },
+    "lessons": {
+        "title": "Lecciones",
+        "completed": "Completada",
+        "locked": "Bloqueada",
+        "start": "Comenzar",
+        "continue": "Continuar",
+        "xpEarned": "XP ganados"
+    },
+    "lesson": {
+        "question": "Pregunta",
+        "yourAnswer": "Tu respuesta",
+        "submit": "Enviar",
+        "next": "Siguiente",
+        "finish": "Finalizar",
+        "correct": "¡Correcto!",
+        "incorrect": "Incorrecto",
+        "lessonComplete": "¡Lección Completada!",
+        "xpEarned": "XP ganados",
+        "backToHome": "Volver al Inicio"
+    },
+    "leaderboard": {
+        "title": "Clasificación",
+        "world": "Mundial",
+        "friends": "Amigos",
+        "you": "Tú",
+        "rank": "Posición",
+        "username": "Usuario",
+        "xp": "XP",
+        "level": "Nivel",
+        "myRank": "Mi clasificación",
+        "worldRank": "Clasificación Mundial",
+        "noData": "Sin datos",
+        "daily": "Diario",
+        "weekly": "Semanal",
+        "monthly": "Mensual",
+        "allTime": "Todo el tiempo"
+    },
+    "profile": {
+        "title": "Perfil",
+        "editProfile": "Editar Perfil",
+        "nickname": "Apodo",
+        "email": "Correo electrónico",
+        "joinedAt": "Miembro desde",
+        "language": "Idioma",
+        "changeLanguage": "Cambiar idioma",
+        "logout": "Cerrar Sesión",
+        "deleteAccount": "Eliminar Cuenta",
+        "saveChanges": "Guardar Cambios",
+        "confirmLogout": "¿Realmente quieres cerrar sesión?",
+        "confirmDelete": "¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.",
+        "deleteInstructions": "Recibirás un código de verificación en tu correo electrónico. Introdúcelo a continuación para confirmar la eliminación.",
+        "verificationCode": "Código de verificación",
+        "errors": {
+            "updateFailed": "Error al actualizar el perfil",
+            "deleteFailed": "Error al eliminar la cuenta",
+            "invalidCode": "Código de verificación inválido"
+        },
+        "success": {
+            "profileUpdated": "Perfil actualizado correctamente",
+            "languageUpdated": "Idioma actualizado correctamente",
+            "accountDeleted": "Cuenta eliminada correctamente"
+        }
+    },
+    "chat": {
+        "title": "Tutor IA",
+        "welcome": "¡Hola! Soy tu tutor de IA. ¿En qué puedo ayudarte hoy?",
+        "placeholder": "Escribe un mensaje...",
+        "aiResponsePlaceholder": "Entiendo. Estoy aquí para ayudarte a practicar y aprender."
+    },
+    "navigation": {
+        "home": "Inicio",
+        "lessons": "Lecciones",
+        "leaderboard": "Clasificación",
+        "profile": "Perfil"
+    }
+}

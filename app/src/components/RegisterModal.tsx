@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Modal, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Modal, TouchableOpacity, ActivityIndicator, Alert, Platform } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { COLORS, SPACING, TYPOGRAPHY } from '../theme';
 import { X, User, Mail, Lock } from 'lucide-react-native';
 import { apiService } from '../services/apiService';
@@ -10,6 +11,7 @@ interface RegisterModalProps {
 }
 
 export const RegisterModal: React.FC<RegisterModalProps> = ({ visible, onClose }) => {
+    const { t, i18n } = useTranslation();
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -19,37 +21,42 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({ visible, onClose }
     const handleRegister = async () => {
         // Client-side validation
         if (!username || !email || !password) {
-            const msg = 'Por favor completa todos los campos';
-            if (typeof window !== 'undefined') {
+            const msg = t('register.errors.allFieldsRequired');
+            if (Platform.OS === 'web' && typeof window !== 'undefined') {
                 window.alert(msg);
             } else {
-                Alert.alert('Error', msg);
+                Alert.alert(t('common.error'), msg);
             }
             return;
         }
 
         if (!email.includes('@') || !email.includes('.')) {
-            const msg = 'Por favor introduce un email válido';
-            if (typeof window !== 'undefined') {
+            const msg = t('register.errors.invalidEmail');
+            if (Platform.OS === 'web' && typeof window !== 'undefined') {
                 window.alert(msg);
             } else {
-                Alert.alert('Error', msg);
+                Alert.alert(t('common.error'), msg);
             }
             return;
         }
 
         if (password.length < 6) {
-            const msg = 'La contraseña debe tener al menos 6 caracteres';
-            if (typeof window !== 'undefined') {
+            const msg = t('register.errors.passwordTooShort');
+            if (Platform.OS === 'web' && typeof window !== 'undefined') {
                 window.alert(msg);
             } else {
-                Alert.alert('Error', msg);
+                Alert.alert(t('common.error'), msg);
             }
             return;
         }
 
         setLoading(true);
-        const result = await apiService.register({ username, email, password });
+        const result = await apiService.register({
+            username,
+            email,
+            password,
+            language: i18n.language
+        });
         setLoading(false);
 
         if (result && !result.error) {
@@ -65,11 +72,11 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({ visible, onClose }
                 onClose();
             }, 3000);
         } else {
-            const msg = result?.error || result?.message || 'Error al registrar usuario';
-            if (typeof window !== 'undefined') {
+            const msg = result?.error || result?.message || t('register.errors.unknownError');
+            if (Platform.OS === 'web' && typeof window !== 'undefined') {
                 window.alert(msg);
             } else {
-                Alert.alert('Error', msg);
+                Alert.alert(t('common.error'), msg);
             }
         }
     };
@@ -85,7 +92,7 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({ visible, onClose }
                 <View style={styles.modalContainer}>
                     {/* Header */}
                     <View style={styles.header}>
-                        <Text style={styles.title}>Crear Cuenta</Text>
+                        <Text style={styles.title}>{t('register.title')}</Text>
                         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
                             <X color={COLORS.textSecondary} size={24} />
                         </TouchableOpacity>
@@ -97,24 +104,23 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({ visible, onClose }
                             <View style={styles.successIcon}>
                                 <Mail color={COLORS.white} size={40} />
                             </View>
-                            <Text style={styles.successTitle}>¡Correo enviado!</Text>
+                            <Text style={styles.successTitle}>{t('register.successTitle')}</Text>
                             <Text style={styles.successMessage}>
-                                Hemos enviado un enlace de verificación a tu correo electrónico.
-                                Por favor revisa tu bandeja de entrada.
+                                {t('register.successMessage')}
                             </Text>
                         </View>
                     ) : (
                         // Form State
                         <View style={styles.form}>
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Nombre</Text>
+                                <Text style={styles.label}>{t('register.name')}</Text>
                                 <View style={styles.inputWrapper}>
                                     <User color={COLORS.textSecondary} size={20} />
                                     <TextInput
                                         style={styles.input}
                                         value={username}
                                         onChangeText={setUsername}
-                                        placeholder="Tu nombre completo"
+                                        placeholder={t('register.name')}
                                         autoCapitalize="words"
                                         editable={!loading}
                                     />
@@ -122,14 +128,14 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({ visible, onClose }
                             </View>
 
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Email</Text>
+                                <Text style={styles.label}>{t('register.email')}</Text>
                                 <View style={styles.inputWrapper}>
                                     <Mail color={COLORS.textSecondary} size={20} />
                                     <TextInput
                                         style={styles.input}
                                         value={email}
                                         onChangeText={setEmail}
-                                        placeholder="correo@ejemplo.com"
+                                        placeholder={t('register.email')}
                                         keyboardType="email-address"
                                         autoCapitalize="none"
                                         editable={!loading}
@@ -138,14 +144,14 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({ visible, onClose }
                             </View>
 
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Contraseña</Text>
+                                <Text style={styles.label}>{t('register.password')}</Text>
                                 <View style={styles.inputWrapper}>
                                     <Lock color={COLORS.textSecondary} size={20} />
                                     <TextInput
                                         style={styles.input}
                                         value={password}
                                         onChangeText={setPassword}
-                                        placeholder="Mínimo 6 caracteres"
+                                        placeholder={t('register.password')}
                                         secureTextEntry
                                         editable={!loading}
                                     />
@@ -160,7 +166,7 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({ visible, onClose }
                                 {loading ? (
                                     <ActivityIndicator color={COLORS.white} />
                                 ) : (
-                                    <Text style={styles.registerButtonText}>Registrarse</Text>
+                                    <Text style={styles.registerButtonText}>{t('register.registerButton')}</Text>
                                 )}
                             </TouchableOpacity>
                         </View>

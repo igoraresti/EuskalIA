@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, TextInput, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, TextInput, Alert, ActivityIndicator, Platform } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { COLORS, SPACING, TYPOGRAPHY } from '../theme';
-import { User, Mail, Lock, Calendar, BookOpen, Trash2, LogOut, Save, ChevronLeft } from 'lucide-react-native';
+import { User, Mail, Lock, Calendar, BookOpen, Trash2, LogOut, Save, ChevronLeft, Globe } from 'lucide-react-native';
 import { apiService } from '../services/apiService';
 import { useAuth } from '../context/AuthContext';
+import { LanguageSelector } from '../components/LanguageSelector';
 
 export const ProfileScreen = ({ navigation }: any) => {
-    const { user: authUser, logout, updateUser } = useAuth();
+    const { t } = useTranslation();
+    const { user: authUser, logout, updateUser, updateLanguage } = useAuth();
     const [user, setUser] = useState<any>(null); // Local user state for form
     const [progress, setProgress] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -40,11 +43,9 @@ export const ProfileScreen = ({ navigation }: any) => {
                     setUsername(userData.username || '');
                     setNickname(userData.nickname || '');
                     setEmail(userData.email || '');
-                    // updateUser(userData); // Removed to prevent infinite loop
                 }
 
                 if (progressData) {
-                    // Handle new structure
                     if (progressData.progress) {
                         setProgress(progressData.progress);
                     } else {
@@ -65,26 +66,55 @@ export const ProfileScreen = ({ navigation }: any) => {
         const result = await apiService.updateProfile(user.id, {
             username,
             nickname,
-            // email, // Email not updatable via this form as per requirements
             password: password || undefined
         });
 
         if (result && !result.error) {
-            Alert.alert('Éxito', 'Perfil actualizado correctamente');
+            const msg = t('profile.success.profileUpdated');
+            if (Platform.OS === 'web' && typeof window !== 'undefined') {
+                window.alert(msg);
+            } else {
+                Alert.alert(t('common.success'), msg);
+            }
             setPassword('');
             // Update local state and context
             const updatedUser = { ...user, username, nickname };
             setUser(updatedUser);
             updateUser(updatedUser);
         } else {
-            Alert.alert('Error', 'No se pudo actualizar el perfil');
+            const msg = t('profile.errors.updateFailed');
+            if (Platform.OS === 'web' && typeof window !== 'undefined') {
+                window.alert(msg);
+            } else {
+                Alert.alert(t('common.error'), msg);
+            }
         }
         setSaving(false);
     };
 
+    const handleLanguageChange = async (languageCode: string) => {
+        const result = await updateLanguage(languageCode);
+        if (result.success) {
+            const msg = t('profile.success.languageUpdated');
+            if (Platform.OS === 'web' && typeof window !== 'undefined') {
+                // Not showing alert for language change to be smoother
+            } else {
+                Alert.alert(t('common.success'), msg);
+            }
+        } else {
+            const msg = t('profile.errors.updateFailed');
+            if (Platform.OS === 'web' && typeof window !== 'undefined') {
+                window.alert(msg);
+            } else {
+                Alert.alert(t('common.error'), msg);
+            }
+        }
+    };
+
     const handleLogout = () => {
-        if (typeof window !== 'undefined') {
-            if (window.confirm('¿Realmente quieres cerrar sesión?')) {
+        const msg = t('profile.confirmLogout');
+        if (Platform.OS === 'web' && typeof window !== 'undefined') {
+            if (window.confirm(msg)) {
                 logout();
                 navigation.reset({
                     index: 0,
@@ -93,12 +123,12 @@ export const ProfileScreen = ({ navigation }: any) => {
             }
         } else {
             Alert.alert(
-                'Cerrar Sesión',
-                '¿Realmente quieres cerrar sesión?',
+                t('profile.logout'),
+                msg,
                 [
-                    { text: 'Cancelar', style: 'cancel' },
+                    { text: t('common.cancel'), style: 'cancel' },
                     {
-                        text: 'Cerrar Sesión',
+                        text: t('profile.logout'),
                         style: 'destructive',
                         onPress: () => {
                             logout();
@@ -115,18 +145,18 @@ export const ProfileScreen = ({ navigation }: any) => {
 
     const handleRequestDelete = () => {
         Alert.alert(
-            'Eliminar Cuenta',
-            '¿Estás seguro? Esta acción enviará un código de confirmación a tu correo.',
+            t('profile.deleteAccount'),
+            t('profile.confirmDelete'),
             [
-                { text: 'Cancelar', style: 'cancel' },
+                { text: t('common.cancel'), style: 'cancel' },
                 {
-                    text: 'Continuar',
+                    text: t('common.confirm'),
                     onPress: async () => {
-                        const success = await apiService.requestDeletion(1);
+                        const success = await apiService.requestDeletion(user?.id || 0);
                         if (success) {
                             setShowDeleteModal(true);
                         } else {
-                            Alert.alert('Error', 'No se pudo procesar la solicitud.');
+                            Alert.alert(t('common.error'), t('profile.errors.deleteFailed'));
                         }
                     }
                 }
@@ -136,17 +166,17 @@ export const ProfileScreen = ({ navigation }: any) => {
 
     const handleVerifyDelete = async () => {
         if (verificationCode.length !== 6) {
-            Alert.alert('Error', 'El código debe tener 6 dígitos.');
+            Alert.alert(t('common.error'), t('profile.errors.invalidCode'));
             return;
         }
 
         setIsVerifying(true);
-        const success = await apiService.deleteAccount(1, verificationCode);
+        const success = await apiService.deleteAccount(user?.id || 0, verificationCode);
         setIsVerifying(false);
 
         if (success) {
             setShowDeleteModal(false);
-            Alert.alert('Cuenta Eliminada', 'Tu cuenta ha sido eliminada correctamente.', [
+            Alert.alert(t('profile.success.accountDeleted'), t('profile.success.accountDeleted'), [
                 {
                     text: 'OK',
                     onPress: () => navigation.reset({
@@ -156,7 +186,7 @@ export const ProfileScreen = ({ navigation }: any) => {
                 }
             ]);
         } else {
-            Alert.alert('Error', 'Código incorrecto o expirado.');
+            Alert.alert(t('common.error'), t('profile.errors.invalidCode'));
         }
     };
 
@@ -183,7 +213,7 @@ export const ProfileScreen = ({ navigation }: any) => {
                 >
                     <ChevronLeft color={COLORS.primary} size={28} />
                 </TouchableOpacity>
-                <Text style={TYPOGRAPHY.h2}>Mi Perfil</Text>
+                <Text style={TYPOGRAPHY.h2}>{t('profile.title')}</Text>
                 <View style={{ width: 28 }} />
             </View>
 
@@ -201,17 +231,17 @@ export const ProfileScreen = ({ navigation }: any) => {
                     <View style={styles.statsGrid}>
                         <View style={styles.statsItem}>
                             <Calendar color={COLORS.textSecondary} size={20} />
-                            <Text style={styles.statsLabel}>Unido</Text>
+                            <Text style={styles.statsLabel}>{t('profile.joinedAt')}</Text>
                             <Text style={styles.statsValue}>{user?.joinedAt ? new Date(user.joinedAt).toLocaleDateString() : 'N/A'}</Text>
                         </View>
                         <View style={styles.statsItem}>
                             <BookOpen color={COLORS.textSecondary} size={20} />
-                            <Text style={styles.statsLabel}>Última Lección</Text>
+                            <Text style={styles.statsLabel}>{t('home.continueLesson')}</Text>
                             <Text style={styles.statsValue}>{progress?.lastLessonTitle || 'N/A'}</Text>
                         </View>
                         <View style={styles.statsItem}>
                             <Text style={styles.statsValueLarge}>{progress?.xp || 0}</Text>
-                            <Text style={styles.statsLabel}>XP Total</Text>
+                            <Text style={styles.statsLabel}>{t('home.totalXP')}</Text>
                         </View>
                     </View>
                 </View>
@@ -219,8 +249,8 @@ export const ProfileScreen = ({ navigation }: any) => {
                 {/* Verification View for Deletion */}
                 {showDeleteModal && (
                     <View style={styles.formSection}>
-                        <Text style={[styles.formTitle, { color: COLORS.error }]}>Confirmar Eliminación</Text>
-                        <Text style={styles.label}>Introduce el código de 6 dígitos enviado a tu correo:</Text>
+                        <Text style={[styles.formTitle, { color: COLORS.error }]}>{t('common.confirm')} {t('profile.deleteAccount')}</Text>
+                        <Text style={styles.label}>{t('profile.deleteInstructions')}</Text>
                         <View style={[styles.inputWrapper, { marginTop: 10 }]}>
                             <TextInput
                                 style={[styles.input, { textAlign: 'center', fontSize: 24, letterSpacing: 8 }]}
@@ -237,14 +267,14 @@ export const ProfileScreen = ({ navigation }: any) => {
                             disabled={isVerifying}
                         >
                             {isVerifying ? <ActivityIndicator color={COLORS.white} /> : (
-                                <Text style={styles.saveButtonText}>Confirmar y Eliminar</Text>
+                                <Text style={styles.saveButtonText}>{t('common.confirm')} & {t('common.delete')}</Text>
                             )}
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={{ alignSelf: 'center', marginTop: 15 }}
                             onPress={() => setShowDeleteModal(false)}
                         >
-                            <Text style={{ color: COLORS.textSecondary }}>Cancelar</Text>
+                            <Text style={{ color: COLORS.textSecondary }}>{t('common.cancel')}</Text>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -252,49 +282,55 @@ export const ProfileScreen = ({ navigation }: any) => {
                 {/* Edit Form */}
                 {!showDeleteModal && (
                     <View style={styles.formSection}>
-                        <Text style={styles.formTitle}>Editar Información</Text>
+                        <Text style={styles.formTitle}>{t('profile.editProfile')}</Text>
 
                         <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Nombre Completo</Text>
+                            <Text style={styles.label}>{t('register.name')}</Text>
                             <View style={styles.inputWrapper}>
                                 <User color={COLORS.textSecondary} size={20} />
                                 <TextInput
                                     style={styles.input}
                                     value={username}
                                     onChangeText={setUsername}
-                                    placeholder="Tu nombre"
+                                    placeholder={t('register.name')}
                                 />
                             </View>
                         </View>
 
                         <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Nombre de Usuario (Nick)</Text>
+                            <Text style={styles.label}>{t('profile.nickname')}</Text>
                             <View style={styles.inputWrapper}>
                                 <Text style={styles.atSymbol}>@</Text>
                                 <TextInput
                                     style={styles.input}
                                     value={nickname}
                                     onChangeText={setNickname}
-                                    placeholder="tu_nick"
+                                    placeholder={t('profile.nickname')}
                                 />
                             </View>
                         </View>
 
                         <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Correo Electrónico</Text>
+                            <Text style={styles.label}>{t('profile.language')}</Text>
+                            <LanguageSelector onLanguageChange={handleLanguageChange} />
+                        </View>
+
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>{t('profile.email')}</Text>
                             <View style={styles.inputWrapper}>
                                 <Mail color={COLORS.textSecondary} size={20} />
                                 <TextInput
-                                    placeholder="correo@ejemplo.com"
+                                    placeholder={t('profile.email')}
                                     keyboardType="email-address"
                                     editable={false}
+                                    value={email}
                                     style={[styles.input, { color: COLORS.textSecondary }]}
                                 />
                             </View>
                         </View>
 
                         <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Nueva Contraseña</Text>
+                            <Text style={styles.label}>{t('register.password')}</Text>
                             <View style={styles.inputWrapper}>
                                 <Lock color={COLORS.textSecondary} size={20} />
                                 <TextInput
@@ -315,7 +351,7 @@ export const ProfileScreen = ({ navigation }: any) => {
                             {saving ? <ActivityIndicator color={COLORS.white} /> : (
                                 <>
                                     <Save color={COLORS.white} size={20} />
-                                    <Text style={styles.saveButtonText}>Guardar Cambios</Text>
+                                    <Text style={styles.saveButtonText}>{t('profile.saveChanges')}</Text>
                                 </>
                             )}
                         </TouchableOpacity>
@@ -326,12 +362,12 @@ export const ProfileScreen = ({ navigation }: any) => {
                 <View style={styles.dangerZone}>
                     <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
                         <LogOut color={COLORS.textSecondary} size={20} />
-                        <Text style={styles.logoutText}>Cerrar Sesión</Text>
+                        <Text style={styles.logoutText}>{t('profile.logout')}</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.deleteButton} onPress={handleRequestDelete}>
                         <Trash2 color={COLORS.error} size={20} />
-                        <Text style={styles.deleteText}>Eliminar Cuenta</Text>
+                        <Text style={styles.deleteText}>{t('profile.deleteAccount')}</Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>
@@ -414,6 +450,7 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: COLORS.textSecondary,
         marginTop: 4,
+        textAlign: 'center',
     },
     statsValue: {
         fontSize: 14,

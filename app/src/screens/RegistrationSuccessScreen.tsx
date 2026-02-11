@@ -1,10 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { COLORS, SPACING, TYPOGRAPHY } from '../theme';
 import { CheckCircle } from 'lucide-react-native';
 import { Button } from '../components/Button';
 
 export const RegistrationSuccessScreen = ({ navigation }: any) => {
+    const { t } = useTranslation();
     const handleGoToLogin = () => {
         navigation.reset({
             index: 0,
@@ -19,14 +21,14 @@ export const RegistrationSuccessScreen = ({ navigation }: any) => {
                     <CheckCircle color={COLORS.primary} size={80} strokeWidth={2} />
                 </View>
 
-                <Text style={[TYPOGRAPHY.h1, styles.title]}>¡Cuenta Verificada!</Text>
+                <Text style={[TYPOGRAPHY.h1, styles.title]}>{t('registrationSuccess.title')}</Text>
 
                 <Text style={[TYPOGRAPHY.body, styles.message]}>
-                    Tu cuenta ha sido verificada exitosamente. Ya puedes iniciar sesión y comenzar a aprender euskera.
+                    {t('registrationSuccess.message')}
                 </Text>
 
                 <Button
-                    title="Ir a Iniciar Sesión"
+                    title={t('registrationSuccess.loginButton')}
                     onPress={handleGoToLogin}
                     style={styles.button}
                 />

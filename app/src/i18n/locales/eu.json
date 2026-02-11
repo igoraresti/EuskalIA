@@ -1,0 +1,153 @@
+{
+    "common": {
+        "appName": "Euskal IA",
+        "loading": "Kargatzen...",
+        "error": "Errorea",
+        "success": "Arrakasta",
+        "cancel": "Ezeztatu",
+        "confirm": "Baieztatu",
+        "save": "Gorde",
+        "delete": "Ezabatu",
+        "edit": "Editatu",
+        "close": "Itxi",
+        "back": "Atzera",
+        "user": "Erabiltzailea"
+    },
+    "languages": {
+        "es": "Español",
+        "en": "English",
+        "pl": "Polski",
+        "eu": "Euskera",
+        "fr": "Français"
+    },
+    "onboarding": {
+        "title": "Euskal IA",
+        "subtitle": "Ikasi euskara modu adimentsuan eta dibertigarrian. IAren indarra zure eskuetan.",
+        "getStarted": "Hasi orain",
+        "alreadyHaveAccount": "Badaukat kontu bat"
+    },
+    "login": {
+        "title": "Saioa hasi",
+        "username": "Erabiltzaile izena",
+        "password": "Pasahitza",
+        "loginButton": "Saioa hasi",
+        "noAccount": "Ez duzu konturik?",
+        "register": "Erregistratu hemen",
+        "errors": {
+            "invalidCredentials": "Erabiltzaile edo pasahitz okerra",
+            "unverifiedEmail": "Mesedez, egiaztatu zure posta elektronikoa saioa hasi aurretik",
+            "serverError": "Zerbitzariaren errorea",
+            "connectionError": "Ezin izan da zerbitzariarekin konektatu. Egiaztatu zure konexioa.",
+            "unknownError": "Errore ezezaguna"
+        }
+    },
+    "register": {
+        "title": "Kontua sortu",
+        "name": "Izena",
+        "email": "Posta elektronikoa",
+        "password": "Pasahitza",
+        "registerButton": "Erregistratu",
+        "successTitle": "Posta elektronikoa bidali da!",
+        "successMessage": "Egiaztapen esteka bat bidali dugu zure posta elektronikora. Mesedez, begiratu zure sarrera-ontzia.",
+        "errors": {
+            "allFieldsRequired": "Eremu guztiak beharrezkoak dira",
+            "invalidEmail": "Posta elektronikoaren formatu okerra",
+            "passwordTooShort": "Pasahitzak gutxienez 6 karaktere izan behar ditu",
+            "usernameTaken": "Erabiltzaile izena hartuta dago",
+            "emailTaken": "Posta elektronikoa erregistratuta dago dagoeneko",
+            "serverError": "Zerbitzariaren errorea",
+            "connectionError": "Ezin izan da zerbitzariarekin konektatu. Egiaztatu zure konexioa.",
+            "unknownError": "Errore ezezaguna"
+        }
+    },
+    "registrationSuccess": {
+        "title": "Kontua egiaztatuta!",
+        "message": "Zure kontua arrakastaz egiaztatu da. Orain saioa hasi eta euskara ikasten hasi zaitezke.",
+        "loginButton": "Joan saioa hastera"
+    },
+    "home": {
+        "title": "Hasiera",
+        "welcome": "Ongi etorri berriro!",
+        "continueLesson": "Jarraitu ikasgaia",
+        "startLesson": "Hasi ikasgaia",
+        "lessonsCompleted": "Osatutako ikasgaiak",
+        "totalXP": "XP guztira",
+        "unit": "Unitatea",
+        "basics": "Oinarriak"
+    },
+    "lessons": {
+        "title": "Ikasgaiak",
+        "completed": "Osatuta",
+        "locked": "Blokeatuta",
+        "start": "Hasi",
+        "continue": "Jarraitu",
+        "xpEarned": "Lortutako XP"
+    },
+    "lesson": {
+        "question": "Galdera",
+        "yourAnswer": "Zure erantzuna",
+        "submit": "Bidali",
+        "next": "Hurrengoa",
+        "finish": "Amaitu",
+        "correct": "Zuzena!",
+        "incorrect": "Okerra",
+        "lessonComplete": "Ikasgaia osatuta!",
+        "xpEarned": "Lortutako XP",
+        "backToHome": "Itzuli hasierara"
+    },
+    "leaderboard": {
+        "title": "Sailkapena",
+        "world": "Mundua",
+        "friends": "Lagunak",
+        "you": "Zu",
+        "rank": "Posizioa",
+        "username": "Erabiltzailea",
+        "xp": "XP",
+        "level": "Maila",
+        "myRank": "Nire postua",
+        "worldRank": "Munduko sailkapena",
+        "noData": "Daturik ez",
+        "daily": "Egunekoa",
+        "weekly": "Astekoa",
+        "monthly": "Hilekoa",
+        "allTime": "Denbora guztia"
+    },
+    "profile": {
+        "title": "Profila",
+        "editProfile": "Editatu profila",
+        "nickname": "Ezizena",
+        "email": "Posta elektronikoa",
+        "joinedAt": "Kide noiztik",
+        "language": "Hizkuntza",
+        "changeLanguage": "Aldatu hizkuntza",
+        "logout": "Saioa itxi",
+        "deleteAccount": "Ezabatu kontua",
+        "saveChanges": "Gorde aldaketak",
+        "confirmLogout": "Benetan saioa itxi nahi duzu?",
+        "confirmDelete": "Ziur zaude zure kontua ezabatu nahi duzula? Ekintza hau ezin da desegin.",
+        "deleteInstructions": "Egiaztapen kode bat jasoko duzu zure posta elektronikoan. Sartu behean ezabatzea baieztatzeko.",
+        "verificationCode": "Egiaztapen kodea",
+        "errors": {
+            "updateFailed": "Ezin izan da profila eguneratu",
+            "deleteFailed": "Ezin izan da kontua ezabatu",
+            "invalidCode": "Egiaztapen kode okerra"
+        },
+        "success": {
+            "profileUpdated": "Profila arrakastaz eguneratuta",
+            "languageUpdated": "Hizkuntza arrakastaz eguneratuta",
+            "accountDeleted": "Kontua arrakastaz ezabatuta"
+        }
+    },
+    "chat": {
+        "title": "IA Tutorea",
+        "welcome": "Kaixo! Zure IA tutorea naiz. Zertan lagundu zaitzaket gaur?",
+        "placeholder": "Idatzi mezu bat...",
+        "aiResponsePlaceholder": "Ulertzen dut. Hemen nago praktikatzera eta ikastera laguntzeko."
+    },
+    "navigation": {
+        "home": "Hasiera",
+        "lessons": "Ikasgaiak",
+        "leaderboard": "Sailkapena",
+        "profile": "Profila"
+    }
+}
