@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, Image } from 'react-native';
 import { COLORS, SPACING, TYPOGRAPHY } from '../theme';
 import { Button } from '../components/Button';
+import { RegisterModal } from '../components/RegisterModal';
+
 
 export const OnboardingScreen = ({ navigation }: any) => {
+    const [showRegisterModal, setShowRegisterModal] = useState(false);
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.content}>
@@ -22,7 +26,7 @@ export const OnboardingScreen = ({ navigation }: any) => {
                 <View style={styles.buttonContainer}>
                     <Button
                         title="Empezar ahora"
-                        onPress={() => navigation.navigate('Home')}
+                        onPress={() => setShowRegisterModal(true)}
                         style={styles.button}
                     />
                     <Button
@@ -33,6 +37,11 @@ export const OnboardingScreen = ({ navigation }: any) => {
                     />
                 </View>
             </View>
+
+            <RegisterModal
+                visible={showRegisterModal}
+                onClose={() => setShowRegisterModal(false)}
+            />
         </SafeAreaView>
     );
 };

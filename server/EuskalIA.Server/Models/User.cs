@@ -13,6 +13,11 @@ namespace EuskalIA.Server.Models
         public string? DeletionCode { get; set; }
         public DateTime? CodeExpiration { get; set; }
         
+        // Email verification fields
+        public bool IsVerified { get; set; } = false;
+        public string? VerificationToken { get; set; }
+        public DateTime? TokenExpiration { get; set; }
+        
         // Navigation property
         public Progress? Progress { get; set; }
     }

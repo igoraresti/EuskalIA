@@ -83,7 +83,7 @@ export const ProfileScreen = ({ navigation }: any) => {
     };
 
     const handleLogout = () => {
-        if (typeof window !== 'undefined' && window.alert && window.confirm) {
+        if (typeof window !== 'undefined') {
             if (window.confirm('¿Realmente quieres cerrar sesión?')) {
                 logout();
                 navigation.reset({

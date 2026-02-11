@@ -8,6 +8,7 @@ import { LessonScreen } from '../screens/LessonScreen';
 import { AIChatScreen } from '../screens/AIChatScreen';
 import { LeaderboardScreen } from '../screens/LeaderboardScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
+import { RegistrationSuccessScreen } from '../screens/RegistrationSuccessScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -23,6 +24,7 @@ export const AppNavigation = () => {
                 AIChat: 'chat',
                 Leaderboard: 'leaderboard',
                 Profile: 'profile',
+                RegistrationSuccess: 'registro-exitoso',
             },
         },
     };
@@ -43,6 +45,7 @@ export const AppNavigation = () => {
                 <Stack.Screen name="AIChat" component={AIChatScreen} />
                 <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />
                 <Stack.Screen name="Profile" component={ProfileScreen} />
+                <Stack.Screen name="RegistrationSuccess" component={RegistrationSuccessScreen} />
             </Stack.Navigator>
         </NavigationContainer>
     );

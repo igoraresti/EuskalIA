@@ -15,6 +15,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // AI Service
 builder.Services.AddScoped<IAIService, MockAIService>();
 builder.Services.AddScoped<IEncryptionService, EncryptionService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // CORS
 builder.Services.AddCors(options =>
@@ -44,7 +45,8 @@ using (var scope = app.Services.CreateScope())
             Nickname = encryptionService.Encrypt("igoraresti"),
             Email = encryptionService.Encrypt("igor@euskalia.eus"),
             Password = encryptionService.Encrypt("1234"),
-            JoinedAt = DateTime.UtcNow.AddMonths(-2)
+            JoinedAt = DateTime.UtcNow.AddMonths(-2),
+            IsVerified = true // Existing user is pre-verified
         };
         db.Users.Add(user);
         db.SaveChanges();

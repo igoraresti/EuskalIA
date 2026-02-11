@@ -14,11 +14,13 @@ namespace EuskalIA.Server.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IEncryptionService _encryptionService;
+        private readonly IEmailService _emailService;
 
-        public UsersController(AppDbContext context, IEncryptionService encryptionService)
+        public UsersController(AppDbContext context, IEncryptionService encryptionService, IEmailService emailService)
         {
             _context = context;
             _encryptionService = encryptionService;
+            _emailService = emailService;
         }
 
         [HttpGet("{id}")]
@@ -52,6 +54,10 @@ namespace EuskalIA.Server.Controllers
             var decryptedPassword = _encryptionService.Decrypt(user.Password);
             if (decryptedPassword != loginDto.Password) 
                 return Unauthorized(new { message = "Usuario o contraseña incorrectos" });
+
+            // Check if user is verified
+            if (!user.IsVerified)
+                return Unauthorized(new { message = "Por favor verifica tu correo electrónico antes de iniciar sesión" });
 
             // Return user details similar to GetUser
             return Ok(new User 
@@ -194,6 +200,100 @@ namespace EuskalIA.Server.Controllers
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
             return Ok(new { message = "Account deleted successfully." });
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
+        {
+            // Validate input
+            if (string.IsNullOrWhiteSpace(registerDto.Username) || 
+                string.IsNullOrWhiteSpace(registerDto.Email) || 
+                string.IsNullOrWhiteSpace(registerDto.Password))
+            {
+                return BadRequest(new { message = "Todos los campos son obligatorios" });
+            }
+
+            // Validate email format
+            if (!registerDto.Email.Contains("@") || !registerDto.Email.Contains("."))
+            {
+                return BadRequest(new { message = "Formato de email inválido" });
+            }
+
+            // Validate password length
+            if (registerDto.Password.Length < 6)
+            {
+                return BadRequest(new { message = "La contraseña debe tener al menos 6 caracteres" });
+            }
+
+            // Check if username already exists
+            var existingUsername = await _context.Users.FirstOrDefaultAsync(u => u.Username == registerDto.Username);
+            if (existingUsername != null)
+            {
+                return BadRequest(new { message = "El nombre de usuario ya está en uso" });
+            }
+
+            // Check if email already exists (need to check encrypted emails)
+            var allUsers = await _context.Users.ToListAsync();
+            var emailExists = allUsers.Any(u => _encryptionService.Decrypt(u.Email) == registerDto.Email);
+            if (emailExists)
+            {
+                return BadRequest(new { message = "El correo electrónico ya está registrado" });
+            }
+
+            // Generate verification token
+            var verificationToken = Guid.NewGuid().ToString();
+
+            // Create new user
+            var newUser = new User
+            {
+                Username = registerDto.Username,
+                Nickname = _encryptionService.Encrypt(registerDto.Username), // Default nickname to username
+                Email = _encryptionService.Encrypt(registerDto.Email),
+                Password = _encryptionService.Encrypt(registerDto.Password),
+                JoinedAt = DateTime.UtcNow,
+                IsVerified = false,
+                VerificationToken = verificationToken,
+                TokenExpiration = DateTime.UtcNow.AddHours(24)
+            };
+
+            _context.Users.Add(newUser);
+            await _context.SaveChangesAsync();
+
+            // Send verification email
+            await _emailService.SendVerificationEmailAsync(registerDto.Email, registerDto.Username, verificationToken);
+
+            return Ok(new { message = "Registro exitoso. Por favor verifica tu correo electrónico." });
+        }
+
+        [HttpGet("verify-email")]
+        public async Task<IActionResult> VerifyEmail([FromQuery] string token)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                return BadRequest("Token inválido");
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.VerificationToken == token);
+            
+            if (user == null)
+            {
+                return BadRequest("Token inválido");
+            }
+
+            if (user.TokenExpiration < DateTime.UtcNow)
+            {
+                return BadRequest("El token ha expirado");
+            }
+
+            // Mark user as verified
+            user.IsVerified = true;
+            user.VerificationToken = null;
+            user.TokenExpiration = null;
+            
+            await _context.SaveChangesAsync();
+
+            // Redirect to frontend success page
+            return Redirect("http://localhost:8081/registro-exitoso");
         }
     }
 }

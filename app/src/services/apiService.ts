@@ -120,5 +120,20 @@ export const apiService = {
             console.error('Error fetching user leaderboard:', error);
             return [];
         }
+    },
+
+    register: async (registerDto: { username: string; email: string; password: string }) => {
+        try {
+            const response = await axios.post(`${BASE_URL}/users/register`, registerDto);
+            return response.data;
+        } catch (error: any) {
+            console.error('Error registering user:', error);
+            if (error.response) {
+                return { error: error.response.data.message || 'Error en el servidor' };
+            } else if (error.request) {
+                return { error: 'No se pudo conectar con el servidor. Verifica tu conexión.' };
+            }
+            return { error: 'Error desconocido' };
+        }
     }
 };
