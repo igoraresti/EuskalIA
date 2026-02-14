@@ -44,6 +44,33 @@ npm run web  # Para probar en el navegador
 npx expo start # Para probar en iOS/Android con Expo Go
 ```
 
+## Tests
+
+### Backend (.NET)
+Para ejecutar los tests del servidor:
+```bash
+cd server/EuskalIA.Tests
+dotnet test
+```
+
+### Frontend (React Native)
+Para ejecutar los tests unitarios de la aplicación:
+```bash
+cd app
+npm test
+```
+
+### End-to-End (Playwright)
+Para ejecutar los tests de integración visual:
+```bash
+cd app
+npx playwright test
+```
+Para ver la interfaz gráfica de los tests:
+```bash
+npx playwright test --ui
+```
+
 ## Despliegue con Docker
 
 Para desplegar el servidor fácilmente en cualquier entorno (incluyendo Windows):

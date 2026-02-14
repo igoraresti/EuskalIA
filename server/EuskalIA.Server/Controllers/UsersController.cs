@@ -60,6 +60,10 @@ namespace EuskalIA.Server.Controllers
             if (!user.IsVerified)
                 return Unauthorized(new { message = "Por favor verifica tu correo electrónico antes de iniciar sesión" });
 
+            // Check if user is active
+            if (!user.IsActive)
+                return Unauthorized(new { message = "Esta cuenta ha sido desactivada." });
+
             // Return user details similar to GetUser
             return Ok(new User 
             {
@@ -119,7 +123,7 @@ namespace EuskalIA.Server.Controllers
                 .Select(lp => new 
                 { 
                     lp.LessonId,
-                    LessonTitle = _context.Lessons.FirstOrDefault(l => l.Id == lp.LessonId).Title,
+                    LessonTitle = _context.Lessons.Where(l => l.Id == lp.LessonId).Select(l => l.Title).FirstOrDefault() ?? "Lección",
                     lp.CorrectAnswers,
                     lp.TotalQuestions
                 })
@@ -186,6 +190,45 @@ namespace EuskalIA.Server.Controllers
             Console.WriteLine("**************************************************");
 
             return Ok(new { message = "Verification code generated and sent." });
+        }
+
+        [HttpPost("{id}/request-deactivation")]
+        public async Task<IActionResult> RequestDeactivation(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
+
+            var token = Guid.NewGuid().ToString();
+            user.DeactivationToken = token;
+            user.DeactivationTokenExpiration = DateTime.UtcNow.AddHours(24);
+            await _context.SaveChangesAsync();
+
+            var decryptedEmail = _encryptionService.Decrypt(user.Email);
+            await _emailService.SendDeactivationEmailAsync(decryptedEmail, user.Username, token);
+
+            return Ok(new { message = "Solicitud de desactivación enviada. Revisa tu correo electrónico." });
+        }
+
+        [HttpGet("confirm-deactivation")]
+        public async Task<IActionResult> ConfirmDeactivation([FromQuery] string token)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+                return BadRequest("Token inválido");
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.DeactivationToken == token);
+            
+            if (user == null || user.DeactivationTokenExpiration < DateTime.UtcNow)
+                return BadRequest("Token inválido o expirado");
+
+            // Logical deletion: deactivate account
+            user.IsActive = false;
+            user.DeactivationToken = null;
+            user.DeactivationTokenExpiration = null;
+            
+            await _context.SaveChangesAsync();
+
+            // Redirect to a success page or login
+            return Redirect("http://localhost:8081/login?deactivated=true");
         }
 
         [HttpDelete("{id}")]

@@ -27,6 +27,19 @@ namespace EuskalIA.Server.Services
             }
         }
 
+        public async Task SendDeactivationEmailAsync(string email, string username, string token)
+        {
+            if (_useMockService)
+            {
+                await SendMockDeactivationEmailAsync(email, username, token);
+            }
+            else
+            {
+                // Future: Send real email
+                await SendMockDeactivationEmailAsync(email, username, token);
+            }
+        }
+
         private Task SendMockEmailAsync(string email, string username, string token)
         {
             var verificationUrl = $"http://localhost:5235/api/users/verify-email?token={token}";
@@ -74,6 +87,29 @@ namespace EuskalIA.Server.Services
             // 
             // await client.SendAsync(message);
             // await client.DisconnectAsync(true);
+        }
+
+        private Task SendMockDeactivationEmailAsync(string email, string username, string token)
+        {
+            var deactivationUrl = $"http://localhost:5235/api/users/confirm-deactivation?token={token}";
+            
+            Console.WriteLine("**************************************************");
+            Console.WriteLine($"[EMAIL SIMULATION] To: {email}");
+            Console.WriteLine($"[EMAIL SIMULATION] Subject: Confirma la desactivación de tu cuenta de EuskalIA");
+            Console.WriteLine($"[EMAIL SIMULATION]");
+            Console.WriteLine($"[EMAIL SIMULATION] Hola {username},");
+            Console.WriteLine($"[EMAIL SIMULATION]");
+            Console.WriteLine($"[EMAIL SIMULATION] Hemos recibido una solicitud para desactivar tu cuenta.");
+            Console.WriteLine($"[EMAIL SIMULATION] Para confirmar esta acción, haz clic en el siguiente enlace:");
+            Console.WriteLine($"[EMAIL SIMULATION]");
+            Console.WriteLine($"[EMAIL SIMULATION] {deactivationUrl}");
+            Console.WriteLine($"[EMAIL SIMULATION]");
+            Console.WriteLine($"[EMAIL SIMULATION] Este enlace expirará en 24 horas.");
+            Console.WriteLine($"[EMAIL SIMULATION]");
+            Console.WriteLine($"[EMAIL SIMULATION] Si no has solicitado esto, puedes ignorar este mensaje.");
+            Console.WriteLine("**************************************************");
+            
+            return Task.CompletedTask;
         }
     }
 }

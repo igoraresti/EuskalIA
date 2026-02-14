@@ -14,7 +14,14 @@ export const LoginScreen = ({ navigation }: any) => {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
 
-    // Remove the forced 'es' useEffect as it resets user selection
+    // Detect deactivated parameter
+    useEffect(() => {
+        // Simple check for web platform URL
+        if (Platform.OS === 'web' && typeof window !== 'undefined' && window.location.search.includes('deactivated=true')) {
+            const msg = "Tu cuenta ha sido desactivada correctamente.";
+            window.alert(msg);
+        }
+    }, []);
 
     const handleLogin = async () => {
         if (!username || !password) {

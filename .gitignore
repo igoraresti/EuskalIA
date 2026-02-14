@@ -19,6 +19,8 @@ server/EuskalIA.Server/euskalia.db
 **/TestResults/
 **/coverage.json
 **/*.txt
+app/playwright-report/
+app/test-results/
 
 # Dependencies
 app/node_modules/

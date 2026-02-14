@@ -21,6 +21,11 @@ namespace EuskalIA.Server.Models
         // Language preference
         public string Language { get; set; } = "es"; // Default: Spanish
         
+        // Deactivation fields
+        public bool IsActive { get; set; } = true;
+        public string? DeactivationToken { get; set; }
+        public DateTime? DeactivationTokenExpiration { get; set; }
+        
         // Navigation property
         public Progress? Progress { get; set; }
     }

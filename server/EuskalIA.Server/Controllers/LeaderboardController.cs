@@ -21,6 +21,7 @@ namespace EuskalIA.Server.Controllers
         {
             var query = _context.Progresses
                 .Include(p => p.User)
+                .Where(p => p.User != null && p.User.IsActive)
                 .AsQueryable();
 
             query = period switch
@@ -49,6 +50,7 @@ namespace EuskalIA.Server.Controllers
         {
             var allRankings = await _context.Progresses
                 .Include(p => p.User)
+                .Where(p => p.User != null && p.User.IsActive)
                 .Select(p => new
                 {
                     p.UserId,

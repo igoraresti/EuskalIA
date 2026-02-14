@@ -143,25 +143,47 @@ export const ProfileScreen = ({ navigation }: any) => {
         }
     };
 
-    const handleRequestDelete = () => {
-        Alert.alert(
-            t('profile.deleteAccount'),
-            t('profile.confirmDelete'),
-            [
-                { text: t('common.cancel'), style: 'cancel' },
-                {
-                    text: t('common.confirm'),
-                    onPress: async () => {
-                        const success = await apiService.requestDeletion(user?.id || 0);
-                        if (success) {
-                            setShowDeleteModal(true);
-                        } else {
-                            Alert.alert(t('common.error'), t('profile.errors.deleteFailed'));
-                        }
+    const handleRequestDeactivation = () => {
+        const msg = "Al desactivar tu cuenta, no podrás volver a iniciar sesión y no aparecerás en las clasificaciones. ¿Quieres proceder?";
+        if (Platform.OS === 'web' && typeof window !== 'undefined') {
+            if (window.confirm(msg)) {
+                performDeactivationRequest();
+            }
+        } else {
+            Alert.alert(
+                t('profile.deleteAccount'),
+                msg,
+                [
+                    { text: t('common.cancel'), style: 'cancel' },
+                    {
+                        text: t('common.confirm'),
+                        onPress: performDeactivationRequest
                     }
-                }
-            ]
-        );
+                ]
+            );
+        }
+    };
+
+    const performDeactivationRequest = async () => {
+        setSaving(true);
+        const result = await apiService.requestAccountDeactivation(user?.id || 0);
+        setSaving(false);
+
+        if (result && !result.error) {
+            const feedbackMsg = "Se ha enviado un correo de confirmación. Revisa tu bandeja de entrada para finalizar el proceso.";
+            if (Platform.OS === 'web' && typeof window !== 'undefined') {
+                window.alert(feedbackMsg);
+            } else {
+                Alert.alert(t('common.success'), feedbackMsg);
+            }
+        } else {
+            const errMsg = result?.error || t('profile.errors.deleteFailed');
+            if (Platform.OS === 'web' && typeof window !== 'undefined') {
+                window.alert(errMsg);
+            } else {
+                Alert.alert(t('common.error'), errMsg);
+            }
+        }
     };
 
     const handleVerifyDelete = async () => {
@@ -365,7 +387,7 @@ export const ProfileScreen = ({ navigation }: any) => {
                         <Text style={styles.logoutText}>{t('profile.logout')}</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.deleteButton} onPress={handleRequestDelete}>
+                    <TouchableOpacity style={styles.deleteButton} onPress={handleRequestDeactivation}>
                         <Trash2 color={COLORS.error} size={20} />
                         <Text style={styles.deleteText}>{t('profile.deleteAccount')}</Text>
                     </TouchableOpacity>

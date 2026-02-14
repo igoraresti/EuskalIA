@@ -102,6 +102,32 @@ export const apiService = {
         }
     },
 
+    requestAccountDeactivation: async (userId: number) => {
+        try {
+            const response = await axios.post(`${BASE_URL}/users/${userId}/request-deactivation`);
+            return response.data;
+        } catch (error: any) {
+            console.error(`Error requesting deactivation for user ${userId}:`, error);
+            if (error.response) {
+                return { error: error.response.data.message || 'Error al solicitar desactivación' };
+            }
+            return { error: 'Error de conexión' };
+        }
+    },
+
+    confirmAccountDeactivation: async (token: string) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/users/confirm-deactivation?token=${token}`);
+            return response.data;
+        } catch (error: any) {
+            console.error('Error confirming deactivation:', error);
+            if (error.response) {
+                return { error: error.response.data.message || 'Error al confirmar desactivación' };
+            }
+            return { error: 'Error de conexión' };
+        }
+    },
+
     getWorldLeaderboard: async (period: string) => {
         try {
             const response = await axios.get(`${BASE_URL}/leaderboard/world?period=${period}`);
