@@ -1,16 +1,10 @@
-using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using EuskalIA.Server.Services.Interfaces;
 
 namespace EuskalIA.Server.Services
 {
-    public interface IEncryptionService
-    {
-        string Encrypt(string text);
-        string Decrypt(string cipherText);
-    }
-
     public class EncryptionService : IEncryptionService
     {
         private static readonly string Key = "EuskalIA_Secret_Key_2024_Security"; // 32 chars

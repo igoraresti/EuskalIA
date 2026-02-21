@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using EuskalIA.Server.Data;
 using EuskalIA.Server.Models;
 using EuskalIA.Server.Services;
+using EuskalIA.Server.Services.Interfaces;
 
 namespace EuskalIA.Server.Controllers
 {

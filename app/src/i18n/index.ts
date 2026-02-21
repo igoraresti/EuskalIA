@@ -23,7 +23,6 @@ i18n
     .init({
         resources,
         fallbackLng: 'es', // Default language
-        lng: 'es', // Initial language (Spanish for login/register)
 
         detection: {
             // Order of language detection

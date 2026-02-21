@@ -1,13 +1,9 @@
 using System.Text.Json;
 using EuskalIA.Server.Models;
+using EuskalIA.Server.Services.Interfaces;
 
 namespace EuskalIA.Server.Services
 {
-    public interface IAIService
-    {
-        Task<List<Exercise>> GenerateExercisesAsync(string topic, int count);
-    }
-
     public class MockAIService : IAIService
     {
         public Task<List<Exercise>> GenerateExercisesAsync(string topic, int count)

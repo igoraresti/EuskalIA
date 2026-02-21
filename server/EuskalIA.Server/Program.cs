@@ -1,5 +1,6 @@
 using EuskalIA.Server.Data;
 using EuskalIA.Server.Services;
+using EuskalIA.Server.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +18,9 @@ builder.Services.AddScoped<IAIService, MockAIService>();
 builder.Services.AddScoped<IEncryptionService, EncryptionService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
+// Localization
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
 // CORS
 builder.Services.AddCors(options =>
 {
@@ -29,6 +33,15 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// Localization Middleware
+var supportedCultures = new[] { "es", "en", "eu", "pl", "fr" };
+var localizationOptions = new RequestLocalizationOptions()
+    .SetDefaultCulture("es")
+    .AddSupportedCultures(supportedCultures)
+    .AddSupportedUICultures(supportedCultures);
+
+app.UseRequestLocalization(localizationOptions);
 
 // Auto-migrate on startup (for easy deployment)
 using (var scope = app.Services.CreateScope())

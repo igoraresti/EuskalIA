@@ -4,6 +4,8 @@ using EuskalIA.Server.Data;
 using EuskalIA.Server.Models;
 using EuskalIA.Server.DTOs;
 using EuskalIA.Server.Services;
+using EuskalIA.Server.Services.Interfaces;
+using Microsoft.Extensions.Localization;
 using System.Linq;
 
 namespace EuskalIA.Server.Controllers
@@ -15,12 +17,14 @@ namespace EuskalIA.Server.Controllers
         private readonly AppDbContext _context;
         private readonly IEncryptionService _encryptionService;
         private readonly IEmailService _emailService;
+        private readonly IStringLocalizer<UsersController> _localizer;
 
-        public UsersController(AppDbContext context, IEncryptionService encryptionService, IEmailService emailService)
+        public UsersController(AppDbContext context, IEncryptionService encryptionService, IEmailService emailService, IStringLocalizer<UsersController> localizer)
         {
             _context = context;
             _encryptionService = encryptionService;
             _emailService = emailService;
+            _localizer = localizer;
         }
 
         [HttpGet("{id}")]
@@ -50,19 +54,19 @@ namespace EuskalIA.Server.Controllers
             // No, the username is plain text in the model, but password/email/nickname are encrypted.
             
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == loginDto.Username);
-            if (user == null) return Unauthorized(new { message = "Usuario o contraseña incorrectos" });
+            if (user == null) return Unauthorized(new { message = _localizer["InvalidCredentials"].Value });
 
             var decryptedPassword = _encryptionService.Decrypt(user.Password);
             if (decryptedPassword != loginDto.Password) 
-                return Unauthorized(new { message = "Usuario o contraseña incorrectos" });
+                return Unauthorized(new { message = _localizer["InvalidCredentials"].Value });
 
             // Check if user is verified
             if (!user.IsVerified)
-                return Unauthorized(new { message = "Por favor verifica tu correo electrónico antes de iniciar sesión" });
+                return Unauthorized(new { message = _localizer["EmailNotVerified"].Value });
 
             // Check if user is active
             if (!user.IsActive)
-                return Unauthorized(new { message = "Esta cuenta ha sido desactivada." });
+                return Unauthorized(new { message = _localizer["AccountDeactivated"].Value });
 
             // Return user details similar to GetUser
             return Ok(new User 
@@ -167,7 +171,7 @@ namespace EuskalIA.Server.Controllers
             if (!string.IsNullOrEmpty(profile.Password)) user.Password = _encryptionService.Encrypt(profile.Password);
 
             await _context.SaveChangesAsync();
-            return Ok(new { Message = "Perfil actualizado con éxito" });
+            return Ok(new { Message = _localizer["ProfileUpdated"].Value });
         }
 
         [HttpPost("{id}/request-deletion")]
@@ -206,19 +210,19 @@ namespace EuskalIA.Server.Controllers
             var decryptedEmail = _encryptionService.Decrypt(user.Email);
             await _emailService.SendDeactivationEmailAsync(decryptedEmail, user.Username, token);
 
-            return Ok(new { message = "Solicitud de desactivación enviada. Revisa tu correo electrónico." });
+            return Ok(new { message = _localizer["DeactivationEmailSent"].Value });
         }
 
         [HttpGet("confirm-deactivation")]
         public async Task<IActionResult> ConfirmDeactivation([FromQuery] string token)
         {
             if (string.IsNullOrWhiteSpace(token))
-                return BadRequest("Token inválido");
+                return BadRequest(_localizer["TokenInvalid"].Value);
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.DeactivationToken == token);
             
             if (user == null || user.DeactivationTokenExpiration < DateTime.UtcNow)
-                return BadRequest("Token inválido o expirado");
+                return BadRequest(_localizer["TokenInvalidOrExpired"].Value);
 
             // Logical deletion: deactivate account
             user.IsActive = false;
@@ -255,19 +259,19 @@ namespace EuskalIA.Server.Controllers
                 string.IsNullOrWhiteSpace(registerDto.Email) || 
                 string.IsNullOrWhiteSpace(registerDto.Password))
             {
-                return BadRequest(new { message = "Todos los campos son obligatorios" });
+                return BadRequest(new { message = _localizer["AllFieldsRequired"].Value });
             }
 
             // Validate email format
             if (!registerDto.Email.Contains("@") || !registerDto.Email.Contains("."))
             {
-                return BadRequest(new { message = "Formato de email inválido" });
+                return BadRequest(new { message = _localizer["InvalidEmailFormat"].Value });
             }
 
             // Validate password length
             if (registerDto.Password.Length < 6)
             {
-                return BadRequest(new { message = "La contraseña debe tener al menos 6 caracteres" });
+                return BadRequest(new { message = _localizer["PasswordTooShort"].Value });
             }
 
             // Check if username already exists
@@ -308,7 +312,7 @@ namespace EuskalIA.Server.Controllers
             // Send verification email
             await _emailService.SendVerificationEmailAsync(registerDto.Email, registerDto.Username, verificationToken, registerDto.Language ?? "es");
 
-            return Ok(new { message = "Registro exitoso. Por favor verifica tu correo electrónico." });
+            return Ok(new { message = _localizer["RegistrationSuccess"].Value });
         }
 
         [HttpGet("verify-email")]
@@ -316,19 +320,19 @@ namespace EuskalIA.Server.Controllers
         {
             if (string.IsNullOrWhiteSpace(token))
             {
-                return BadRequest("Token inválido");
+                return BadRequest(_localizer["TokenInvalid"].Value);
             }
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.VerificationToken == token);
             
             if (user == null)
             {
-                return BadRequest("Token inválido");
+                return BadRequest(_localizer["TokenInvalid"].Value);
             }
 
             if (user.TokenExpiration < DateTime.UtcNow)
             {
-                return BadRequest("El token ha expirado");
+                return BadRequest(_localizer["TokenExpired"].Value);
             }
 
             // Mark user as verified
@@ -355,13 +359,13 @@ namespace EuskalIA.Server.Controllers
             var validLanguages = new[] { "es", "en", "pl", "eu", "fr" };
             if (!validLanguages.Contains(updateLanguageDto.Language))
             {
-                return BadRequest(new { message = "Idioma no válido" });
+                return BadRequest(new { message = _localizer["InvalidLanguage"].Value });
             }
 
             user.Language = updateLanguageDto.Language;
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Idioma actualizado correctamente", language = user.Language });
+            return Ok(new { message = _localizer["LanguageUpdated"].Value, language = user.Language });
         }
     }
 }
