@@ -11,7 +11,8 @@
         "edit": "Editar",
         "close": "Cerrar",
         "back": "Volver",
-        "user": "Usuario"
+        "user": "Usuario",
+        "continue": "Continuar"
     },
     "languages": {
         "es": "Español",
@@ -33,7 +34,9 @@
         "loginButton": "Iniciar Sesión",
         "noAccount": "¿No tienes cuenta?",
         "register": "Regístrate aquí",
+        "deactivatedMessage": "Tu cuenta ha sido desactivada correctamente.",
         "errors": {
+            "allFieldsRequired": "Todos los campos son obligatorios",
             "invalidCredentials": "Usuario o contraseña incorrectos",
             "unverifiedEmail": "Por favor verifica tu correo electrónico antes de iniciar sesión",
             "serverError": "Error en el servidor",
@@ -81,7 +84,13 @@
         "locked": "Bloqueada",
         "start": "Comenzar",
         "continue": "Continuar",
-        "xpEarned": "XP ganados"
+        "xpEarned": "XP ganados",
+        "noExercises": "No se encontraron ejercicios para esta lección",
+        "goodJob": "¡Buen trabajo!",
+        "almost": "¡Casi!",
+        "correctAnswer": "Respuesta correcta",
+        "correctWas": "La respuesta correcta era",
+        "check": "Comprobar"
     },
     "lesson": {
         "question": "Pregunta",
@@ -114,7 +123,8 @@
     },
     "profile": {
         "title": "Perfil",
-        "editProfile": "Editar Perfil",
+        "userSettings": "Configuración de usuario",
+        "appPreferences": "Preferencias de la aplicación",
         "nickname": "Apodo",
         "email": "Correo electrónico",
         "joinedAt": "Miembro desde",
@@ -126,6 +136,8 @@
         "confirmLogout": "¿Realmente quieres cerrar sesión?",
         "confirmDelete": "¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.",
         "deleteInstructions": "Recibirás un código de verificación en tu correo electrónico. Introdúcelo a continuación para confirmar la eliminación.",
+        "deactivateConfirm": "Al desactivar tu cuenta, no podrás volver a iniciar sesión y no aparecerás en las clasificaciones. ¿Quieres proceder?",
+        "deactivateFeedback": "Se ha enviado un correo de confirmación. Revisa tu bandeja de entrada para finalizar el proceso.",
         "verificationCode": "Código de verificación",
         "errors": {
             "updateFailed": "Error al actualizar el perfil",

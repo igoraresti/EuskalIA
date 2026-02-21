@@ -11,7 +11,8 @@
         "edit": "Modifier",
         "close": "Fermer",
         "back": "Retour",
-        "user": "Utilisateur"
+        "user": "Utilisateur",
+        "continue": "Continuer"
     },
     "languages": {
         "es": "Español",
@@ -33,7 +34,9 @@
         "loginButton": "Se connecter",
         "noAccount": "Vous n'avez pas de compte?",
         "register": "Inscrivez-vous ici",
+        "deactivatedMessage": "Votre compte a été désactivé avec succès.",
         "errors": {
+            "allFieldsRequired": "Tous les champs sont obligatoires",
             "invalidCredentials": "Nom d'utilisateur ou mot de passe incorrect",
             "unverifiedEmail": "Veuillez vérifier votre e-mail avant de vous connecter",
             "serverError": "Erreur du serveur",
@@ -81,7 +84,13 @@
         "locked": "Verrouillée",
         "start": "Commencer",
         "continue": "Continuer",
-        "xpEarned": "XP gagnés"
+        "xpEarned": "XP gagnés",
+        "noExercises": "Aucun exercice trouvé pour cette leçon",
+        "goodJob": "Bon travail !",
+        "almost": "Presque !",
+        "correctAnswer": "Réponse correcte",
+        "correctWas": "La réponse correcte était",
+        "check": "Vérifier"
     },
     "lesson": {
         "question": "Question",
@@ -114,7 +123,8 @@
     },
     "profile": {
         "title": "Profil",
-        "editProfile": "Modifier le profil",
+        "userSettings": "Paramètres utilisateur",
+        "appPreferences": "Préférences de l'application",
         "nickname": "Surnom",
         "email": "E-mail",
         "joinedAt": "Membre depuis",
@@ -126,6 +136,8 @@
         "confirmLogout": "Voulez-vous vraiment vous déconnecter?",
         "confirmDelete": "Êtes-vous sûr de vouloir supprimer votre compte? Cette action ne peut pas être annulée.",
         "deleteInstructions": "Vous recevrez un code de vérification dans votre e-mail. Entrez-le ci-dessous pour confirmer la suppression.",
+        "deactivateConfirm": "En désactivant votre compte, vous ne pourrez plus vous connecter et vous n'apparaîtrez plus dans les classements. Voulez-vous continuer ?",
+        "deactivateFeedback": "Un e-mail de confirmation a été envoyé. Vérifiez votre boîte de réception pour terminer le processus.",
         "verificationCode": "Code de vérification",
         "errors": {
             "updateFailed": "Échec de la mise à jour du profil",

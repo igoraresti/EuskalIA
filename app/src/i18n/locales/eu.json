@@ -11,7 +11,8 @@
         "edit": "Editatu",
         "close": "Itxi",
         "back": "Atzera",
-        "user": "Erabiltzailea"
+        "user": "Erabiltzailea",
+        "continue": "Jarraitu"
     },
     "languages": {
         "es": "Español",
@@ -32,9 +33,11 @@
         "password": "Pasahitza",
         "loginButton": "Saioa hasi",
         "noAccount": "Ez duzu konturik?",
-        "register": "Erregistratu hemen",
+        "register": "Eman izena hemen",
+        "deactivatedMessage": "Zure kontua ondo desaktibatu da.",
         "errors": {
-            "invalidCredentials": "Erabiltzaile edo pasahitz okerra",
+            "allFieldsRequired": "Eremu guztiak derrigorrezkoak dira",
+            "invalidCredentials": "Erabiltzaile izena edo pasahitza okerra",
             "unverifiedEmail": "Mesedez, egiaztatu zure posta elektronikoa saioa hasi aurretik",
             "serverError": "Zerbitzariaren errorea",
             "connectionError": "Ezin izan da zerbitzariarekin konektatu. Egiaztatu zure konexioa.",
@@ -81,7 +84,13 @@
         "locked": "Blokeatuta",
         "start": "Hasi",
         "continue": "Jarraitu",
-        "xpEarned": "Lortutako XP"
+        "xpEarned": "XP irabazita",
+        "noExercises": "Ez da ariketarik aurkitu ikasgai honetarako",
+        "goodJob": "Lan ona!",
+        "almost": "Ia!",
+        "correctAnswer": "Erantzun zuzena",
+        "correctWas": "Erantzun zuzena hau zen",
+        "check": "Egiaztatu"
     },
     "lesson": {
         "question": "Galdera",
@@ -114,7 +123,8 @@
     },
     "profile": {
         "title": "Profila",
-        "editProfile": "Editatu profila",
+        "userSettings": "Erabiltzailearen ezarpenak",
+        "appPreferences": "Aplikazioaren hobespenak",
         "nickname": "Ezizena",
         "email": "Posta elektronikoa",
         "joinedAt": "Kide noiztik",
@@ -125,8 +135,10 @@
         "saveChanges": "Gorde aldaketak",
         "confirmLogout": "Benetan saioa itxi nahi duzu?",
         "confirmDelete": "Ziur zaude zure kontua ezabatu nahi duzula? Ekintza hau ezin da desegin.",
-        "deleteInstructions": "Egiaztapen kode bat jasoko duzu zure posta elektronikoan. Sartu behean ezabatzea baieztatzeko.",
-        "verificationCode": "Egiaztapen kodea",
+        "deleteInstructions": "Egiaztapen-kode bat jasoko duzu zure posta elektronikoan. Sartu behean ezabatzea berresteko.",
+        "deactivateConfirm": "Zure kontua desaktibatzean, ezingo zara berriro saioa hasi eta ez zara sailkapenetan agertuko. Prozedu nahi duzu?",
+        "deactivateFeedback": "Berrespen-mezu bat bidali da. Egiaztatu zure sarrera-ontzia prozesua amaitzeko.",
+        "verificationCode": "Egiaztapen-kodea",
         "errors": {
             "updateFailed": "Ezin izan da profila eguneratu",
             "deleteFailed": "Ezin izan da kontua ezabatu",

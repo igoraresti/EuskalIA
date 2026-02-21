@@ -10,8 +10,9 @@
         "delete": "Usuń",
         "edit": "Edytuj",
         "close": "Zamknij",
-        "back": "Wstecz",
-        "user": "Użytkownik"
+        "back": "Wróć",
+        "user": "Użytkownik",
+        "continue": "Kontynuuj"
     },
     "languages": {
         "es": "Español",
@@ -33,7 +34,9 @@
         "loginButton": "Zaloguj się",
         "noAccount": "Nie masz konta?",
         "register": "Zarejestruj się tutaj",
+        "deactivatedMessage": "Twoje konto zostało pomyślnie dezaktywowane.",
         "errors": {
+            "allFieldsRequired": "Wszystkie pola są wymagane",
             "invalidCredentials": "Nieprawidłowa nazwa użytkownika lub hasło",
             "unverifiedEmail": "Proszę zweryfikować swój e-mail przed zalogowaniem",
             "serverError": "Błąd serwera",
@@ -81,7 +84,13 @@
         "locked": "Zablokowana",
         "start": "Rozpocznij",
         "continue": "Kontynuuj",
-        "xpEarned": "Zdobyte XP"
+        "xpEarned": "Zdobyte XP",
+        "noExercises": "Nie znaleziono ćwiczeń dla tej lekcji",
+        "goodJob": "Dobra robota!",
+        "almost": "Prawie!",
+        "correctAnswer": "Poprawna odpowiedź",
+        "correctWas": "Poprawna odpowiedź to",
+        "check": "Sprawdź"
     },
     "lesson": {
         "question": "Pytanie",
@@ -114,7 +123,8 @@
     },
     "profile": {
         "title": "Profil",
-        "editProfile": "Edytuj profil",
+        "userSettings": "Ustawienia użytkownika",
+        "appPreferences": "Preferencje aplikacji",
         "nickname": "Pseudonim",
         "email": "E-mail",
         "joinedAt": "Członek od",
@@ -126,6 +136,8 @@
         "confirmLogout": "Czy na pewno chcesz się wylogować?",
         "confirmDelete": "Czy na pewno chcesz usunąć swoje konto? Ta akcja nie może być cofnięta.",
         "deleteInstructions": "Otrzymasz kod weryfikacyjny na swój e-mail. Wprowadź go poniżej, aby potwierdzić usunięcie.",
+        "deactivateConfirm": "Dezaktywując konto, nie będziesz mógł się ponownie zalogować i nie będziesz pojawiać się w rankingach. Czy chcesz kontynuować?",
+        "deactivateFeedback": "Wiadomość e-mail z potwierdzeniem została wysłana. Sprawdź swoją skrzynkę odbiorczą, aby zakończyć proces.",
         "verificationCode": "Kod weryfikacyjny",
         "errors": {
             "updateFailed": "Nie udało się zaktualizować profilu",

@@ -11,7 +11,8 @@
         "edit": "Edit",
         "close": "Close",
         "back": "Back",
-        "user": "User"
+        "user": "User",
+        "continue": "Continue"
     },
     "languages": {
         "es": "Español",
@@ -33,7 +34,9 @@
         "loginButton": "Log In",
         "noAccount": "Don't have an account?",
         "register": "Register here",
+        "deactivatedMessage": "Your account has been successfully deactivated.",
         "errors": {
+            "allFieldsRequired": "All fields are required",
             "invalidCredentials": "Invalid username or password",
             "unverifiedEmail": "Please verify your email before logging in",
             "serverError": "Server error",
@@ -81,7 +84,13 @@
         "locked": "Locked",
         "start": "Start",
         "continue": "Continue",
-        "xpEarned": "XP earned"
+        "xpEarned": "XP earned",
+        "noExercises": "No exercises found for this lesson",
+        "goodJob": "Good job!",
+        "almost": "Almost!",
+        "correctAnswer": "Correct answer",
+        "correctWas": "The correct answer was",
+        "check": "Check"
     },
     "lesson": {
         "question": "Question",
@@ -114,7 +123,8 @@
     },
     "profile": {
         "title": "Profile",
-        "editProfile": "Edit Profile",
+        "userSettings": "User Settings",
+        "appPreferences": "App Preferences",
         "nickname": "Nickname",
         "email": "Email",
         "joinedAt": "Member since",
@@ -126,6 +136,8 @@
         "confirmLogout": "Do you really want to log out?",
         "confirmDelete": "Are you sure you want to delete your account? This action cannot be undone.",
         "deleteInstructions": "You will receive a verification code in your email. Enter it below to confirm deletion.",
+        "deactivateConfirm": "By deactivating your account, you will not be able to log in again and you will not appear in the rankings. Do you want to proceed?",
+        "deactivateFeedback": "A confirmation email has been sent. Check your inbox to finish the process.",
         "verificationCode": "Verification code",
         "errors": {
             "updateFailed": "Failed to update profile",

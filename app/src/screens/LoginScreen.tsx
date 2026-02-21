@@ -18,7 +18,7 @@ export const LoginScreen = ({ navigation }: any) => {
     useEffect(() => {
         // Simple check for web platform URL
         if (Platform.OS === 'web' && typeof window !== 'undefined' && window.location.search.includes('deactivated=true')) {
-            const msg = "Tu cuenta ha sido desactivada correctamente.";
+            const msg = t('login.deactivatedMessage');
             window.alert(msg);
         }
     }, []);

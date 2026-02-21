@@ -144,7 +144,7 @@ export const ProfileScreen = ({ navigation }: any) => {
     };
 
     const handleRequestDeactivation = () => {
-        const msg = "Al desactivar tu cuenta, no podrás volver a iniciar sesión y no aparecerás en las clasificaciones. ¿Quieres proceder?";
+        const msg = t('profile.deactivateConfirm');
         if (Platform.OS === 'web' && typeof window !== 'undefined') {
             if (window.confirm(msg)) {
                 performDeactivationRequest();
@@ -170,7 +170,7 @@ export const ProfileScreen = ({ navigation }: any) => {
         setSaving(false);
 
         if (result && !result.error) {
-            const feedbackMsg = "Se ha enviado un correo de confirmación. Revisa tu bandeja de entrada para finalizar el proceso.";
+            const feedbackMsg = t('profile.deactivateFeedback');
             if (Platform.OS === 'web' && typeof window !== 'undefined') {
                 window.alert(feedbackMsg);
             } else {
@@ -301,10 +301,20 @@ export const ProfileScreen = ({ navigation }: any) => {
                     </View>
                 )}
 
+                {/* App Preferences Section */}
+                {!showDeleteModal && (
+                    <View style={styles.formSection}>
+                        <Text style={styles.formTitle}>{t('profile.appPreferences')}</Text>
+                        <View style={styles.inputGroup}>
+                            <LanguageSelector onLanguageChange={handleLanguageChange} />
+                        </View>
+                    </View>
+                )}
+
                 {/* Edit Form */}
                 {!showDeleteModal && (
                     <View style={styles.formSection}>
-                        <Text style={styles.formTitle}>{t('profile.editProfile')}</Text>
+                        <Text style={styles.formTitle}>{t('profile.userSettings')}</Text>
 
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>{t('register.name')}</Text>
@@ -330,11 +340,6 @@ export const ProfileScreen = ({ navigation }: any) => {
                                     placeholder={t('profile.nickname')}
                                 />
                             </View>
-                        </View>
-
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>{t('profile.language')}</Text>
-                            <LanguageSelector onLanguageChange={handleLanguageChange} />
                         </View>
 
                         <View style={styles.inputGroup}>
