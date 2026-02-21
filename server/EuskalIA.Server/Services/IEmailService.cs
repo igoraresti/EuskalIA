@@ -2,7 +2,7 @@ namespace EuskalIA.Server.Services
 {
     public interface IEmailService
     {
-        Task SendVerificationEmailAsync(string email, string username, string token);
+        Task SendVerificationEmailAsync(string email, string username, string token, string language);
         Task SendDeactivationEmailAsync(string email, string username, string token);
     }
 }

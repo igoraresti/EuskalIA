@@ -306,7 +306,7 @@ namespace EuskalIA.Server.Controllers
             await _context.SaveChangesAsync();
 
             // Send verification email
-            await _emailService.SendVerificationEmailAsync(registerDto.Email, registerDto.Username, verificationToken);
+            await _emailService.SendVerificationEmailAsync(registerDto.Email, registerDto.Username, verificationToken, registerDto.Language ?? "es");
 
             return Ok(new { message = "Registro exitoso. Por favor verifica tu correo electrónico." });
         }
@@ -339,7 +339,7 @@ namespace EuskalIA.Server.Controllers
             await _context.SaveChangesAsync();
 
             // Redirect to frontend success page
-            return Redirect("http://localhost:8081/registro-exitoso");
+            return Redirect($"http://localhost:8081/registro-exitoso?lng={user.Language}");
         }
 
         [HttpPut("{id}/language")]

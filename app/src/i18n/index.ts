@@ -27,8 +27,9 @@ i18n
 
         detection: {
             // Order of language detection
-            order: ['localStorage', 'navigator'],
+            order: ['querystring', 'localStorage', 'navigator'],
             caches: ['localStorage'], // Cache user language preference
+            lookupQuerystring: 'lng',
             lookupLocalStorage: 'i18nextLng',
         },
 
