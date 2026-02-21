@@ -19,10 +19,11 @@ export const OnboardingScreen = ({ navigation }: any) => {
             </View>
             <View style={styles.content}>
                 <View style={styles.logoContainer}>
-                    {/* Logo placeholder */}
-                    <View style={styles.logoCircle}>
-                        <Text style={styles.logoText}>IA</Text>
-                    </View>
+                    <Image
+                        source={require('../../assets/icon.png')}
+                        style={styles.logoImage}
+                        resizeMode="contain"
+                    />
                 </View>
 
                 <Text style={[TYPOGRAPHY.h1, styles.title]}>{t('onboarding.title')}</Text>
@@ -74,18 +75,9 @@ const styles = StyleSheet.create({
     logoContainer: {
         marginBottom: SPACING.xl,
     },
-    logoCircle: {
-        width: 120,
-        height: 120,
-        borderRadius: 60,
-        backgroundColor: COLORS.primary,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    logoText: {
-        color: COLORS.white,
-        fontSize: 40,
-        fontWeight: 'bold',
+    logoImage: {
+        width: 150,
+        height: 150,
     },
     title: {
         textAlign: 'center',
