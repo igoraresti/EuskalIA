@@ -1,4 +1,4 @@
-using EuskalIA.Server.Services;
+using EuskalIA.Server.Services.AI;
 using FluentAssertions;
 using Xunit;
 

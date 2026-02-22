@@ -1,6 +1,7 @@
 using EuskalIA.Server.Data;
-using EuskalIA.Server.Services;
-using EuskalIA.Server.Services.Interfaces;
+using EuskalIA.Server.Services.Email;
+using EuskalIA.Server.Services.AI;
+using EuskalIA.Server.Services.Encryption;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // AI Service
 builder.Services.AddScoped<IAIService, MockAIService>();
 builder.Services.AddScoped<IEncryptionService, EncryptionService>();
+
+// Email Infrastructure
+builder.Services.AddSingleton<IEmailQueue, EmailQueue>();
+builder.Services.AddHostedService<EmailBackgroundSender>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Localization

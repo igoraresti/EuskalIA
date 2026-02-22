@@ -3,8 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using EuskalIA.Server.Data;
 using EuskalIA.Server.Models;
 using EuskalIA.Server.DTOs;
-using EuskalIA.Server.Services;
-using EuskalIA.Server.Services.Interfaces;
+using EuskalIA.Server.Services.Email;
+using EuskalIA.Server.Services.Encryption;
 using Microsoft.Extensions.Localization;
 using System.Linq;
 

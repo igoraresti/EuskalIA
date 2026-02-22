@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EuskalIA.Server.Data;
 using EuskalIA.Server.Models;
-using EuskalIA.Server.Services;
-using EuskalIA.Server.Services.Interfaces;
+using EuskalIA.Server.Services.AI;
+using EuskalIA.Server.Services.Encryption;
 
 namespace EuskalIA.Server.Controllers
 {

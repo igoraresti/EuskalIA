@@ -1,4 +1,4 @@
-namespace EuskalIA.Server.Services.Interfaces
+namespace EuskalIA.Server.Services.Email
 {
     public interface IEmailService
     {

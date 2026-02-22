@@ -1,4 +1,4 @@
-using EuskalIA.Server.Services;
+using EuskalIA.Server.Services.Encryption;
 using Xunit;
 
 namespace EuskalIA.Tests.Services

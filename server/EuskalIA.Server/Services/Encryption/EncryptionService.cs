@@ -1,9 +1,7 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using EuskalIA.Server.Services.Interfaces;
-
-namespace EuskalIA.Server.Services
+namespace EuskalIA.Server.Services.Encryption
 {
     public class EncryptionService : IEncryptionService
     {

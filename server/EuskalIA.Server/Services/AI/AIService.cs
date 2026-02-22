@@ -1,8 +1,6 @@
 using System.Text.Json;
 using EuskalIA.Server.Models;
-using EuskalIA.Server.Services.Interfaces;
-
-namespace EuskalIA.Server.Services
+namespace EuskalIA.Server.Services.AI
 {
     public class MockAIService : IAIService
     {

@@ -1,6 +1,6 @@
 using EuskalIA.Server.Models;
 
-namespace EuskalIA.Server.Services.Interfaces
+namespace EuskalIA.Server.Services.AI
 {
     public interface IAIService
     {

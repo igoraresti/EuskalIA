@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; line-height: 1.6; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo { font-size: 24px; font-weight: bold; color: #2C3E50; }
+        .content { margin-bottom: 30px; font-size: 16px; }
+        h2 { color: #2C3E50; }
+        .button-container { text-align: center; margin: 30px 0; }
+        .btn { background-color: #27ae60; color: #ffffff !important; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; font-size: 16px; }
+        .disclaimer { font-size: 13px; color: #7f8c8d; margin-top: 20px; padding-top: 20px; border-top: 1px solid #eaeaea; }
+        .footer { font-size: 12px; color: #888; text-align: center; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">EuskalIA 🦉</div>
+        </div>
+        
+        <div class="content">
+            <h2>{{Title}}</h2>
+            <p>{{Greeting}}</p>
+            <p>{{Message}}</p>
+            
+            <div class="button-container">
+                <a href="{{VerificationUrl}}" class="btn">{{ButtonText}}</a>
+            </div>
+            
+            <p class="disclaimer">{{LinkExpiring}}</p>
+            <p class="disclaimer">{{IgnoreMessage}}</p>
+        </div>
+        
+        <div class="footer">
+            &copy; {{Year}} EuskalIA. Todos los derechos reservados.
+        </div>
+    </div>
+</body>
+</html>
