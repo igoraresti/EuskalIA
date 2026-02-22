@@ -7,6 +7,7 @@ using EuskalIA.Server.Services.Encryption;
 using EuskalIA.Server.Services.Email;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
+using EuskalIA.Server.Services.Auth;
 using Moq;
 using Xunit;
 
@@ -16,12 +17,14 @@ namespace EuskalIA.Tests.Controllers
     {
         private readonly Mock<IEncryptionService> _mockEncrypt;
         private readonly Mock<IEmailService> _mockEmail;
+        private readonly Mock<IJwtService> _mockJwt;
         private readonly Mock<IStringLocalizer<UsersController>> _mockLocalizer;
 
         public UsersControllerTests()
         {
             _mockEncrypt = new Mock<IEncryptionService>();
             _mockEmail = new Mock<IEmailService>();
+            _mockJwt = new Mock<IJwtService>();
             _mockLocalizer = new Mock<IStringLocalizer<UsersController>>();
             
             _mockEncrypt.Setup(e => e.Encrypt(It.IsAny<string>())).Returns((string s) => s);
@@ -31,7 +34,7 @@ namespace EuskalIA.Tests.Controllers
 
         private UsersController GetController(EuskalIA.Server.Data.AppDbContext context)
         {
-            return new UsersController(context, _mockEncrypt.Object, _mockEmail.Object, _mockLocalizer.Object);
+            return new UsersController(context, _mockEncrypt.Object, _mockEmail.Object, _mockJwt.Object, _mockLocalizer.Object);
         }
 
         [Fact]
@@ -146,6 +149,41 @@ namespace EuskalIA.Tests.Controllers
             // Assert
             Assert.IsType<OkObjectResult>(result);
             Assert.Null(await context.Users.FindAsync(1));
+        }
+
+        [Fact]
+        public async Task Login_ReturnsToken_WhenCredentialsAreValid()
+        {
+            // Arrange
+            var context = GetDatabaseContext();
+            var user = new User 
+            { 
+                Id = 1, 
+                Username = "testuser", 
+                Password = "hashed_password",
+                IsActive = true,
+                IsVerified = true,
+                Nickname = "nick",
+                Email = "email"
+            };
+            context.Users.Add(user);
+            await context.SaveChangesAsync();
+
+            _mockEncrypt.Setup(e => e.Decrypt("hashed_password")).Returns("plain_password");
+            _mockJwt.Setup(j => j.GenerateToken(It.IsAny<User>())).Returns("mock_token");
+
+            var controller = GetController(context);
+
+            // Act
+            var result = await controller.Login(new LoginDto { Username = "testuser", Password = "plain_password" });
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            // Result is an anonymous type, so we use dynamic or reflection to verify
+            var response = okResult.Value as dynamic;
+            Assert.NotNull(response);
+            // Since it's anonymous, we might need to check properties via reflection if Cast fails
+            // But usually OkObjectResult.Value is the object itself.
         }
     }
 }

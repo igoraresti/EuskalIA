@@ -5,8 +5,11 @@ using EuskalIA.Server.Models;
 using EuskalIA.Server.Services.AI;
 using EuskalIA.Server.Services.Encryption;
 
+using Microsoft.AspNetCore.Authorization;
+
 namespace EuskalIA.Server.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class LessonsController : ControllerBase

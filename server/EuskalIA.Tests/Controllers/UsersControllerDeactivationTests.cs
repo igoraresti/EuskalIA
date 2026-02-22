@@ -8,6 +8,7 @@ using EuskalIA.Server.Services.Email;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
+using EuskalIA.Server.Services.Auth;
 using Moq;
 using Xunit;
 
@@ -17,12 +18,14 @@ namespace EuskalIA.Tests.Controllers
     {
         private readonly Mock<IEncryptionService> _mockEncrypt;
         private readonly Mock<IEmailService> _mockEmail;
+        private readonly Mock<IJwtService> _mockJwt;
         private readonly Mock<IStringLocalizer<UsersController>> _mockLocalizer;
 
         public UsersControllerDeactivationTests()
         {
             _mockEncrypt = new Mock<IEncryptionService>();
             _mockEmail = new Mock<IEmailService>();
+            _mockJwt = new Mock<IJwtService>();
             _mockLocalizer = new Mock<IStringLocalizer<UsersController>>();
 
             _mockEncrypt.Setup(e => e.Decrypt(It.IsAny<string>())).Returns((string s) => s);
@@ -31,7 +34,7 @@ namespace EuskalIA.Tests.Controllers
 
         private UsersController GetController(EuskalIA.Server.Data.AppDbContext context)
         {
-            return new UsersController(context, _mockEncrypt.Object, _mockEmail.Object, _mockLocalizer.Object);
+            return new UsersController(context, _mockEncrypt.Object, _mockEmail.Object, _mockJwt.Object, _mockLocalizer.Object);
         }
 
         [Fact]

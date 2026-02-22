@@ -26,6 +26,9 @@ namespace EuskalIA.Server.Models
         public string? DeactivationToken { get; set; }
         public DateTime? DeactivationTokenExpiration { get; set; }
         
+        // Role-based access
+        public string Role { get; set; } = "User";
+        
         // Navigation property
         public Progress? Progress { get; set; }
     }

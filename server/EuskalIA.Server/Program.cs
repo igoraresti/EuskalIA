@@ -2,21 +2,32 @@ using EuskalIA.Server.Data;
 using EuskalIA.Server.Services.Email;
 using EuskalIA.Server.Services.AI;
 using EuskalIA.Server.Services.Encryption;
+using EuskalIA.Server.Services.Auth;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+    });
 builder.Services.AddOpenApi();
 
 // SQLite DB
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=euskalia.db"));
 
-// AI Service
+// Domain Services
 builder.Services.AddScoped<IAIService, MockAIService>();
 builder.Services.AddScoped<IEncryptionService, EncryptionService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 
 // Email Infrastructure
 builder.Services.AddSingleton<IEmailQueue, EmailQueue>();
@@ -25,6 +36,32 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Localization
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+// JWT Authentication
+var jwtSecret = builder.Configuration["JwtSettings:Secret"]!;
+var jwtIssuer = builder.Configuration["JwtSettings:Issuer"]!;
+var jwtAudience = builder.Configuration["JwtSettings:Audience"]!;
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
+    };
+});
+
+builder.Services.AddAuthorization();
 
 // CORS
 builder.Services.AddCors(options =>
@@ -64,11 +101,22 @@ using (var scope = app.Services.CreateScope())
             Email = encryptionService.Encrypt("igor@euskalia.eus"),
             Password = encryptionService.Encrypt("1234"),
             JoinedAt = DateTime.UtcNow.AddMonths(-2),
-            IsVerified = true, // Existing user is pre-verified
-            Language = "es" // Default language
+            IsVerified = true,
+            Language = "es",
+            Role = "Admin"
         };
         db.Users.Add(user);
         db.SaveChanges();
+    }
+    else
+    {
+        // Migration: ensure igoraresti has Admin role
+        var adminUser = db.Users.FirstOrDefault(u => u.Username == "igoraresti");
+        if (adminUser != null && adminUser.Role != "Admin")
+        {
+            adminUser.Role = "Admin";
+            db.SaveChanges();
+        }
     }
 }
 
@@ -80,6 +128,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowAll");
 // app.UseHttpsRedirection(); // Disabled for initial public IP testing without SSL
+app.UseAuthentication(); // Must be before UseAuthorization
 app.UseAuthorization();
 app.MapControllers();
 

@@ -6,6 +6,8 @@ using EuskalIA.Server.DTOs;
 using EuskalIA.Server.Services.Email;
 using EuskalIA.Server.Services.Encryption;
 using Microsoft.Extensions.Localization;
+using Microsoft.AspNetCore.Authorization;
+using EuskalIA.Server.Services.Auth;
 using System.Linq;
 
 namespace EuskalIA.Server.Controllers
@@ -17,16 +19,19 @@ namespace EuskalIA.Server.Controllers
         private readonly AppDbContext _context;
         private readonly IEncryptionService _encryptionService;
         private readonly IEmailService _emailService;
+        private readonly IJwtService _jwtService;
         private readonly IStringLocalizer<UsersController> _localizer;
 
-        public UsersController(AppDbContext context, IEncryptionService encryptionService, IEmailService emailService, IStringLocalizer<UsersController> localizer)
+        public UsersController(AppDbContext context, IEncryptionService encryptionService, IEmailService emailService, IJwtService jwtService, IStringLocalizer<UsersController> localizer)
         {
             _context = context;
             _encryptionService = encryptionService;
             _emailService = emailService;
+            _jwtService = jwtService;
             _localizer = localizer;
         }
 
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
         {
@@ -68,18 +73,26 @@ namespace EuskalIA.Server.Controllers
             if (!user.IsActive)
                 return Unauthorized(new { message = _localizer["AccountDeactivated"].Value });
 
-            // Return user details similar to GetUser
-            return Ok(new User 
+            var token = _jwtService.GenerateToken(user);
+
+            // Return user details including token and role
+            return Ok(new 
             {
-                Id = user.Id,
-                Username = user.Username,
-                Nickname = _encryptionService.Decrypt(user.Nickname),
-                Email = _encryptionService.Decrypt(user.Email),
-                JoinedAt = user.JoinedAt,
-                Language = user.Language
+                Token = token,
+                User = new 
+                {
+                    user.Id,
+                    user.Username,
+                    Nickname = _encryptionService.Decrypt(user.Nickname),
+                    Email = _encryptionService.Decrypt(user.Email),
+                    user.JoinedAt,
+                    user.Language,
+                    user.Role
+                }
             });
         }
 
+        [Authorize]
         [HttpGet("{id}/progress")]
         public async Task<ActionResult<object>> GetProgress(int id)
         {
@@ -140,6 +153,7 @@ namespace EuskalIA.Server.Controllers
             });
         }
 
+        [Authorize]
         [HttpPost("{id}/xp")]
         public async Task<IActionResult> AddXP(int id, [FromBody] XPUpdateDto update)
         {
@@ -159,6 +173,7 @@ namespace EuskalIA.Server.Controllers
             return Ok(progress);
         }
 
+        [Authorize]
         [HttpPut("{id}/profile")]
         public async Task<IActionResult> UpdateProfile(int id, [FromBody] ProfileUpdateDto profile)
         {
@@ -174,6 +189,7 @@ namespace EuskalIA.Server.Controllers
             return Ok(new { Message = _localizer["ProfileUpdated"].Value });
         }
 
+        [Authorize]
         [HttpPost("{id}/request-deletion")]
         public async Task<IActionResult> RequestDeletion(int id)
         {
@@ -196,6 +212,7 @@ namespace EuskalIA.Server.Controllers
             return Ok(new { message = "Verification code generated and sent." });
         }
 
+        [Authorize]
         [HttpPost("{id}/request-deactivation")]
         public async Task<IActionResult> RequestDeactivation(int id)
         {
@@ -235,6 +252,7 @@ namespace EuskalIA.Server.Controllers
             return Redirect("http://localhost:8081/login?deactivated=true");
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAccount(int id, [FromQuery] string? code)
         {
@@ -346,6 +364,7 @@ namespace EuskalIA.Server.Controllers
             return Redirect($"http://localhost:8081/registro-exitoso?lng={user.Language}");
         }
 
+        [Authorize]
         [HttpPut("{id}/language")]
         public async Task<IActionResult> UpdateLanguage(int id, [FromBody] UpdateLanguageDto updateLanguageDto)
         {

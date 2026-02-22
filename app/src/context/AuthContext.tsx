@@ -11,15 +11,17 @@ interface AuthContextType {
     updateUser: (userData: any) => void;
     updateLanguage: (language: string) => Promise<{ success: boolean; error?: string }>;
     isLoading: boolean;
+    isAdmin: boolean;
 }
 
-const AuthContext = createContext<AuthContextType>({
+export const AuthContext = createContext<AuthContextType>({
     user: null,
     login: async () => ({ success: false }),
     logout: () => { },
     updateUser: () => { },
     updateLanguage: async () => ({ success: false }),
-    isLoading: true
+    isLoading: true,
+    isAdmin: false
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -31,6 +33,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const checkPersistedUser = async () => {
             try {
                 const jsonValue = await AsyncStorage.getItem('@user');
+                const token = await AsyncStorage.getItem('@token');
+                console.log('Persisted user state:', { hasUser: !!jsonValue, hasToken: !!token });
                 if (jsonValue != null) {
                     const parsedUser = JSON.parse(jsonValue);
                     setUser(parsedUser);
@@ -50,22 +54,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const login = async (username: string, password: string) => {
         setIsLoading(true);
         const result = await apiService.login({ username, password });
+        console.log('Login API response:', result);
         setIsLoading(false);
 
-        if (result && !result.error) {
-            setUser(result);
+        const token = result?.token || result?.Token;
+        const userData = result?.user || result?.User;
+
+        if (result && !result.error && token) {
+            setUser(userData);
+
             // Sync i18n with user language from login response
-            if (result.language) {
-                i18n.changeLanguage(result.language);
+            if (userData.language) {
+                i18n.changeLanguage(userData.language);
                 if (Platform.OS === 'web') {
-                    localStorage.setItem('i18nextLng', result.language);
+                    localStorage.setItem('i18nextLng', userData.language);
                 }
             }
 
             try {
-                await AsyncStorage.setItem('@user', JSON.stringify(result));
+                await AsyncStorage.setItem('@user', JSON.stringify(userData));
+                await AsyncStorage.setItem('@token', token);
+                console.log('Successfully saved user and token to storage');
             } catch (e) {
-                console.error("Error saving user", e);
+                console.error("Error saving user or token", e);
             }
             return { success: true };
         }
@@ -84,8 +95,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         i18n.changeLanguage('es');
         try {
             await AsyncStorage.removeItem('@user');
+            await AsyncStorage.removeItem('@token');
         } catch (e) {
-            console.error("Error removing user", e);
+            console.error("Error removing user info", e);
         }
     };
 
@@ -119,8 +131,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { success: false, error: result?.error };
     };
 
+    const isAdmin = user?.role === 'Admin';
+
     return (
-        <AuthContext.Provider value={{ user, login, logout, updateUser, updateLanguage, isLoading }}>
+        <AuthContext.Provider value={{ user, login, logout, updateUser, updateLanguage, isLoading, isAdmin }}>
             {children}
         </AuthContext.Provider>
     );

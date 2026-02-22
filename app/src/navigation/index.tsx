@@ -1,3 +1,4 @@
+// App Navigation Configuration
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -9,6 +10,7 @@ import { AIChatScreen } from '../screens/AIChatScreen';
 import { LeaderboardScreen } from '../screens/LeaderboardScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { RegistrationSuccessScreen } from '../screens/RegistrationSuccessScreen';
+import { AdminDashboardScreen } from '../screens/AdminDashboardScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -24,6 +26,7 @@ export const AppNavigation = () => {
                 AIChat: 'chat',
                 Leaderboard: 'leaderboard',
                 Profile: 'profile',
+                Admin: 'admin',
                 RegistrationSuccess: 'registro-exitoso',
             },
         },
@@ -45,6 +48,7 @@ export const AppNavigation = () => {
                 <Stack.Screen name="AIChat" component={AIChatScreen} />
                 <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />
                 <Stack.Screen name="Profile" component={ProfileScreen} />
+                <Stack.Screen name="Admin" component={AdminDashboardScreen} />
                 <Stack.Screen name="RegistrationSuccess" component={RegistrationSuccessScreen} />
             </Stack.Navigator>
         </NavigationContainer>

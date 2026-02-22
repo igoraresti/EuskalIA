@@ -3,8 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using EuskalIA.Server.Data;
 using EuskalIA.Server.Models;
 
+using Microsoft.AspNetCore.Authorization;
+
 namespace EuskalIA.Server.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class LeaderboardController : ControllerBase

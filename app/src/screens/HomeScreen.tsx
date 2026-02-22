@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { COLORS, SPACING, TYPOGRAPHY } from '../theme';
-import { BookOpen, Trophy, MessageCircle, User as UserIcon } from 'lucide-react-native';
+import { BookOpen, Trophy, MessageCircle, User as UserIcon, Shield } from 'lucide-react-native';
 import { apiService } from '../services/apiService';
 import { useAuth } from '../context/AuthContext';
 
 export const HomeScreen = ({ navigation }: any) => {
     const { t } = useTranslation();
-    const { user } = useAuth();
+    const { user, isAdmin } = useAuth();
     const [lessons, setLessons] = useState<any[]>([]);
     const [progress, setProgress] = useState<any>(null);
     const [lessonScores, setLessonScores] = useState<any[]>([]);
@@ -74,6 +74,14 @@ export const HomeScreen = ({ navigation }: any) => {
                         </View>
                     </View>
                 </View>
+                {isAdmin && (
+                    <TouchableOpacity
+                        style={styles.adminIcon}
+                        onPress={() => navigation.navigate('Admin')}
+                    >
+                        <Shield color={COLORS.primary} size={28} />
+                    </TouchableOpacity>
+                )}
                 <TouchableOpacity
                     style={styles.profileIcon}
                     onPress={() => navigation.navigate('Profile')}
@@ -179,6 +187,10 @@ const styles = StyleSheet.create({
     },
     profileIcon: {
         padding: 8,
+    },
+    adminIcon: {
+        padding: 8,
+        marginRight: 4,
     },
     scrollContent: {
         padding: SPACING.lg,

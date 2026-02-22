@@ -1,7 +1,26 @@
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CONFIG } from '../config';
 
 const BASE_URL = CONFIG.BASE_URL;
+
+// Add a request interceptor to include the JWT token in all requests
+axios.interceptors.request.use(
+    async (config) => {
+        try {
+            const token = await AsyncStorage.getItem('@token');
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
+        } catch (e) {
+            console.error('Error fetching token from storage', e);
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
 
 export const apiService = {
     login: async (loginDto: any) => {
@@ -173,6 +192,36 @@ export const apiService = {
                 return { error: error.response.data.message || 'Error al actualizar el idioma' };
             }
             return { error: 'Error desconocido' };
+        }
+    },
+
+    getAdminStats: async () => {
+        try {
+            const response = await axios.get(`${BASE_URL}/admin/stats`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching admin stats:', error);
+            return null;
+        }
+    },
+
+    getAdminUsers: async (filters: any) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/admin/users`, { params: filters });
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching admin users:', error);
+            return { items: [], totalCount: 0, page: 1, totalPages: 0 };
+        }
+    },
+
+    toggleUserActive: async (userId: number) => {
+        try {
+            const response = await axios.put(`${BASE_URL}/admin/users/${userId}/toggle-active`);
+            return response.data;
+        } catch (error) {
+            console.error(`Error toggling active status for user ${userId}:`, error);
+            return null;
         }
     }
 };
