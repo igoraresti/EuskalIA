@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, TextInput, Alert, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, TextInput, Alert, ActivityIndicator, Platform, Modal } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { COLORS, SPACING, TYPOGRAPHY } from '../theme';
 import { User, Mail, Lock, Calendar, BookOpen, Trash2, LogOut, Save, ChevronLeft, Globe } from 'lucide-react-native';
@@ -19,6 +19,10 @@ export const ProfileScreen = ({ navigation }: any) => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [verificationCode, setVerificationCode] = useState('');
     const [isVerifying, setIsVerifying] = useState(false);
+
+    // Confirmation modals (replacing window.confirm for Chrome compatibility)
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [showDeactivationModal, setShowDeactivationModal] = useState(false);
 
     // Form states
     const [username, setUsername] = useState('');
@@ -112,19 +116,12 @@ export const ProfileScreen = ({ navigation }: any) => {
     };
 
     const handleLogout = () => {
-        const msg = t('profile.confirmLogout');
-        if (Platform.OS === 'web' && typeof window !== 'undefined') {
-            if (window.confirm(msg)) {
-                logout();
-                navigation.reset({
-                    index: 0,
-                    routes: [{ name: 'Onboarding' }],
-                });
-            }
+        if (Platform.OS === 'web') {
+            setShowLogoutModal(true);
         } else {
             Alert.alert(
                 t('profile.logout'),
-                msg,
+                t('profile.confirmLogout'),
                 [
                     { text: t('common.cancel'), style: 'cancel' },
                     {
@@ -132,10 +129,7 @@ export const ProfileScreen = ({ navigation }: any) => {
                         style: 'destructive',
                         onPress: () => {
                             logout();
-                            navigation.reset({
-                                index: 0,
-                                routes: [{ name: 'Onboarding' }],
-                            });
+                            navigation.reset({ index: 0, routes: [{ name: 'Onboarding' }] });
                         }
                     }
                 ]
@@ -143,22 +137,22 @@ export const ProfileScreen = ({ navigation }: any) => {
         }
     };
 
+    const confirmLogout = () => {
+        setShowLogoutModal(false);
+        logout();
+        navigation.reset({ index: 0, routes: [{ name: 'Onboarding' }] });
+    };
+
     const handleRequestDeactivation = () => {
-        const msg = t('profile.deactivateConfirm');
-        if (Platform.OS === 'web' && typeof window !== 'undefined') {
-            if (window.confirm(msg)) {
-                performDeactivationRequest();
-            }
+        if (Platform.OS === 'web') {
+            setShowDeactivationModal(true);
         } else {
             Alert.alert(
                 t('profile.deleteAccount'),
-                msg,
+                t('profile.deactivateConfirm'),
                 [
                     { text: t('common.cancel'), style: 'cancel' },
-                    {
-                        text: t('common.confirm'),
-                        onPress: performDeactivationRequest
-                    }
+                    { text: t('common.confirm'), onPress: performDeactivationRequest }
                 ]
             );
         }
@@ -398,6 +392,42 @@ export const ProfileScreen = ({ navigation }: any) => {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
+
+            {/* Logout Confirmation Modal */}
+            <Modal visible={showLogoutModal} transparent animationType="fade" onRequestClose={() => setShowLogoutModal(false)}>
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalBox}>
+                        <Text style={styles.modalTitle}>{t('profile.logout')}</Text>
+                        <Text style={styles.modalMessage}>{t('profile.confirmLogout')}</Text>
+                        <View style={styles.modalButtons}>
+                            <TouchableOpacity style={styles.modalCancel} onPress={() => setShowLogoutModal(false)}>
+                                <Text style={styles.modalCancelText}>{t('common.cancel')}</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.modalConfirm} onPress={confirmLogout}>
+                                <Text style={styles.modalConfirmText}>{t('profile.logout')}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Deactivation Confirmation Modal */}
+            <Modal visible={showDeactivationModal} transparent animationType="fade" onRequestClose={() => setShowDeactivationModal(false)}>
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalBox}>
+                        <Text style={styles.modalTitle}>{t('profile.deleteAccount')}</Text>
+                        <Text style={styles.modalMessage}>{t('profile.deactivateConfirm')}</Text>
+                        <View style={styles.modalButtons}>
+                            <TouchableOpacity style={styles.modalCancel} onPress={() => setShowDeactivationModal(false)}>
+                                <Text style={styles.modalCancelText}>{t('common.cancel')}</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.modalConfirm, { backgroundColor: COLORS.error }]} onPress={() => { setShowDeactivationModal(false); performDeactivationRequest(); }}>
+                                <Text style={styles.modalConfirmText}>{t('common.confirm')}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 };
@@ -573,5 +603,63 @@ const styles = StyleSheet.create({
         color: COLORS.error,
         fontWeight: '600',
         marginLeft: 10,
-    }
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 24,
+    },
+    modalBox: {
+        backgroundColor: COLORS.white,
+        borderRadius: 20,
+        padding: 24,
+        width: '100%',
+        maxWidth: 360,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.2,
+        shadowRadius: 16,
+        elevation: 10,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: COLORS.text,
+        marginBottom: 10,
+    },
+    modalMessage: {
+        fontSize: 15,
+        color: COLORS.textSecondary,
+        marginBottom: 24,
+        lineHeight: 22,
+    },
+    modalButtons: {
+        flexDirection: 'row',
+        gap: 12,
+    },
+    modalCancel: {
+        flex: 1,
+        padding: 14,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#E0E0E0',
+        alignItems: 'center',
+    },
+    modalCancelText: {
+        color: COLORS.textSecondary,
+        fontWeight: '600',
+    },
+    modalConfirm: {
+        flex: 1,
+        padding: 14,
+        borderRadius: 12,
+        backgroundColor: COLORS.primary,
+        alignItems: 'center',
+    },
+    modalConfirmText: {
+        color: COLORS.white,
+        fontWeight: '700',
+    },
 });

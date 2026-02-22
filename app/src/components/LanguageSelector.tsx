@@ -37,7 +37,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({ onLanguageCh
     };
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, compact && styles.containerCompact]}>
             <TouchableOpacity
                 style={[styles.selector, compact && styles.selectorCompact]}
                 onPress={() => setIsOpen(true)}
@@ -97,6 +97,10 @@ const styles = StyleSheet.create({
     container: {
         width: '100%',
     },
+    containerCompact: {
+        width: 'auto',
+        flexShrink: 1,
+    },
     selector: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -114,7 +118,8 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         backgroundColor: '#fff',
         borderColor: '#2D5F3F',
-        minWidth: 120,
+        minWidth: 100,
+        maxWidth: 160,
         width: 'auto',
     },
     selectorLeft: {

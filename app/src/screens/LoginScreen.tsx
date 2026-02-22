@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TextInput, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator, Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { COLORS, SPACING, TYPOGRAPHY } from '../theme';
@@ -13,6 +13,7 @@ export const LoginScreen = ({ navigation }: any) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const passwordRef = useRef<any>(null);
 
     // Detect deactivated parameter
     useEffect(() => {
@@ -76,6 +77,9 @@ export const LoginScreen = ({ navigation }: any) => {
                             onChangeText={setUsername}
                             placeholder={t('login.username')}
                             autoCapitalize="none"
+                            returnKeyType="next"
+                            onSubmitEditing={() => passwordRef.current?.focus()}
+                            blurOnSubmit={false}
                         />
                     </View>
 
@@ -87,6 +91,9 @@ export const LoginScreen = ({ navigation }: any) => {
                             onChangeText={setPassword}
                             placeholder={t('login.password')}
                             secureTextEntry
+                            ref={passwordRef}
+                            returnKeyType="go"
+                            onSubmitEditing={handleLogin}
                         />
                     </View>
 
@@ -112,9 +119,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+        gap: SPACING.sm,
     },
     backButton: {
         padding: 4,
+        flexShrink: 0,
     },
     content: {
         flex: 1,
