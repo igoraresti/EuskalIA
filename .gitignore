@@ -19,12 +19,18 @@ server/EuskalIA.Server/euskalia.db
 **/TestResults/
 **/coverage.json
 **/*.txt
+*.log
 app/playwright-report/
 app/test-results/
 
 # Dependencies
 app/node_modules/
 node_env/
+
+# Secrets & Environment Variables
+*.env
+.env
+.env.*
 
 # IDEs
 .vscode/
@@ -33,3 +39,4 @@ node_env/
 *.userosscache
 *.sln.docstates
 EuskalIA_Production.apk
+Plan

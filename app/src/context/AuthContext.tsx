@@ -7,6 +7,7 @@ import i18n from '../i18n';
 interface AuthContextType {
     user: any | null;
     login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
+    socialLogin: (provider: string, token: string) => Promise<{ success: boolean; error?: string }>;
     logout: () => void;
     updateUser: (userData: any) => void;
     updateLanguage: (language: string) => Promise<{ success: boolean; error?: string }>;
@@ -17,6 +18,7 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType>({
     user: null,
     login: async () => ({ success: false }),
+    socialLogin: async () => ({ success: false }),
     logout: () => { },
     updateUser: () => { },
     updateLanguage: async () => ({ success: false }),
@@ -89,6 +91,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { success: false, error: errorKey || 'unknownError' };
     };
 
+    const socialLogin = async (provider: string, externalToken: string) => {
+        setIsLoading(true);
+        const result = await apiService.socialLogin({ provider, token: externalToken });
+        console.log(`Social Login (${provider}) API response:`, result);
+        setIsLoading(false);
+
+        const token = result?.token || result?.Token;
+        const userData = result?.user || result?.User;
+
+        if (result && !result.error && token) {
+            setUser(userData);
+
+            if (userData.language) {
+                i18n.changeLanguage(userData.language);
+                if (Platform.OS === 'web') {
+                    localStorage.setItem('i18nextLng', userData.language);
+                }
+            }
+
+            try {
+                await AsyncStorage.setItem('@user', JSON.stringify(userData));
+                await AsyncStorage.setItem('@token', token);
+                console.log('Successfully saved user and token to storage after social login');
+            } catch (e) {
+                console.error("Error saving user or token", e);
+            }
+            return { success: true };
+        }
+
+        return { success: false, error: result?.error || 'unknownError' };
+    };
+
     const logout = async () => {
         setUser(null);
         // Reset to default language 'es' on logout
@@ -134,7 +168,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const isAdmin = user?.role === 'Admin';
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, updateUser, updateLanguage, isLoading, isAdmin }}>
+        <AuthContext.Provider value={{ user, login, socialLogin, logout, updateUser, updateLanguage, isLoading, isAdmin }}>
             {children}
         </AuthContext.Provider>
     );

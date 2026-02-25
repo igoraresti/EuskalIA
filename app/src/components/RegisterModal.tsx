@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { COLORS, SPACING, TYPOGRAPHY } from '../theme';
 import { X, User, Mail, Lock } from 'lucide-react-native';
 import { apiService } from '../services/apiService';
+import { LoginButtons } from './LoginButtons';
 
 interface RegisterModalProps {
     visible: boolean;
@@ -169,6 +170,8 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({ visible, onClose }
                                     <Text style={styles.registerButtonText}>{t('register.registerButton')}</Text>
                                 )}
                             </TouchableOpacity>
+
+                            <LoginButtons />
                         </View>
                     )}
                 </View>

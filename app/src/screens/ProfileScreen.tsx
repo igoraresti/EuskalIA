@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, TextInput, Alert, ActivityIndicator, Platform, Modal } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { COLORS, SPACING, TYPOGRAPHY } from '../theme';
-import { User, Mail, Lock, Calendar, BookOpen, Trash2, LogOut, Save, ChevronLeft, Globe } from 'lucide-react-native';
+import { User, Mail, Lock, Calendar, BookOpen, Trash2, LogOut, Save, ChevronLeft, Globe, Check } from 'lucide-react-native';
 import { apiService } from '../services/apiService';
 import { useAuth } from '../context/AuthContext';
 import { LanguageSelector } from '../components/LanguageSelector';
@@ -14,6 +14,7 @@ export const ProfileScreen = ({ navigation }: any) => {
     const [progress, setProgress] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
 
     // Deletion states
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -31,7 +32,7 @@ export const ProfileScreen = ({ navigation }: any) => {
     const [password, setPassword] = useState('');
 
     useEffect(() => {
-        if (!authUser) return;
+        if (!authUser?.id) return;
 
         const loadProfile = async () => {
             setLoading(true);
@@ -62,10 +63,15 @@ export const ProfileScreen = ({ navigation }: any) => {
             setLoading(false);
         };
         loadProfile();
-    }, [authUser]);
+    }, [authUser?.id]);
+
+    // Track if form has any unsaved modifications
+    const hasChanges = username !== (user?.username || '') ||
+        nickname !== (user?.nickname || '') ||
+        password.length > 0;
 
     const handleUpdate = async () => {
-        if (!user) return;
+        if (!user || !hasChanges) return;
         setSaving(true);
         const result = await apiService.updateProfile(user.id, {
             username,
@@ -74,17 +80,17 @@ export const ProfileScreen = ({ navigation }: any) => {
         });
 
         if (result && !result.error) {
-            const msg = t('profile.success.profileUpdated');
-            if (Platform.OS === 'web' && typeof window !== 'undefined') {
-                window.alert(msg);
-            } else {
-                Alert.alert(t('common.success'), msg);
-            }
             setPassword('');
             // Update local state and context
             const updatedUser = { ...user, username, nickname };
             setUser(updatedUser);
             updateUser(updatedUser);
+
+            // Trigger the visual success effect
+            setIsSuccess(true);
+            setTimeout(() => {
+                setIsSuccess(false);
+            }, 2000);
         } else {
             const msg = t('profile.errors.updateFailed');
             if (Platform.OS === 'web' && typeof window !== 'undefined') {
@@ -365,15 +371,26 @@ export const ProfileScreen = ({ navigation }: any) => {
                         </View>
 
                         <TouchableOpacity
-                            style={styles.saveButton}
+                            style={[
+                                styles.saveButton,
+                                (!hasChanges || saving) && styles.saveButtonDisabled,
+                                isSuccess && styles.saveButtonSuccess
+                            ]}
                             onPress={handleUpdate}
-                            disabled={saving}
+                            disabled={!hasChanges || saving}
                         >
                             {saving ? <ActivityIndicator color={COLORS.white} /> : (
-                                <>
-                                    <Save color={COLORS.white} size={20} />
-                                    <Text style={styles.saveButtonText}>{t('profile.saveChanges')}</Text>
-                                </>
+                                isSuccess ? (
+                                    <>
+                                        <Check color={COLORS.white} size={20} />
+                                        <Text style={styles.saveButtonText}>{t('profile.success.profileUpdated', '¡Guardado!')}</Text>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Save color={COLORS.white} size={20} />
+                                        <Text style={styles.saveButtonText}>{t('profile.saveChanges')}</Text>
+                                    </>
+                                )
                             )}
                         </TouchableOpacity>
                     </View>
@@ -568,6 +585,13 @@ const styles = StyleSheet.create({
         padding: 16,
         borderRadius: 16,
         marginTop: SPACING.md,
+    },
+    saveButtonDisabled: {
+        backgroundColor: COLORS.textSecondary,
+        opacity: 0.5,
+    },
+    saveButtonSuccess: {
+        backgroundColor: COLORS.success || '#4CAF50',
     },
     saveButtonText: {
         color: COLORS.white,

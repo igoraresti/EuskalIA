@@ -5,6 +5,14 @@
 # Add node_env to PATH
 export PATH="$(pwd)/node_env/bin:$PATH"
 
+# Load centralized environment variables
+if [ -f .env ]; then
+  echo "--- Cargando variables de entorno (.env) ---"
+  set -a
+  source .env
+  set +a
+fi
+
 # Verify Node version
 echo "Using Node from: $(which node)"
 node --version

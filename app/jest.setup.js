@@ -75,6 +75,15 @@ jest.mock('lucide-react-native', () => {
     };
 });
 
+// Mock LoginButtons explicitly so it never tries to load its tricky expo-auth native dependencies globally during test renders
+jest.mock('./src/components/LoginButtons', () => {
+    const React = require('react');
+    const { View } = require('react-native');
+    return {
+        LoginButtons: () => React.createElement(View, { testID: 'mocked-login-buttons' })
+    };
+});
+
 // Avoid console error noise in tests
 console.error = jest.fn();
 console.warn = jest.fn();

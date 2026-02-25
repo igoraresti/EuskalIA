@@ -28,6 +28,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IAIService, MockAIService>();
 builder.Services.AddScoped<IEncryptionService, EncryptionService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddHttpClient<ISocialAuthService, SocialAuthService>();
 
 // Email Infrastructure
 builder.Services.AddSingleton<IEmailQueue, EmailQueue>();

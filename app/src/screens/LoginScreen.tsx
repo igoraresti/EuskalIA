@@ -6,6 +6,7 @@ import { Button } from '../components/Button';
 import { useAuth } from '../context/AuthContext';
 import { ChevronLeft } from 'lucide-react-native';
 import { LanguageSelector } from '../components/LanguageSelector';
+import { LoginButtons } from '../components/LoginButtons';
 
 export const LoginScreen = ({ navigation }: any) => {
     const { t, i18n } = useTranslation();
@@ -103,6 +104,8 @@ export const LoginScreen = ({ navigation }: any) => {
                         style={styles.button}
                         disabled={loading}
                     />
+
+                    <LoginButtons />
                 </View>
             </View>
         </SafeAreaView>
