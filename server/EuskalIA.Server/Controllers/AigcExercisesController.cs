@@ -28,8 +28,8 @@ namespace EuskalIA.Server.Controllers
                 query = query.Where(e => e.LevelId == levelId);
             }
 
-            // AIGC Logic: Never send REJECTED exercises to clients
-            query = query.Where(e => e.Status != "REJECTED");
+            // Only serve APPROVED exercises to players
+            query = query.Where(e => e.Status == "APPROVED");
 
             var exercises = await query
                 .Select(e => new AigcExerciseResponseDto
@@ -114,7 +114,7 @@ namespace EuskalIA.Server.Controllers
 
             // Use StartsWith so that "A1" matches both "A1" and "A1_UNIT_1" etc.
             var allLevelExercises = await _context.AigcExercises
-                .Where(e => (e.LevelId == levelId || e.LevelId.StartsWith(levelId + "_")) && e.Status != "REJECTED")
+                .Where(e => (e.LevelId == levelId || e.LevelId.StartsWith(levelId + "_")) && e.Status == "APPROVED")
                 .ToListAsync();
 
             if (!allLevelExercises.Any()) return Ok(new List<AigcExerciseResponseDto>());

@@ -11,6 +11,8 @@ import { LeaderboardScreen } from '../screens/LeaderboardScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { RegistrationSuccessScreen } from '../screens/RegistrationSuccessScreen';
 import { AdminDashboardScreen } from '../screens/AdminDashboardScreen';
+import { AdminExercisesScreen } from '../screens/AdminExercisesScreen';
+import { AdminImportScreen } from '../screens/AdminImportScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -49,6 +51,8 @@ export const AppNavigation = () => {
                 <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />
                 <Stack.Screen name="Profile" component={ProfileScreen} />
                 <Stack.Screen name="Admin" component={AdminDashboardScreen} />
+                <Stack.Screen name="AdminExercises" component={AdminExercisesScreen} />
+                <Stack.Screen name="AdminImport" component={AdminImportScreen} />
                 <Stack.Screen name="RegistrationSuccess" component={RegistrationSuccessScreen} />
             </Stack.Navigator>
         </NavigationContainer>

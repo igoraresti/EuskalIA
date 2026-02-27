@@ -281,5 +281,77 @@ export const apiService = {
             console.error(`Error toggling active status for user ${userId}:`, error);
             return null;
         }
-    }
+    },
+
+    getAdminExercises: async (filters: {
+        levelId?: string; topic?: string; status?: string; search?: string;
+        sortBy?: string; sortDir?: string; page?: number; pageSize?: number;
+    }) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/admin/exercises`, { params: filters });
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching admin exercises:', error);
+            return { total: 0, page: 1, pageSize: 20, items: [] };
+        }
+    },
+
+    getAdminExerciseStats: async (id: string) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/admin/exercises/${id}/stats`);
+            return response.data;
+        } catch (error) {
+            console.error(`Error fetching exercise stats ${id}:`, error);
+            return null;
+        }
+    },
+
+    deleteAdminExercise: async (id: string) => {
+        try {
+            const response = await axios.delete(`${BASE_URL}/admin/exercises/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error(`Error deleting exercise ${id}:`, error);
+            return null;
+        }
+    },
+
+    previewImport: async (exercises: any[], threshold: number) => {
+        try {
+            const response = await axios.post(`${BASE_URL}/admin/exercises/import`, {
+                exercises,
+                confirm: false,
+                threshold
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error previewing import:', error);
+            return null;
+        }
+    },
+
+    confirmImport: async (exercises: any[], threshold: number) => {
+        try {
+            const response = await axios.post(`${BASE_URL}/admin/exercises/import`, {
+                exercises,
+                confirm: true,
+                threshold
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error confirming import:', error);
+            return null;
+        }
+    },
+
+    bulkUpdateExerciseStatus: async (ids: string[], status: string) => {
+        try {
+            const response = await axios.patch(`${BASE_URL}/admin/exercises/bulk-status`, { ids, status });
+            return response.data;
+        } catch (error) {
+            console.error('Error bulk updating exercise status:', error);
+            return null;
+        }
+    },
 };
+
