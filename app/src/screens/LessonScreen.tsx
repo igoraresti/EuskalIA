@@ -24,6 +24,13 @@ export const LessonScreen = ({ navigation, route }: any) => {
     const [aigcIsCorrect, setAigcIsCorrect] = useState<boolean | null>(null);
     const [shouldCheckAigc, setShouldCheckAigc] = useState(false);
 
+    // EuskaraGo XP State
+    const [startTime, setStartTime] = useState<number>(Date.now());
+    const [errorsCount, setErrorsCount] = useState<number>(0);
+    const [correctCount, setCorrectCount] = useState<number>(0);
+    const [showXpModal, setShowXpModal] = useState(false);
+    const [earnedXp, setEarnedXp] = useState(0);
+
     // Global Interaction State
     const [isChecked, setIsChecked] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -98,6 +105,12 @@ export const LessonScreen = ({ navigation, route }: any) => {
             setIsCorrect(correct);
             setIsChecked(true);
 
+            if (correct) {
+                setCorrectCount(prev => prev + 1);
+            } else {
+                setErrorsCount(prev => prev + 1);
+            }
+
             if (currentExercise.isAigc && user) {
                 await apiService.submitExerciseAttempt(user.id, currentExercise.id, correct);
             }
@@ -113,6 +126,13 @@ export const LessonScreen = ({ navigation, route }: any) => {
         setIsChecked(true);
         setShouldCheckAigc(false);
         const currentExercise = exercises[currentExerciseIndex];
+
+        if (correct) {
+            setCorrectCount(prev => prev + 1);
+        } else {
+            setErrorsCount(prev => prev + 1);
+        }
+
         if (user) {
             await apiService.submitExerciseAttempt(user.id, currentExercise.id, correct);
         }
@@ -136,12 +156,53 @@ export const LessonScreen = ({ navigation, route }: any) => {
             setShouldCheckAigc(false);
             setIsChecked(false);
         } else {
-            // Lesson completed! Add XP
+            // Lesson completed! Calculate EuskaraGo XP
             if (user) {
-                await apiService.addXP(user.id, 10);
+                // 1. Determine Multiplier based on Level
+                let multiplier = 1.0;
+                const levelPrefix = levelId ? levelId.substring(0, 2) : 'A1';
+                switch (levelPrefix) {
+                    case 'A1': multiplier = 1.0; break;
+                    case 'A2': multiplier = 1.2; break;
+                    case 'B1': multiplier = 1.5; break;
+                    case 'B2': multiplier = 1.8; break;
+                    case 'C1': multiplier = 2.5; break;
+                    default: multiplier = 1.0;
+                }
+
+                // 2. Base XP = Correct Answers * XP Base (10) * Multiplier
+                let baseXp = correctCount * 10 * multiplier;
+
+                // 3. Perfection Bonus (Ondorengoa)
+                if (errorsCount === 0) {
+                    baseXp = baseXp * 1.2;
+                }
+
+                // 4. Speed Bonus (Azkarra)
+                const endTime = Date.now();
+                const diffSeconds = (endTime - startTime) / 1000;
+                let speedBonus = 0;
+                if (diffSeconds < 90) {
+                    speedBonus = 15;
+                } else if (diffSeconds <= 180) {
+                    speedBonus = 5;
+                }
+
+                // 5. Final XP
+                const finalXp = Math.round(baseXp + speedBonus);
+                setEarnedXp(finalXp);
+
+                await apiService.addXP(user.id, finalXp);
+                setShowXpModal(true);
+            } else {
+                navigation.navigate('Home');
             }
-            navigation.navigate('Home');
         }
+    };
+
+    const handleFinishLesson = () => {
+        setShowXpModal(false);
+        navigation.navigate('Home');
     };
 
     if (loading) {
@@ -246,6 +307,30 @@ export const LessonScreen = ({ navigation, route }: any) => {
                     style={styles.checkButton}
                 />
             </View>
+
+            {/* EuskaraGo XP Summary Modal equivalent - displayed conditionally */}
+            {showXpModal && (
+                <View style={[StyleSheet.absoluteFill, styles.modalOverlay]}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Lección Completada!</Text>
+                        <Text style={styles.xpAmount}>+{earnedXp} XP</Text>
+
+                        <View style={styles.statsContainer}>
+                            <Text style={styles.statLine}>Aciertos: {correctCount}</Text>
+                            <Text style={styles.statLine}>Errores: {errorsCount}</Text>
+                            {errorsCount === 0 && <Text style={styles.bonusText}>🔥 Bono Perfección (+20%)</Text>}
+                            <Text style={styles.statLine}>Tiempo: {Math.round((Date.now() - startTime) / 1000)}s</Text>
+                        </View>
+
+                        <Button
+                            title="Continuar"
+                            onPress={handleFinishLesson}
+                            variant="primary"
+                            style={{ width: '100%', marginTop: SPACING.lg }}
+                        />
+                    </View>
+                </View>
+            )}
         </SafeAreaView>
     );
 };
@@ -350,5 +435,47 @@ const styles = StyleSheet.create({
     },
     checkButton: {
         width: '100%',
+    },
+    modalOverlay: {
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: SPACING.xl,
+        zIndex: 1000,
+    },
+    modalContent: {
+        backgroundColor: COLORS.white,
+        borderRadius: 24,
+        padding: SPACING.xl,
+        width: '100%',
+        alignItems: 'center',
+    },
+    modalTitle: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: COLORS.primary,
+        marginBottom: SPACING.md,
+    },
+    xpAmount: {
+        fontSize: 48,
+        fontWeight: '900',
+        color: COLORS.accent,
+        marginBottom: SPACING.lg,
+    },
+    statsContainer: {
+        width: '100%',
+        backgroundColor: '#F5F5F5',
+        borderRadius: 12,
+        padding: SPACING.md,
+        gap: SPACING.sm,
+    },
+    statLine: {
+        fontSize: 16,
+        color: COLORS.text,
+    },
+    bonusText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: COLORS.accent,
     }
 });
