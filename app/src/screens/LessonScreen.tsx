@@ -6,41 +6,134 @@ import { X, CheckCircle2, AlertCircle } from 'lucide-react-native';
 import { Button } from '../components/Button';
 import { apiService } from '../services/apiService';
 import { useAuth } from '../context/AuthContext';
+import { BlockBuilderExercise } from '../components/exercises/BlockBuilderExercise';
 
 export const LessonScreen = ({ navigation, route }: any) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { user } = useAuth();
-    const { lessonId } = route.params;
-    const [lesson, setLesson] = useState<any>(null);
+    const { levelId, lessonId } = route.params;
+
+    // We will hold a mix of legacy and AIGC exercises here
+    const [exercises, setExercises] = useState<any[]>([]);
     const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
+
+    // Legacy MCQ State
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
+
+    // AIGC State
+    const [aigcIsCorrect, setAigcIsCorrect] = useState<boolean | null>(null);
+    const [shouldCheckAigc, setShouldCheckAigc] = useState(false);
+
+    // Global Interaction State
     const [isChecked, setIsChecked] = useState(false);
     const [loading, setLoading] = useState(true);
     const [isCorrect, setIsCorrect] = useState(false);
 
     useEffect(() => {
-        const fetchLesson = async () => {
+        const fetchExercises = async () => {
             setLoading(true);
-            const data = await apiService.getLesson(lessonId);
-            setLesson(data);
-            setLoading(false);
-        };
-        fetchLesson();
-    }, [lessonId]);
+            try {
+                if (levelId && user) {
+                    // New Route: Intelligent SRS Session
+                    const sessionData = await apiService.getSessionExercises(levelId, user.id);
+                    if (sessionData && sessionData.length > 0) {
+                        const parsedSession = sessionData.map((ex: any) => {
+                            if (ex.templateType === 'block_builder') {
+                                return {
+                                    id: ex.id,
+                                    isAigc: true,
+                                    templateType: ex.templateType,
+                                    content: JSON.parse(ex.jsonSchema),
+                                    question: "Block Builder Exercise"
+                                };
+                            } else {
+                                // Assume multiple_choice
+                                const schema = JSON.parse(ex.jsonSchema);
+                                const userLang = i18n.language || 'es';
+                                return {
+                                    id: ex.id,
+                                    isAigc: true,
+                                    templateType: ex.templateType,
+                                    question: schema.question[userLang] || schema.question['es'] || schema.question,
+                                    optionsJson: JSON.stringify(schema.options),
+                                    correctAnswer: schema.correctAnswer
+                                };
+                            }
+                        });
+                        setExercises(parsedSession);
+                    }
+                } else if (lessonId) {
+                    // Legacy Lesson Route
+                    const lessonData = await apiService.getLesson(lessonId);
+                    let loadedExercises = lessonData?.exercises || [];
 
-    const handleCheck = () => {
-        if (selectedOption !== null && lesson) {
-            const currentExercise = lesson.exercises[currentExerciseIndex];
+                    const fallbackLevelId = lessonData?.level ? `A1_UNIT_${lessonData.level}` : 'A1';
+                    const aigcExercises = await apiService.getAigcExercises(fallbackLevelId);
+
+                    if (aigcExercises && aigcExercises.length > 0) {
+                        const randomAigc = aigcExercises[Math.floor(Math.random() * aigcExercises.length)];
+                        loadedExercises.push({
+                            id: randomAigc.id,
+                            isAigc: true,
+                            templateType: randomAigc.templateType,
+                            content: JSON.parse(randomAigc.jsonSchema),
+                            question: "AIGC Exercise"
+                        });
+                    }
+                    setExercises(loadedExercises);
+                }
+            } catch (e) {
+                console.error("Failed loading exercises", e);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchExercises();
+    }, [levelId, lessonId, user]);
+
+    const handleCheckLegacy = async () => {
+        if (selectedOption !== null && exercises.length > 0) {
+            const currentExercise = exercises[currentExerciseIndex];
             const correct = selectedOption === currentExercise.correctAnswer;
             setIsCorrect(correct);
             setIsChecked(true);
+
+            if (currentExercise.isAigc && user) {
+                await apiService.submitExerciseAttempt(user.id, currentExercise.id, correct);
+            }
+        }
+    };
+
+    const handleCheckAigc = () => {
+        setShouldCheckAigc(true); // Triggers the child component to call onResult
+    };
+
+    const handleAigcResult = async (correct: boolean) => {
+        setIsCorrect(correct);
+        setIsChecked(true);
+        setShouldCheckAigc(false);
+        const currentExercise = exercises[currentExerciseIndex];
+        if (user) {
+            await apiService.submitExerciseAttempt(user.id, currentExercise.id, correct);
+        }
+    };
+
+    const handleCheck = () => {
+        const currentExercise = exercises[currentExerciseIndex];
+        if (currentExercise.isAigc && currentExercise.templateType === 'block_builder') {
+            handleCheckAigc();
+        } else {
+            handleCheckLegacy();
         }
     };
 
     const handleContinue = async () => {
-        if (currentExerciseIndex < lesson.exercises.length - 1) {
+        if (currentExerciseIndex < exercises.length - 1) {
             setCurrentExerciseIndex(currentExerciseIndex + 1);
+            // Reset state
             setSelectedOption(null);
+            setAigcIsCorrect(null);
+            setShouldCheckAigc(false);
             setIsChecked(false);
         } else {
             // Lesson completed! Add XP
@@ -59,7 +152,7 @@ export const LessonScreen = ({ navigation, route }: any) => {
         );
     }
 
-    if (!lesson || lesson.exercises.length === 0) {
+    if (exercises.length === 0) {
         return (
             <View style={styles.loadingContainer}>
                 <Text>{t('lesson.noExercises')}</Text>
@@ -68,24 +161,25 @@ export const LessonScreen = ({ navigation, route }: any) => {
         );
     }
 
-    const currentExercise = lesson.exercises[currentExerciseIndex];
-    const options = JSON.parse(currentExercise.optionsJson);
+    const currentExercise = exercises[currentExerciseIndex];
 
-    return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <X color={COLORS.textSecondary} size={28} />
-                </TouchableOpacity>
-                <View style={styles.progressBack}>
-                    <View style={[styles.progressBar, { width: `${((currentExerciseIndex + 1) / lesson.exercises.length) * 100}%` }]} />
-                </View>
-                <Text style={styles.heartText}>❤️ 5</Text>
-            </View>
+    const renderExerciseContent = () => {
+        if (currentExercise.isAigc && currentExercise.templateType === 'block_builder') {
+            return (
+                <BlockBuilderExercise
+                    key={currentExercise.id}
+                    data={currentExercise.content}
+                    onResult={handleAigcResult}
+                    checkTriggered={shouldCheckAigc}
+                />
+            );
+        }
 
-            <View style={styles.content}>
+        // Legacy Multiple Choice Fallback
+        const options = currentExercise.optionsJson ? JSON.parse(currentExercise.optionsJson) : [];
+        return (
+            <>
                 <Text style={[TYPOGRAPHY.h2, styles.question]}>{currentExercise.question}</Text>
-
                 <View style={styles.optionsContainer}>
                     {options.map((option: string, index: number) => (
                         <TouchableOpacity
@@ -105,6 +199,26 @@ export const LessonScreen = ({ navigation, route }: any) => {
                         </TouchableOpacity>
                     ))}
                 </View>
+            </>
+        );
+    };
+
+    const isCheckDisabled = (currentExercise.isAigc && currentExercise.templateType === 'block_builder') ? false : selectedOption === null;
+
+    return (
+        <SafeAreaView style={styles.container}>
+            <View style={styles.header}>
+                <TouchableOpacity onPress={() => navigation.goBack()}>
+                    <X color={COLORS.textSecondary} size={28} />
+                </TouchableOpacity>
+                <View style={styles.progressBack}>
+                    <View style={[styles.progressBar, { width: `${((currentExerciseIndex + 1) / exercises.length) * 100}%` }]} />
+                </View>
+                <Text style={styles.heartText}>❤️ 5</Text>
+            </View>
+
+            <View style={styles.content}>
+                {renderExerciseContent()}
             </View>
 
             <View style={[
@@ -116,19 +230,19 @@ export const LessonScreen = ({ navigation, route }: any) => {
                         {isCorrect ? <CheckCircle2 color={COLORS.success} size={32} /> : <AlertCircle color={COLORS.secondary} size={32} />}
                         <View style={styles.feedbackTextWrapper}>
                             <Text style={[styles.feedbackTitle, !isCorrect && { color: COLORS.secondary }]}>
-                                {isCorrect ? t('lesson.goodJob') : t('lesson.almost')}
+                                {isCorrect ? t('lessons.goodJob') : t('lessons.almost')}
                             </Text>
                             <Text style={[styles.feedbackTranslation, !isCorrect && { color: COLORS.secondary }]}>
-                                {isCorrect ? t('lesson.correctAnswer') : `${t('lesson.correctWas')}: ${currentExercise.correctAnswer}`}
+                                {isCorrect ? t('lessons.correctAnswer') : (currentExercise.isAigc ? t('lessons.retry') : `${t('lessons.correctWas')}: ${currentExercise.correctAnswer}`)}
                             </Text>
                         </View>
                     </View>
                 ) : null}
 
                 <Button
-                    title={isChecked ? t('common.continue') : t('lesson.check')}
+                    title={isChecked ? t('common.continue') : t('lessons.check')}
                     onPress={isChecked ? handleContinue : handleCheck}
-                    variant={selectedOption === null ? 'outline' : 'primary'}
+                    variant={isCheckDisabled ? 'outline' : 'primary'}
                     style={styles.checkButton}
                 />
             </View>

@@ -90,7 +90,8 @@
         "almost": "Almost!",
         "correctAnswer": "Correct answer",
         "correctWas": "The correct answer was",
-        "check": "Check"
+        "check": "Check",
+        "retry": "Try again"
     },
     "lesson": {
         "question": "Question",

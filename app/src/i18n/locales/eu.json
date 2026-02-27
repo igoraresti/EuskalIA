@@ -90,7 +90,8 @@
         "almost": "Ia!",
         "correctAnswer": "Erantzun zuzena",
         "correctWas": "Erantzun zuzena hau zen",
-        "check": "Egiaztatu"
+        "check": "Egiaztatu",
+        "retry": "Saiatu berriro"
     },
     "lesson": {
         "question": "Galdera",

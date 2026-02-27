@@ -20,9 +20,20 @@ builder.Services.AddControllers()
     });
 builder.Services.AddOpenApi();
 
-// SQLite DB
+// SQLite / SQL Server DB depending on Environment
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=euskalia.db";
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=euskalia.db"));
+{
+    if (builder.Environment.IsDevelopment())
+    {
+        options.UseSqlite(connectionString);
+    }
+    else
+    {
+        options.UseSqlServer(connectionString);
+    }
+});
 
 // Domain Services
 builder.Services.AddScoped<IAIService, MockAIService>();
@@ -91,16 +102,17 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var encryptionService = scope.ServiceProvider.GetRequiredService<IEncryptionService>();
-    db.Database.EnsureCreated();
+    db.Database.Migrate();
 
     if (!db.Users.Any())
     {
+        var adminPassword = encryptionService.Encrypt("1234");
         var user = new EuskalIA.Server.Models.User
         {
             Username = "igoraresti",
-            Nickname = encryptionService.Encrypt("igoraresti"),
+            Nickname = encryptionService.Encrypt("adminigor"),
             Email = encryptionService.Encrypt("igor@euskalia.eus"),
-            Password = encryptionService.Encrypt("1234"),
+            Password = adminPassword,
             JoinedAt = DateTime.UtcNow.AddMonths(-2),
             IsVerified = true,
             Language = "es",
@@ -119,6 +131,9 @@ using (var scope = app.Services.CreateScope())
             db.SaveChanges();
         }
     }
+    
+    // Seed AIGC Sample Exercise
+    EuskalIA.Server.Utils.AigcSeeder.SeedAigcExercises(db);
 }
 
 // Configure the HTTP request pipeline.

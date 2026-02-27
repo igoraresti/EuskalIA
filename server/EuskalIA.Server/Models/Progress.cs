@@ -13,6 +13,7 @@ namespace EuskalIA.Server.Models
         public int Streak { get; set; }
         public int Level { get; set; }
         public int Txanponak { get; set; }
+        public int Indabak { get; set; } = 5; // Initial energy/stamina
         public DateTime LastLessonDate { get; set; } = DateTime.MinValue;
         public string LastLessonTitle { get; set; } = string.Empty;
         

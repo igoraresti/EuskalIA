@@ -73,6 +73,41 @@ export const apiService = {
         }
     },
 
+    getAigcExercises: async (levelId?: string) => {
+        try {
+            const url = levelId ? `${BASE_URL}/aigcexercises?levelId=${levelId}` : `${BASE_URL}/aigcexercises`;
+            const response = await axios.get(url);
+            return response.data; // Returns Array of AigcExerciseResponseDto
+        } catch (error) {
+            console.error('Error fetching AIGC exercises:', error);
+            return [];
+        }
+    },
+
+    getSessionExercises: async (levelId: string, userId: number) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/aigcexercises/session?levelId=${levelId}&userId=${userId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching session exercises:', error);
+            return [];
+        }
+    },
+
+    submitExerciseAttempt: async (userId: number, exerciseId: string, isCorrect: boolean) => {
+        try {
+            await axios.post(`${BASE_URL}/aigcexercises/attempt`, {
+                userId,
+                exerciseId,
+                isCorrect
+            });
+            return true;
+        } catch (error) {
+            console.error('Error submitting attempt:', error);
+            return false;
+        }
+    },
+
     getUserProgress: async (userId: number) => {
         try {
             const response = await axios.get(`${BASE_URL}/users/${userId}/progress`);

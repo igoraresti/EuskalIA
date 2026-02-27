@@ -91,32 +91,27 @@ export const HomeScreen = ({ navigation }: any) => {
             </View>
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
-                <Text style={[TYPOGRAPHY.h2, styles.sectionTitle]}>
-                    {t('home.unit')} 1: {t('home.basics')}
-                </Text>
+                <View style={styles.levelsContainer}>
+                    <TouchableOpacity
+                        style={[styles.levelNode, { backgroundColor: '#4CAF50' }]}
+                        onPress={() => navigation.navigate('Lesson', { levelId: 'A1' })}
+                    >
+                        <Text style={styles.levelTitle}>A1</Text>
+                    </TouchableOpacity>
 
-                <View style={styles.pathContainer}>
-                    {lessons.map((lesson: any, index: number) => (
-                        <TouchableOpacity
-                            key={lesson.id}
-                            style={[
-                                styles.lessonNode,
-                                { marginLeft: index % 2 === 0 ? 0 : 60 }
-                            ]}
-                            onPress={() => navigation.navigate('Lesson', { lessonId: lesson.id })}
-                        >
-                            <View style={[
-                                styles.nodeCircle,
-                                styles.activeNode
-                            ]}>
-                                <BookOpen color={COLORS.white} size={28} />
-                            </View>
-                            <Text style={styles.lessonTitle}>{lesson.title}</Text>
-                            {getLessonScore(lesson.id) && (
-                                <Text style={styles.scoreText}>{getLessonScore(lesson.id)}</Text>
-                            )}
-                        </TouchableOpacity>
-                    ))}
+                    <TouchableOpacity
+                        style={[styles.levelNode, { backgroundColor: '#FF9800', marginLeft: 80 }]}
+                        onPress={() => navigation.navigate('Lesson', { levelId: 'A2' })}
+                    >
+                        <Text style={styles.levelTitle}>A2</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={[styles.levelNode, { backgroundColor: '#2196F3', marginLeft: -80 }]}
+                        onPress={() => navigation.navigate('Lesson', { levelId: 'B1' })}
+                    >
+                        <Text style={styles.levelTitle}>B1</Text>
+                    </TouchableOpacity>
                 </View>
             </ScrollView>
 
@@ -200,33 +195,28 @@ const styles = StyleSheet.create({
         marginBottom: SPACING.xl,
         textAlign: 'center',
     },
-    pathContainer: {
+    levelsContainer: {
         width: '100%',
         alignItems: 'center',
+        marginTop: SPACING.xl,
+        gap: SPACING.xl,
     },
-    lessonNode: {
-        alignItems: 'center',
-        marginBottom: SPACING.xl,
-        width: 100,
-    },
-    nodeCircle: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        backgroundColor: '#DDD',
+    levelNode: {
+        width: 120,
+        height: 120,
+        borderRadius: 60,
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: SPACING.xs,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+        elevation: 8,
     },
-    activeNode: {
-        backgroundColor: COLORS.primary,
-        transform: [{ scale: 1.1 }],
-        borderWidth: 4,
-        borderColor: '#A5D6A7',
-    },
-    lessonTitle: {
-        fontWeight: '600',
-        color: COLORS.text,
+    levelTitle: {
+        fontSize: 36,
+        fontWeight: 'bold',
+        color: COLORS.white,
     },
     tabBar: {
         flexDirection: 'row',

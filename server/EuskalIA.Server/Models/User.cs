@@ -31,5 +31,11 @@ namespace EuskalIA.Server.Models
         
         // Navigation property
         public Progress? Progress { get; set; }
+        
+        // Navigation property for SRS nodes
+        public ICollection<UserSrsNode> SrsNodes { get; set; } = new List<UserSrsNode>();
+        
+        // Navigation property for exercise attempts
+        public ICollection<UserExerciseAttempt> ExerciseAttempts { get; set; } = new List<UserExerciseAttempt>();
     }
 }
