@@ -52,7 +52,6 @@ export const LeaderboardScreen = ({ navigation }: any) => {
 
                 <View style={styles.userInfo}>
                     <Text style={[styles.username, isMe && styles.meText]}>{item.username}</Text>
-                    <Text style={styles.levelText}>{t('leaderboard.level')} {item.level}</Text>
                 </View>
 
                 <View style={styles.xpContainer}>

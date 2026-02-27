@@ -1,9 +1,6 @@
 using EuskalIA.Server.Data;
 using EuskalIA.Server.Models;
-using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using System.IO;
-using System.Collections.Generic;
 
 namespace EuskalIA.Server.Utils
 {
@@ -11,72 +8,73 @@ namespace EuskalIA.Server.Utils
     {
         public static void SeedAigcExercises(AppDbContext context)
         {
-            // Seed B1 parsing from json if they don't exist
-            if (!context.AigcExercises.Any(e => e.LevelId == "B1"))
+            // Resolve the Lessons folder relative to the repo root (2 levels up from
+            // the running binary: bin/Debug/net9.0 -> project -> server -> repo root)
+            var projectDir = Directory.GetCurrentDirectory();
+            var repoRoot = Path.GetFullPath(Path.Combine(projectDir, "..", ".."));
+            var lessonsDir = Path.Combine(repoRoot, "Lessons");
+
+            SeedFromJsonFile(context, Path.Combine(lessonsDir, "a1_exercises.json"), "A1");
+            SeedFromJsonFile(context, Path.Combine(lessonsDir, "a2_exercises.json"), "A2");
+            SeedFromJsonFile(context, Path.Combine(lessonsDir, "b1_exercises.json"), "B1");
+        }
+
+        private static void SeedFromJsonFile(AppDbContext context, string filePath, string level)
+        {
+            if (!File.Exists(filePath))
             {
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "b1_exercises.json");
-                if (File.Exists(filePath))
-                {
-                    var jsonContent = File.ReadAllText(filePath);
-                    var exercises = JsonSerializer.Deserialize<List<AigcExercise>>(jsonContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    if (exercises != null)
-                    {
-                        context.AigcExercises.AddRange(exercises);
-                        context.SaveChanges();
-                    }
-                }
+                Console.WriteLine($"[AigcSeeder] JSON not found for {level}: {filePath}");
+                return;
             }
 
-            // Seed A1 test if it doesn't exist
-            if (!context.AigcExercises.Any(e => e.ExerciseCode == "test-block-builder-01"))
+            var jsonContent = File.ReadAllText(filePath);
+            var exercises = JsonSerializer.Deserialize<List<AigcExerciseJson>>(jsonContent,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (exercises == null) return;
+
+            int inserted = 0;
+            foreach (var ex in exercises)
             {
-                var schema = new
-                {
-                    promptLocal = "Construye la palabra: 'Para el monte'",
-                    validation = new
-                    {
-                        correctSequence = new[] { "root_mendi", "art_a", "des_rentzat" },
-                        targetWord = "Mendiarentzat",
-                        targetTranslation = "Para el monte",
-                        feedback = new
-                        {
-                            onSuccess = "¡Perfecto!",
-                            onFail = "La estructura correcta es: Mendi (íz) + a (artículo) + rentzat (para)."
-                        }
-                    },
-                    elements = new
-                    {
-                        stem = new
-                        {
-                            id = "root_mendi",
-                            text = "Mendi",
-                            type = "noun",
-                            colorCode = "#2196F3"
-                        },
-                        pieces = new[]
-                        {
-                            new { id = "art_a", text = "a", type = "article", colorCode = "#4CAF50" },
-                            new { id = "des_rentzat", text = "rentzat", type = "destination", colorCode = "#FF9800" },
-                            new { id = "erg_k", text = "k", type = "ergative", colorCode = "#E91E63" },
-                            new { id = "loc_n", text = "n", type = "locative", colorCode = "#9C27B0" }
-                        }
-                    }
-                };
+                // Skip if already in the database (idempotent by exerciseCode)
+                if (context.AigcExercises.Any(e => e.ExerciseCode == ex.ExerciseCode))
+                    continue;
 
                 context.AigcExercises.Add(new AigcExercise
                 {
-                    ExerciseCode = "test-block-builder-01",
-                    TemplateType = "block_builder",
-                    LevelId = "A1_UNIT_1",  
-                    Topics = "Destination",
-                    Difficulty = 1,
-                    Status = "VERIFIED",
-                    JsonSchema = JsonSerializer.Serialize(schema),
+                    ExerciseCode = ex.ExerciseCode,
+                    TemplateType = ex.TemplateType,
+                    LevelId = ex.LevelId ?? level,
+                    Topics = ex.Topics ?? "",
+                    Difficulty = ex.Difficulty,
+                    Status = ex.Status ?? "VERIFIED",
+                    JsonSchema = ex.JsonSchema ?? "{}",
                     CreatedAt = DateTime.UtcNow
                 });
-
-                context.SaveChanges();
+                inserted++;
             }
+
+            if (inserted > 0)
+            {
+                context.SaveChanges();
+                Console.WriteLine($"[AigcSeeder] {level}: inserted {inserted} exercises.");
+            }
+            else
+            {
+                Console.WriteLine($"[AigcSeeder] {level}: all exercises already present, skipped.");
+            }
+        }
+
+        // Minimal DTO for JSON deserialization
+        private class AigcExerciseJson
+        {
+            public string ExerciseCode { get; set; } = "";
+            public string TemplateType { get; set; } = "multiple_choice";
+            public string? LevelId { get; set; }
+            public string? Topics { get; set; }
+            public int Difficulty { get; set; } = 1;
+            public string? Status { get; set; }
+            public string? JsonSchema { get; set; }
         }
     }
 }

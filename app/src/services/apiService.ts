@@ -216,6 +216,15 @@ export const apiService = {
         }
     },
 
+    getGlobalRank: async (userId: number) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/leaderboard/rank/${userId}`);
+            return response.data as { rank: number; total: number };
+        } catch (error) {
+            return null;
+        }
+    },
+
     register: async (registerDto: { username: string; email: string; password: string; language?: string }) => {
         try {
             const response = await axios.post(`${BASE_URL}/users/register`, registerDto);

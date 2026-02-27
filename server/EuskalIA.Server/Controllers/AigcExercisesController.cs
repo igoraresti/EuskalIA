@@ -112,8 +112,9 @@ namespace EuskalIA.Server.Controllers
         {
             if (string.IsNullOrEmpty(levelId)) return BadRequest("LevelId is required");
 
+            // Use StartsWith so that "A1" matches both "A1" and "A1_UNIT_1" etc.
             var allLevelExercises = await _context.AigcExercises
-                .Where(e => e.LevelId == levelId && e.Status != "REJECTED")
+                .Where(e => (e.LevelId == levelId || e.LevelId.StartsWith(levelId + "_")) && e.Status != "REJECTED")
                 .ToListAsync();
 
             if (!allLevelExercises.Any()) return Ok(new List<AigcExerciseResponseDto>());

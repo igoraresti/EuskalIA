@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Animated, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Animated, ActivityIndicator, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { COLORS, SPACING, TYPOGRAPHY } from '../theme';
 import { X, CheckCircle2, AlertCircle } from 'lucide-react-native';
@@ -7,6 +7,7 @@ import { Button } from '../components/Button';
 import { apiService } from '../services/apiService';
 import { useAuth } from '../context/AuthContext';
 import { BlockBuilderExercise } from '../components/exercises/BlockBuilderExercise';
+import { LessonProgressService } from '../services/LessonProgressService';
 
 export const LessonScreen = ({ navigation, route }: any) => {
     const { t, i18n } = useTranslation();
@@ -36,10 +37,52 @@ export const LessonScreen = ({ navigation, route }: any) => {
     const [loading, setLoading] = useState(true);
     const [isCorrect, setIsCorrect] = useState(false);
 
+    // Track whether we've already saved to avoid double-saves during unmount
+    const isSavingRef = useRef(false);
+    // Track if the lesson was completed (so we don't save the progress at unmount)
+    const lessonCompletedRef = useRef(false);
+
+    // ─── Save progress whenever the exercise index changes ───────────────────
+    const saveProgress = async (
+        exList: any[],
+        index: number,
+        correct: number,
+        errors: number,
+        start: number
+    ) => {
+        if (levelId && exList.length > 0) {
+            await LessonProgressService.save({
+                levelId,
+                exercises: exList,
+                currentExerciseIndex: index,
+                correctCount: correct,
+                errorsCount: errors,
+                startTime: start,
+                savedAt: Date.now(),
+            });
+        }
+    };
+
+    // ─── Clear progress on unmount if lesson not yet finished ────────────────
+    // We do NOT clear here; the user can resume. Clear only on completion or
+    // when the user explicitly chooses to discard from HomeScreen.
+
     useEffect(() => {
         const fetchExercises = async () => {
             setLoading(true);
             try {
+                // Check for saved progress first
+                const saved = await LessonProgressService.load();
+                if (saved && saved.levelId === levelId && saved.exercises.length > 0) {
+                    // Resume from saved state
+                    setExercises(saved.exercises);
+                    setCurrentExerciseIndex(saved.currentExerciseIndex);
+                    setCorrectCount(saved.correctCount);
+                    setErrorsCount(saved.errorsCount);
+                    setStartTime(saved.startTime);
+                    return;
+                }
+
                 if (levelId && user) {
                     // New Route: Intelligent SRS Session
                     const sessionData = await apiService.getSessionExercises(levelId, user.id);
@@ -62,12 +105,22 @@ export const LessonScreen = ({ navigation, route }: any) => {
                                     isAigc: true,
                                     templateType: ex.templateType,
                                     question: schema.question[userLang] || schema.question['es'] || schema.question,
-                                    optionsJson: JSON.stringify(schema.options),
+                                    optionsJson: JSON.stringify([...schema.options].sort(() => Math.random() - 0.5)),
                                     correctAnswer: schema.correctAnswer
                                 };
                             }
                         });
                         setExercises(parsedSession);
+                        // Save the freshly loaded session so resuming works immediately
+                        await LessonProgressService.save({
+                            levelId,
+                            exercises: parsedSession,
+                            currentExerciseIndex: 0,
+                            correctCount: 0,
+                            errorsCount: 0,
+                            startTime: Date.now(),
+                            savedAt: Date.now(),
+                        });
                     }
                 } else if (lessonId) {
                     // Legacy Lesson Route
@@ -105,10 +158,12 @@ export const LessonScreen = ({ navigation, route }: any) => {
             setIsCorrect(correct);
             setIsChecked(true);
 
+            const newCorrect = correctCount + (correct ? 1 : 0);
+            const newErrors = errorsCount + (correct ? 0 : 1);
             if (correct) {
-                setCorrectCount(prev => prev + 1);
+                setCorrectCount(newCorrect);
             } else {
-                setErrorsCount(prev => prev + 1);
+                setErrorsCount(newErrors);
             }
 
             if (currentExercise.isAigc && user) {
@@ -127,10 +182,12 @@ export const LessonScreen = ({ navigation, route }: any) => {
         setShouldCheckAigc(false);
         const currentExercise = exercises[currentExerciseIndex];
 
+        const newCorrect = correctCount + (correct ? 1 : 0);
+        const newErrors = errorsCount + (correct ? 0 : 1);
         if (correct) {
-            setCorrectCount(prev => prev + 1);
+            setCorrectCount(newCorrect);
         } else {
-            setErrorsCount(prev => prev + 1);
+            setErrorsCount(newErrors);
         }
 
         if (user) {
@@ -149,14 +206,19 @@ export const LessonScreen = ({ navigation, route }: any) => {
 
     const handleContinue = async () => {
         if (currentExerciseIndex < exercises.length - 1) {
-            setCurrentExerciseIndex(currentExerciseIndex + 1);
-            // Reset state
+            const nextIndex = currentExerciseIndex + 1;
+            setCurrentExerciseIndex(nextIndex);
+            // Reset per-exercise state
             setSelectedOption(null);
             setAigcIsCorrect(null);
             setShouldCheckAigc(false);
             setIsChecked(false);
+            // Persist progress
+            await saveProgress(exercises, nextIndex, correctCount, errorsCount, startTime);
         } else {
-            // Lesson completed! Calculate EuskaraGo XP
+            // Lesson completed!
+            lessonCompletedRef.current = true;
+            await LessonProgressService.clear(); // Discard progress on completion
             if (user) {
                 // 1. Determine Multiplier based on Level
                 let multiplier = 1.0;
@@ -308,7 +370,7 @@ export const LessonScreen = ({ navigation, route }: any) => {
                 />
             </View>
 
-            {/* EuskaraGo XP Summary Modal equivalent - displayed conditionally */}
+            {/* EuskaraGo XP Summary Modal */}
             {showXpModal && (
                 <View style={[StyleSheet.absoluteFill, styles.modalOverlay]}>
                     <View style={styles.modalContent}>

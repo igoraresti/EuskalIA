@@ -1,5 +1,5 @@
 # User Specific
-Especificaciones.txt
+Especificaciones.md
 *.txt
 DEPLOYMENT_GUIDE.md
 app/src/config.ts
@@ -40,3 +40,4 @@ node_env/
 *.sln.docstates
 EuskalIA_Production.apk
 Lessons/
+seed_exercises.py

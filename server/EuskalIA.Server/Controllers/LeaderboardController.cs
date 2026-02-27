@@ -88,5 +88,20 @@ namespace EuskalIA.Server.Controllers
 
             return Ok(relativeRankings);
         }
+
+        [HttpGet("rank/{userId}")]
+        public async Task<ActionResult<object>> GetUserGlobalRank(int userId)
+        {
+            var allXps = await _context.Progresses
+                .Where(p => p.User != null && p.User.IsActive)
+                .OrderByDescending(p => p.XP)
+                .Select(p => p.UserId)
+                .ToListAsync();
+
+            var rank = allXps.IndexOf(userId) + 1;
+            if (rank == 0) return NotFound();
+
+            return Ok(new { rank, total = allXps.Count });
+        }
     }
 }
