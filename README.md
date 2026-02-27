@@ -63,40 +63,20 @@ El repositorio es un **Monorepo** que alberga ambas partes fundamentales:
 
 ---
 
-## 🚀 Despliegue e Instalación
+## � Licencia
 
-EuskalIA está codificado y arquitectado con mentalidad *Cloud-Ready*. Desde el uso de variables de entorno `.env` encriptadas hasta proxys inversos dinámicos.
+Este proyecto está bajo la **Licencia MIT**.
 
-> [!TIP]  
-> 📖 Para una guía Exhaustiva, Paso A Paso y "De Cero a Héroe" sobre cómo desplegar este repositorio en un Windows Server con HTTPS usando Nginx/Caddy y DNS gratuitos, por favor consulta nuestro manual oficial:
->
-> 👉 **[📓 DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)**
+Copyright (c) 2026 Igor Aresti
 
-### Desarrollo Local (Quick-Start)
+Se concede permiso por la presente, de forma gratuita, a cualquier persona que obtenga una copia de este software y de los archivos de documentación asociados (el "Software"), para utilizar el Software sin restricción, incluyendo sin limitación los derechos de uso, copia, modificación, fusión, publicación, distribución, sublicencia y/o venta de copias del Software, y para permitir a las personas a las que se les proporcione el Software a hacer lo mismo, sujeto a las siguientes condiciones:
 
-Si solo quieres trastear con el código en tu ordenador:
-
-**1. Arrancar el Backend:**
-```bash
-cd server/EuskalIA.Server
-dotnet run
-# Escuchará en: http://localhost:5235
-```
-
-**2. Arrancar el Frontend:**
-Abre una terminal nueva:
-```bash
-cd app
-npm install
-npm run web  # Versión de navegador
-# O bien:
-npx expo start # Escanea el QR con tu móvil y la app "Expo Go"
-```
-
-**(O alternativamente, en Mac o Linux, simplemente tira de consola en la raíz y ejecuta `./start.sh` para hacer ambos procesos de golpe).*
+**El aviso de copyright anterior y este aviso de permiso se incluirán en todas las copias o partes sustanciales del Software.** (Es decir, puedes usarlo, pero debes citar la autoría original).
 
 ---
+
 <div align="center">
   <i>Diseñado y Programado a la vieja usanza del buen código C# y la magia de React.</i><br/>
   <b>Desarrollado por @igoraresti</b>
 </div>
+
