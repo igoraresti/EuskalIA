@@ -2,7 +2,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CONFIG } from '../config';
 
-const BASE_URL = CONFIG.BASE_URL;
+const BASE_URL = `${CONFIG.BASE_URL}/euskalia`;
 
 // Add a request interceptor to include the JWT token in all requests
 axios.interceptors.request.use(

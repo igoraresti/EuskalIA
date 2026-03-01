@@ -20,9 +20,9 @@ namespace EuskalIA.Tests.Controllers
             using var context = GetDatabaseContext();
             
             context.AigcExercises.AddRange(
-                new AigcExercise { LevelId = "A1", Status = "VERIFIED", ExerciseCode = "1", TemplateType= "Type1", JsonSchema="{}" },
-                new AigcExercise { LevelId = "A1", Status = "VERIFIED", ExerciseCode = "2", TemplateType= "Type2", JsonSchema="{}" },
-                new AigcExercise { LevelId = "B2", Status = "VERIFIED", ExerciseCode = "3", TemplateType= "Type3", JsonSchema="{}" }
+                new AigcExercise { LevelId = "A1", Status = "APPROVED", ExerciseCode = "1", TemplateType= "Type1", JsonSchema="{}" },
+                new AigcExercise { LevelId = "A1", Status = "APPROVED", ExerciseCode = "2", TemplateType= "Type2", JsonSchema="{}" },
+                new AigcExercise { LevelId = "B2", Status = "APPROVED", ExerciseCode = "3", TemplateType= "Type3", JsonSchema="{}" }
             );
             await context.SaveChangesAsync();
 
@@ -45,8 +45,8 @@ namespace EuskalIA.Tests.Controllers
             using var context = GetDatabaseContext();
             
             context.AigcExercises.AddRange(
-                new AigcExercise { LevelId = "A1", Status = "VERIFIED", ExerciseCode = "1", TemplateType= "Type1", JsonSchema="{}" },
-                new AigcExercise { LevelId = "A1", Status = "BETA", ExerciseCode = "2", TemplateType= "Type2", JsonSchema="{}" },
+                new AigcExercise { LevelId = "A1", Status = "APPROVED", ExerciseCode = "1", TemplateType= "Type1", JsonSchema="{}" },
+                new AigcExercise { LevelId = "A1", Status = "APPROVED", ExerciseCode = "2", TemplateType= "Type2", JsonSchema="{}" },
                 new AigcExercise { LevelId = "A1", Status = "REJECTED", ExerciseCode = "3", TemplateType= "Type3", JsonSchema="{}" }
             );
             await context.SaveChangesAsync();

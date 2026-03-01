@@ -63,7 +63,32 @@ El repositorio es un **Monorepo** que alberga ambas partes fundamentales:
 
 ---
 
-## � Licencia
+## 🛠️ Instalación y Depuración (Android)
+
+Si tienes el archivo `EuskalLingo.apk` y deseas instalarlo o depurarlo en un dispositivo físico o emulador, puedes usar los siguientes comandos:
+
+### Instalar APK
+Utiliza `adb` para instalar el paquete en un dispositivo conectado:
+```bash
+adb install -r EuskalLingo.apk
+```
+
+### Depuración y Logs
+Para ver los logs de la aplicación filtrando por errores críticos y términos relacionados con el proyecto:
+
+1. **Limpiar logs previos:**
+   ```bash
+   adb logcat -c
+   ```
+
+2. **Ver logs filtrados:**
+   ```bash
+   adb logcat "*:E" | grep -iE "euskal|react|fatal|javascript"
+   ```
+
+---
+
+## ⚖️ Licencia
 
 Este proyecto está bajo la **Licencia MIT**.
 

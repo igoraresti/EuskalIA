@@ -8,6 +8,8 @@ app/src/config.prod.ts
 # Build Folders
 **/bin/
 **/obj/
+server/api_publish/
+EuskalLingo.apk
 
 # Databases
 *.db

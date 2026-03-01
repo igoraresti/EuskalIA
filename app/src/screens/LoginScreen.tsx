@@ -19,7 +19,7 @@ export const LoginScreen = ({ navigation }: any) => {
     // Detect deactivated parameter
     useEffect(() => {
         // Simple check for web platform URL
-        if (Platform.OS === 'web' && typeof window !== 'undefined' && window.location.search.includes('deactivated=true')) {
+        if (Platform.OS === 'web' && typeof window !== 'undefined' && window.location?.search?.includes('deactivated=true')) {
             const msg = t('login.deactivatedMessage');
             window.alert(msg);
         }
@@ -137,6 +137,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginBottom: SPACING.xl * 2,
         color: COLORS.primary,
+        fontWeight: '900',
     },
     form: {
         gap: SPACING.lg,
@@ -146,16 +147,21 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 14,
-        fontWeight: '600',
+        fontWeight: '800',
         color: COLORS.textSecondary,
+        textTransform: 'uppercase',
+        marginLeft: 4,
     },
     input: {
         backgroundColor: COLORS.surface,
-        borderRadius: 12,
+        borderRadius: 16,
         padding: SPACING.md,
-        fontSize: 16,
-        borderWidth: 1,
-        borderColor: '#E0E0E0',
+        fontSize: 18,
+        borderWidth: 2,
+        borderColor: COLORS.border,
+        borderBottomWidth: 4,
+        borderBottomColor: COLORS.border,
+        color: COLORS.text,
     },
     button: {
         marginTop: SPACING.md,

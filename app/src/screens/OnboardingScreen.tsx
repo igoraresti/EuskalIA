@@ -26,10 +26,12 @@ export const OnboardingScreen = ({ navigation }: any) => {
                     />
                 </View>
 
-                <Text style={[TYPOGRAPHY.h1, styles.title]}>{t('onboarding.title')}</Text>
-                <Text style={[TYPOGRAPHY.body, styles.subtitle]}>
-                    {t('onboarding.subtitle')}
-                </Text>
+                <View style={styles.textContainer}>
+                    <Text style={[TYPOGRAPHY.h1, styles.title]}>{t('onboarding.title')}</Text>
+                    <Text style={[TYPOGRAPHY.body, styles.subtitle]}>
+                        {t('onboarding.subtitle')}
+                    </Text>
+                </View>
 
                 <View style={styles.buttonContainer}>
                     <Button
@@ -68,26 +70,34 @@ const styles = StyleSheet.create({
     content: {
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'center',
         paddingHorizontal: SPACING.xl,
-        paddingBottom: SPACING.xl,
+        paddingBottom: SPACING.xl * 2,
     },
     logoContainer: {
-        marginBottom: SPACING.xl,
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     logoImage: {
-        width: 150,
-        height: 150,
+        width: 180,
+        height: 180,
+    },
+    textContainer: {
+        alignItems: 'center',
+        marginBottom: SPACING.xl * 2,
     },
     title: {
         textAlign: 'center',
-        marginBottom: SPACING.md,
+        fontSize: 36,
+        marginBottom: SPACING.sm,
         color: COLORS.primary,
+        letterSpacing: -1,
     },
     subtitle: {
         textAlign: 'center',
-        marginBottom: SPACING.xl * 2,
-        lineHeight: 24,
+        fontSize: 18,
+        color: COLORS.textSecondary,
+        paddingHorizontal: SPACING.md,
     },
     buttonContainer: {
         width: '100%',

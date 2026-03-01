@@ -1,6 +1,6 @@
 {
     "common": {
-        "appName": "Euskal IA",
+        "appName": "EuskalLingo",
         "loading": "Loading...",
         "error": "Error",
         "success": "Success",
@@ -22,7 +22,7 @@
         "fr": "Français"
     },
     "onboarding": {
-        "title": "Euskal IA",
+        "title": "EuskalLingo",
         "subtitle": "Learn Basque in an intelligent and fun way. The power of AI in your hands.",
         "getStarted": "Get Started",
         "alreadyHaveAccount": "Already have an account"

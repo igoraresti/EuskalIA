@@ -136,21 +136,21 @@ export const HomeScreen = ({ navigation }: any) => {
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                     <View style={styles.levelsContainer}>
                         <TouchableOpacity
-                            style={[styles.levelNode, { backgroundColor: '#4CAF50' }]}
+                            style={[styles.levelNode, { backgroundColor: COLORS.primary, borderBottomColor: COLORS.primaryDark }]}
                             onPress={() => handleLevelPress('A1')}
                         >
                             <Text style={styles.levelTitle}>A1</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
-                            style={[styles.levelNode, { backgroundColor: '#FF9800', marginLeft: 80 }]}
+                            style={[styles.levelNode, { backgroundColor: COLORS.accent, borderBottomColor: COLORS.accentDark, marginLeft: 80 }]}
                             onPress={() => handleLevelPress('A2')}
                         >
                             <Text style={styles.levelTitle}>A2</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
-                            style={[styles.levelNode, { backgroundColor: '#2196F3', marginLeft: -80 }]}
+                            style={[styles.levelNode, { backgroundColor: COLORS.secondary, borderBottomColor: COLORS.secondaryDark, marginLeft: -80 }]}
                             onPress={() => handleLevelPress('B1')}
                         >
                             <Text style={styles.levelTitle}>B1</Text>
@@ -226,15 +226,15 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: SPACING.md,
-        borderBottomWidth: 1,
-        borderBottomColor: '#EEE',
+        borderBottomWidth: 2,
+        borderBottomColor: COLORS.border,
     },
     headerLeft: {
         flex: 1,
     },
     userName: {
-        fontSize: 18,
-        fontWeight: 'bold',
+        fontSize: 20,
+        fontWeight: '800',
         color: COLORS.primary,
         marginBottom: 4,
     },
@@ -246,18 +246,20 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: COLORS.surface,
-        paddingHorizontal: SPACING.sm,
-        paddingVertical: 4,
-        borderRadius: 12,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 16,
+        borderBottomWidth: 2,
+        borderBottomColor: '#E5E5E5',
     },
     statIcon: {
         fontSize: 16,
         marginRight: 4,
     },
     statText: {
-        fontWeight: 'bold',
+        fontWeight: '800',
         color: COLORS.text,
-        fontSize: 12,
+        fontSize: 14,
     },
     profileIcon: {
         padding: 8,
@@ -267,43 +269,36 @@ const styles = StyleSheet.create({
         marginRight: 4,
     },
     scrollContent: {
-        padding: SPACING.lg,
+        paddingTop: SPACING.xl,
+        paddingBottom: 100,
         alignItems: 'center',
-    },
-    sectionTitle: {
-        marginBottom: SPACING.xl,
-        textAlign: 'center',
     },
     levelsContainer: {
         width: '100%',
         alignItems: 'center',
-        marginTop: SPACING.xl,
-        gap: SPACING.xl,
+        gap: 40,
     },
     levelNode: {
-        width: 120,
-        height: 120,
-        borderRadius: 60,
+        width: 100,
+        height: 100,
+        borderRadius: 50,
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 5,
-        elevation: 8,
+        borderBottomWidth: 8, // Intense 3D effect for levels
     },
     levelTitle: {
-        fontSize: 36,
-        fontWeight: 'bold',
+        fontSize: 32,
+        fontWeight: '900',
         color: COLORS.white,
     },
     tabBar: {
         flexDirection: 'row',
-        height: 60,
-        borderTopWidth: 1,
-        borderTopColor: '#EEE',
+        height: 70,
+        borderTopWidth: 2,
+        borderTopColor: COLORS.border,
         justifyContent: 'space-around',
         alignItems: 'center',
+        backgroundColor: COLORS.white,
     },
     tabItem: {
         padding: 10,
@@ -317,53 +312,66 @@ const styles = StyleSheet.create({
     // Resume-conflict dialog styles
     modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.55)',
+        backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'center',
         alignItems: 'center',
         padding: 24,
     },
     dialogBox: {
         backgroundColor: '#fff',
-        borderRadius: 20,
+        borderRadius: 24,
         padding: 24,
         width: '100%',
         maxWidth: 420,
-        gap: 12,
+        borderWidth: 2,
+        borderColor: COLORS.border,
+        borderBottomWidth: 8,
+        borderBottomColor: COLORS.border,
     },
     dialogTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
+        fontSize: 22,
+        fontWeight: '900',
         color: COLORS.text,
-        marginBottom: 4,
+        marginBottom: 8,
+        textAlign: 'center',
     },
     dialogMessage: {
-        fontSize: 15,
+        fontSize: 17,
         color: COLORS.textSecondary,
-        lineHeight: 22,
-        marginBottom: 8,
+        lineHeight: 24,
+        marginBottom: 20,
+        textAlign: 'center',
     },
     dialogBtnPrimary: {
         backgroundColor: COLORS.primary,
-        borderRadius: 12,
+        borderRadius: 16,
         paddingVertical: 14,
         alignItems: 'center',
+        borderBottomWidth: 4,
+        borderBottomColor: COLORS.primaryDark,
+        marginBottom: 12,
     },
     dialogBtnPrimaryText: {
         color: '#fff',
-        fontSize: 16,
-        fontWeight: '700',
+        fontSize: 18,
+        fontWeight: '800',
+        textTransform: 'uppercase',
     },
     dialogBtnDestructive: {
-        borderRadius: 12,
+        backgroundColor: COLORS.white,
+        borderRadius: 16,
         paddingVertical: 14,
         alignItems: 'center',
-        borderWidth: 1.5,
-        borderColor: COLORS.secondary,
+        borderWidth: 2,
+        borderColor: COLORS.border,
+        borderBottomWidth: 4,
+        borderBottomColor: COLORS.border,
     },
     dialogBtnDestructiveText: {
         color: COLORS.secondary,
-        fontSize: 16,
-        fontWeight: '600',
+        fontSize: 18,
+        fontWeight: '800',
+        textTransform: 'uppercase',
     },
 });
 

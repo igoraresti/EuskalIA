@@ -21,9 +21,9 @@ export const Button: React.FC<ButtonProps> = ({
 }) => {
     const getButtonStyle = () => {
         switch (variant) {
-            case 'secondary': return styles.secondary;
+            case 'secondary': return [styles.secondary, { borderBottomColor: COLORS.secondaryDark }];
             case 'outline': return styles.outline;
-            default: return styles.primary;
+            default: return [styles.primary, { borderBottomColor: COLORS.primaryDark }];
         }
     };
 
@@ -48,42 +48,46 @@ export const Button: React.FC<ButtonProps> = ({
 
 const styles = StyleSheet.create({
     base: {
-        paddingVertical: SPACING.md,
+        paddingVertical: 14,
         paddingHorizontal: SPACING.xl,
         borderRadius: 16,
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 4,
+        borderBottomWidth: 4, // The 3D effect
     },
     baseText: {
         fontSize: 18,
-        fontWeight: 'bold',
+        fontWeight: '800', // Extra bold
+        textTransform: 'uppercase', // Playful and bold
+        letterSpacing: 0.8,
     },
     primary: {
         backgroundColor: COLORS.primary,
+        borderColor: COLORS.primary,
     },
     primaryText: {
         color: COLORS.white,
     },
     secondary: {
         backgroundColor: COLORS.secondary,
+        borderColor: COLORS.secondary,
     },
     outline: {
         backgroundColor: COLORS.white,
         borderWidth: 2,
-        borderColor: COLORS.primary,
+        borderColor: COLORS.border,
+        borderBottomWidth: 4,
+        borderBottomColor: COLORS.border,
     },
     outlineText: {
-        color: COLORS.primary,
+        color: COLORS.secondary,
     },
     disabled: {
         opacity: 0.5,
+        backgroundColor: COLORS.border,
+        borderBottomColor: COLORS.border,
     },
     disabledText: {
-        color: '#666',
+        color: '#AFAFAF',
     }
 });

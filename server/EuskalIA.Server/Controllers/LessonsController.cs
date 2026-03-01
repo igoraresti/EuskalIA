@@ -11,7 +11,7 @@ namespace EuskalIA.Server.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/euskalia/[controller]")]
     public class LessonsController : ControllerBase
     {
         private readonly AppDbContext _context;

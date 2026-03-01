@@ -9,7 +9,7 @@ using EuskalIA.Server.Services.Encryption;
 namespace EuskalIA.Server.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/euskalia/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly AppDbContext _context;

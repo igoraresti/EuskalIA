@@ -20,19 +20,12 @@ builder.Services.AddControllers()
     });
 builder.Services.AddOpenApi();
 
-// SQLite / SQL Server DB depending on Environment
+// Always use SQLite — path is configured via ConnectionStrings:DefaultConnection
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=euskalia.db";
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    if (builder.Environment.IsDevelopment())
-    {
-        options.UseSqlite(connectionString);
-    }
-    else
-    {
-        options.UseSqlServer(connectionString);
-    }
+    options.UseSqlite(connectionString);
 });
 
 // Domain Services
@@ -141,6 +134,23 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.Use(async (context, next) =>
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogInformation($"=> Incoming Request: {context.Request.Method} {context.Request.Path}");
+    
+    try
+    {
+        await next();
+        logger.LogInformation($"<= Outgoing Response: {context.Response.StatusCode}");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, $"!! Unhandled Exception during request to {context.Request.Path}");
+        throw;
+    }
+});
 
 app.UseCors("AllowAll");
 // app.UseHttpsRedirection(); // Disabled for initial public IP testing without SSL

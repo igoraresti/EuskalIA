@@ -1,6 +1,6 @@
 {
     "common": {
-        "appName": "Euskal IA",
+        "appName": "EuskalLingo",
         "loading": "Kargatzen...",
         "error": "Errorea",
         "success": "Arrakasta",
@@ -22,7 +22,7 @@
         "fr": "Français"
     },
     "onboarding": {
-        "title": "Euskal IA",
+        "title": "EuskalLingo",
         "subtitle": "Ikasi euskara modu adimentsuan eta dibertigarrian. IAren indarra zure eskuetan.",
         "getStarted": "Hasi orain",
         "alreadyHaveAccount": "Badaukat kontu bat"

@@ -2,9 +2,6 @@
 
 # Euskal IA Unified Start Script (Mac/Linux)
 
-# Add node_env to PATH
-export PATH="$(pwd)/node_env/bin:$PATH"
-
 # Load centralized environment variables
 if [ -f .env ]; then
   echo "--- Cargando variables de entorno (.env) ---"

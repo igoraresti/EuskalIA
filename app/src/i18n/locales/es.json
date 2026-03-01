@@ -1,6 +1,6 @@
 {
     "common": {
-        "appName": "Euskal IA",
+        "appName": "EuskalLingo",
         "loading": "Cargando...",
         "error": "Error",
         "success": "Éxito",
@@ -22,8 +22,8 @@
         "fr": "Français"
     },
     "onboarding": {
-        "title": "Euskal IA",
-        "subtitle": "Aprende euskera de forma inteligente y divertida. El poder de la IA en tus manos.",
+        "title": "EuskalLingo",
+        "subtitle": "¡La forma más divertida de aprender euskera!",
         "getStarted": "Empezar ahora",
         "alreadyHaveAccount": "Ya tengo cuenta"
     },

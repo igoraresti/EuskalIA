@@ -13,7 +13,7 @@ using System.Linq;
 namespace EuskalIA.Server.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/euskalia/[controller]")]
     public class UsersController : ControllerBase
     {
         private readonly AppDbContext _context;

@@ -11,7 +11,7 @@ namespace EuskalIA.Server.Controllers
 {
     [Authorize(Roles = "Admin")]
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/euskalia/[controller]")]
     public class AdminController : ControllerBase
     {
         private readonly AppDbContext _context;

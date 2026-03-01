@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace EuskalIA.Server.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/euskalia/[controller]")]
     public class AigcExercisesController : ControllerBase
     {
         private readonly AppDbContext _context;
