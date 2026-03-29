@@ -1,0 +1,10 @@
+# Reglas Generales del Proyecto EuskalIA
+
+## Ejecución Automática de Tests
+Siempre que realices cambios en el código fuente, ya sea en el backend (C#) o en el frontend (React Native/Expo), debes ejecutar los tests correspondientes automáticamente antes de dar la tarea por completada o de solicitar revisión al usuario. Esto asegura que no hemos introducido regresiones de forma inadvertida.
+
+### Comandos de Test a ejecutar:
+- **Backend (.NET):** `dotnet test server/EuskalIA.sln`
+- **Frontend (React Native):** `npm test -- --watchAll=false` (Ejecutar desde el directorio `/app` o mediante variables de entorno CI=true)
+
+Debes comprobar el `command_status` tras lanzar los comandos y aplicar correcciones si los tests fallan antes de notificar al usuario.

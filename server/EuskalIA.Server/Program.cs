@@ -134,6 +134,10 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+else
+{
+    app.UseHsts();
+}
 
 app.Use(async (context, next) =>
 {
@@ -153,10 +157,9 @@ app.Use(async (context, next) =>
 });
 
 app.UseCors("AllowAll");
-// app.UseHttpsRedirection(); // Disabled for initial public IP testing without SSL
+app.UseHttpsRedirection(); 
 app.UseAuthentication(); // Must be before UseAuthorization
 app.UseAuthorization();
 app.MapControllers();
 
-// Bind to all interfaces (0.0.0.0) so it's accessible externally
-app.Run("http://0.0.0.0:5235");
+app.Run();

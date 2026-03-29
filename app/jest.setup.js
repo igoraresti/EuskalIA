@@ -46,7 +46,7 @@ jest.mock('i18next-browser-languagedetector', () => ({
         detect() { return 'es'; }
         cacheUserLanguage() { }
     }
-}));
+}), { virtual: true });
 
 // Mock lucide-react-native
 jest.mock('lucide-react-native', () => {

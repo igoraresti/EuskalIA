@@ -14,14 +14,14 @@ fi
 echo "Using Node from: $(which node)"
 node --version
 
-echo "--- Limpiando puertos ---"
-# Kill processes on backend port 5235 and frontend port 8081
+# Kill processes on backend HTTPS port 7229, HTTP port 5235, and frontend port 8081
+lsof -ti:7229 | xargs kill -9 2>/dev/null
 lsof -ti:5235 | xargs kill -9 2>/dev/null
 lsof -ti:8081 | xargs kill -9 2>/dev/null
 
 echo "--- Iniciando Servidor .NET (Backend) ---"
 cd server/EuskalIA.Server
-dotnet run --launch-profile http &
+dotnet run --launch-profile https &
 BACKEND_PID=$!
 
 echo "--- Esperando a que el servidor esté listo... ---"
@@ -29,6 +29,7 @@ sleep 5
 
 echo "--- Iniciando App Web (Frontend) ---"
 cd ../../app
+export EXPO_HTTPS=1
 npm run web
 
 # Cleanup backend on exit
