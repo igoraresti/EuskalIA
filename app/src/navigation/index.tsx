@@ -13,6 +13,7 @@ import { RegistrationSuccessScreen } from '../screens/RegistrationSuccessScreen'
 import { AdminDashboardScreen } from '../screens/AdminDashboardScreen';
 import { AdminExercisesScreen } from '../screens/AdminExercisesScreen';
 import { AdminImportScreen } from '../screens/AdminImportScreen';
+import { ReviewScreen } from '../screens/ReviewScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -29,6 +30,7 @@ export const AppNavigation = () => {
                 Leaderboard: 'leaderboard',
                 Profile: 'profile',
                 Admin: 'admin',
+                Review: 'review',
                 RegistrationSuccess: 'registro-exitoso',
             },
         },
@@ -47,6 +49,7 @@ export const AppNavigation = () => {
                 <Stack.Screen name="Login" component={LoginScreen} />
                 <Stack.Screen name="Home" component={HomeScreen} />
                 <Stack.Screen name="Lesson" component={LessonScreen} />
+                <Stack.Screen name="Review" component={ReviewScreen} />
                 <Stack.Screen name="AIChat" component={AIChatScreen} />
                 <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />
                 <Stack.Screen name="Profile" component={ProfileScreen} />

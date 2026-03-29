@@ -22,6 +22,7 @@ EuskalIA no es solo un clon de aplicaciones tradicionales de idiomas. Es un ecos
 - **🔐 Social Authentication Segura:** Flujos OAuth integrados para Google y Facebook. Registro automático y generación de alias ("Nicknames") aleatorios respetuosos con la privacidad en un solo clic.
 - **🌍 Internacionalización (i18n):** Interfaz disponible y traducida dinámicamente en **Español, Euskera, Inglés, Francés y Polaco**.
 - **🧠 Generación de Ejercicios por IA:** Integrado con modelos generativos para adaptar la educación dinámicamente y no depender de un banco de preguntas estático. (Framework listo vía `MockAIService`).
+- **📅 Repaso Espaciado (SRS):** Sistema inteligente basado en el algoritmo SM-2 que programa repasos automáticos según el nivel de dominio del usuario, maximizando la retención a largo plazo.
 - **🏆 Sistema de Gamificación (Leaderboards):** Ranking Global y Personal. Gana puntos de experiencia (XP), mantén rachas de días seguidos ("Streaks") y gana *Txanponak* (monedas virtuales).
 - **🛡️ Panel de Administración (Admin Dashboard):** Exclusivo para usuarios con rol `Admin`. Interfaz web integrada para ver métricas, listar usuarios y activar/desactivar cuentas conflictivas.
 - **🗑️ Gestión de Privacidad (Deactivation Flow):** Flujo completo automatizado donde un usuario puede solicitar la desactivación de su cuenta. Tras confirmarlo por Email (con token seguro + PIN), desaparece de forma segura sin romper la base de datos (Soft Delete).
@@ -36,6 +37,7 @@ La arquitectura Frontend React Native (Expo) está dividida en pantallas fluidas
 | **Login / Registro** | Experiencia unificada con validaciones, control de vista de contraseñas, olvidé mi contraseña y botones nativos para Google y Facebook. El registro permite seleccionar el idioma materno desde el inicio. |
 | **Home (Dashboard)** | El núcleo del progreso. Muestra en una cabecera flotante las estadísticas (Racha de fuego 🔥, Monedas 🪙 y Bandera de idioma 🇪🇸). Debajo, un listado de las Lecciones del curso disponibles. |
 | **Lesson (Quiz UI)** | Pantalla inmersiva para contestar ejercicios. Incluye barras de progreso (`ProgressBar`), opciones interactivas y modales de éxito/fracaso con el característico estilete gamificado. |
+| **Review (SRS)** | Sesión de refuerzo personalizada activada por el sistema de repaso espaciado. Enfocada en temas con menor dominio detectado por el algoritmo. |
 | **Leaderboard** | Un podio visual donde competir con el resto del mundo clasificando por mayor cantidad de XP ganada al resolver lecciones. |
 | **Profile** | Un rincón personal. Permite visualizar el avatar, consultar cuándo te uniste, cambiar tu `Username/Nickname`, re-seleccionar tu idioma (aplicación en tiempo real de traducciones) y un botón de peligro para solicitar la desactivación de cuenta. |
 | **Admin Panel** | *Sólo accesible por el Rol Admin, oculto al resto*. Muestra estadísticas críticas del servidor (usuarios totales, número de lecciones) y una tabla paginada de todos los jugadores con poder absoluto de "baneo temporal" (Toggle Active). |
@@ -47,8 +49,9 @@ La arquitectura Frontend React Native (Expo) está dividida en pantallas fluidas
 El repositorio es un **Monorepo** que alberga ambas partes fundamentales de la arquitectura:
 
 ### 1. Servidor API (`/server`)
-- **Framework:** `ASP.NET Core 9.0 Web API`.
+- **Framework:** `ASP.NET Core 10.0 Web API`.
 - **OR/M:** `Entity Framework Core`
+- **Lógica de Negocio:** Servicios desacoplados para Auth, AI, Email y **SRS (Algoritmo SM-2)**.
 - **Autenticación:** Sistema de claims basado en `JWT Bearer`. Separación de roles (User/Admin).
 - **Base de Datos:** SQLite automatizado. En el primer arranque crea el archivo `euskalia.db` e inyecta usuarios de prueba (incluido un usuario Admin root `igoraresti`).
 - **Testeo:** Suite completa usando `xUnit` y un proveedor en memoria In-Memory DB.

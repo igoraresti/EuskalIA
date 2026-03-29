@@ -255,6 +255,12 @@ export const LessonScreen = ({ navigation, route }: any) => {
                 setEarnedXp(finalXp);
 
                 await apiService.addXP(user.id, finalXp);
+                
+                // Track lesson completion for SRS if it's a fixed lesson
+                if (lessonId) {
+                    await apiService.completeLesson(user.id, lessonId);
+                }
+                
                 setShowXpModal(true);
             } else {
                 navigation.navigate('Home');

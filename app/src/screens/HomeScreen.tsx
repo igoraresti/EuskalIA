@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Act
 import { LessonProgressService } from '../services/LessonProgressService';
 import { useTranslation } from 'react-i18next';
 import { COLORS, SPACING, TYPOGRAPHY } from '../theme';
-import { BookOpen, Trophy, MessageCircle, User as UserIcon, Shield } from 'lucide-react-native';
+import { BookOpen, Trophy, MessageCircle, User as UserIcon, Shield, Clock } from 'lucide-react-native';
 import { apiService } from '../services/apiService';
 import { useAuth } from '../context/AuthContext';
 
@@ -15,6 +15,7 @@ export const HomeScreen = ({ navigation }: any) => {
     const [lessonScores, setLessonScores] = useState<any[]>([]);
     const [globalRank, setGlobalRank] = useState<{ rank: number; total: number } | null>(null);
     const [loading, setLoading] = useState(true);
+    const [srsStatus, setSrsStatus] = useState<{ pendingCount: number }>({ pendingCount: 0 });
 
     // Resume-conflict dialog state
     const [resumeDialog, setResumeDialog] = useState<{
@@ -62,14 +63,16 @@ export const HomeScreen = ({ navigation }: any) => {
 
             setLoading(true);
             try {
-                const [lessonsData, progressData, rankData] = await Promise.all([
+                const [lessonsData, progressData, rankData, srsData] = await Promise.all([
                     apiService.getLessons(),
                     apiService.getUserProgress(user.id),
-                    apiService.getGlobalRank(user.id)
+                    apiService.getGlobalRank(user.id),
+                    apiService.getSrsStatus(user.id)
                 ]);
 
                 setLessons(lessonsData);
                 setGlobalRank(rankData);
+                setSrsStatus(srsData);
                 if (progressData && progressData.progress) {
                     setProgress(progressData.progress);
                     setLessonScores(progressData.lessonScores || []);
@@ -134,6 +137,26 @@ export const HomeScreen = ({ navigation }: any) => {
                 </View>
 
                 <ScrollView contentContainerStyle={styles.scrollContent}>
+                    {srsStatus.pendingCount > 0 && (
+                        <TouchableOpacity
+                            style={styles.reviewCard}
+                            onPress={() => navigation.navigate('Review')}
+                        >
+                            <View style={styles.reviewIconContainer}>
+                                <Clock color={COLORS.white} size={28} />
+                            </View>
+                            <View style={styles.reviewTextContainer}>
+                                <Text style={styles.reviewTitle}>Repaso Diario</Text>
+                                <Text style={styles.reviewSubtitle}>
+                                    Tienes {srsStatus.pendingCount} temas para reforzar
+                                </Text>
+                            </View>
+                            <View style={styles.reviewBadge}>
+                                <Text style={styles.reviewBadgeText}>{srsStatus.pendingCount}</Text>
+                            </View>
+                        </TouchableOpacity>
+                    )}
+
                     <View style={styles.levelsContainer}>
                         <TouchableOpacity
                             style={[styles.levelNode, { backgroundColor: COLORS.primary, borderBottomColor: COLORS.primaryDark }]}
@@ -372,6 +395,59 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '800',
         textTransform: 'uppercase',
+    },
+    reviewCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: COLORS.white,
+        borderRadius: 20,
+        padding: 16,
+        marginHorizontal: 20,
+        marginBottom: 32,
+        borderWidth: 2,
+        borderColor: COLORS.primary,
+        borderBottomWidth: 6,
+        borderBottomColor: COLORS.primaryDark,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 4,
+    },
+    reviewIconContainer: {
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        backgroundColor: COLORS.primary,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 16,
+    },
+    reviewTextContainer: {
+        flex: 1,
+    },
+    reviewTitle: {
+        fontSize: 18,
+        fontWeight: '900',
+        color: COLORS.text,
+    },
+    reviewSubtitle: {
+        fontSize: 14,
+        color: COLORS.textSecondary,
+        marginTop: 2,
+    },
+    reviewBadge: {
+        backgroundColor: COLORS.secondary,
+        borderRadius: 12,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    reviewBadgeText: {
+        color: COLORS.white,
+        fontSize: 14,
+        fontWeight: '900',
     },
 });
 

@@ -3,6 +3,7 @@ using EuskalIA.Server.Services.Email;
 using EuskalIA.Server.Services.AI;
 using EuskalIA.Server.Services.Encryption;
 using EuskalIA.Server.Services.Auth;
+using EuskalIA.Server.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -32,6 +33,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IAIService, MockAIService>();
 builder.Services.AddScoped<IEncryptionService, EncryptionService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<ISrsService, SrsService>();
 builder.Services.AddHttpClient<ISocialAuthService, SocialAuthService>();
 
 // Email Infrastructure

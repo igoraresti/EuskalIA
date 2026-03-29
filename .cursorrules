@@ -8,3 +8,12 @@ Siempre que realices cambios en el código fuente, ya sea en el backend (C#) o e
 - **Frontend (React Native):** `npm test -- --watchAll=false` (Ejecutar desde el directorio `/app` o mediante variables de entorno CI=true)
 
 Debes comprobar el `command_status` tras lanzar los comandos y aplicar correcciones si los tests fallan antes de notificar al usuario.
+
+## Documentación de la funcionalidad
+Todo cambio funcional o nueva característica debe estar correctamente reflejada en el `README.md`. Esto incluye:
+1. **Características Principales:** Añadir un nuevo punto si la funcionalidad es destacada.
+2. **Tablas de Pantallas:** Si se crea una nueva pantalla o se modifica el flujo de navegación, actualizar la sección "Experiencia de Usuario y Pantallas".
+3. **Parte Técnica:** Si se introducen nuevos servicios, controladores o tecnologías (ej. un nuevo middleware o librería crítica), actualizar la sección correspondiente.
+4. **Instrucciones del Desarrollador:** Si el cambio requiere nuevas variables de entorno o pasos de configuración, documentarlo en la sección "Parte del Desarrollador".
+
+No des por finalizada una tarea hasta que el README.md sea un reflejo fiel del estado actual del repositorio.

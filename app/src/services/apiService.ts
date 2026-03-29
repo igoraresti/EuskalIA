@@ -353,5 +353,46 @@ export const apiService = {
             return null;
         }
     },
+    
+    // SRS Methods
+    getSrsStatus: async (userId: number) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/srs/status/${userId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching SRS status:', error);
+            return { pendingCount: 0 };
+        }
+    },
+
+    getSrsSession: async (userId: number) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/srs/session/${userId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching SRS session:', error);
+            return [];
+        }
+    },
+
+    recordSrsReview: async (userId: number, topic: string, isCorrect: boolean) => {
+        try {
+            await axios.post(`${BASE_URL}/srs/record`, { userId, topic, isCorrect });
+            return true;
+        } catch (error) {
+            console.error('Error recording SRS review:', error);
+            return false;
+        }
+    },
+
+    completeLesson: async (userId: number, lessonId: number) => {
+        try {
+            await axios.post(`${BASE_URL}/srs/complete-lesson`, { userId, lessonId });
+            return true;
+        } catch (error) {
+            console.error('Error completing lesson for SRS:', error);
+            return false;
+        }
+    },
 };
 

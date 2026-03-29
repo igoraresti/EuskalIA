@@ -8,11 +8,8 @@ namespace EuskalIA.Tests
     {
         protected AppDbContext GetDatabaseContext()
         {
-            var connection = new SqliteConnection("DataSource=:memory:");
-            connection.Open();
-
             var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseSqlite(connection)
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
             var context = new AppDbContext(options);
