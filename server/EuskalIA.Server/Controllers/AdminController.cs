@@ -82,11 +82,23 @@ namespace EuskalIA.Server.Controllers
             var today = DateTime.UtcNow.Date;
             var registrationsToday = await _context.Users.CountAsync(u => u.JoinedAt >= today);
 
-            return Ok(new AdminStatsDto
+            // AI Health
+            var lastLogs = await _context.AigcLogs
+                .OrderByDescending(l => l.Timestamp)
+                .Take(5)
+                .ToListAsync();
+
+            var hasErrors = lastLogs.Any(l => l.Status != "SUCCESS");
+
+            return Ok(new 
             {
                 TotalUsers = totalUsers,
                 ActiveUsers = activeUsers,
-                RegistrationsToday = registrationsToday
+                RegistrationsToday = registrationsToday,
+                AiHealth = new {
+                    Status = hasErrors ? "WARNING" : "HEALTHY",
+                    LastLogs = lastLogs
+                }
             });
         }
 
@@ -225,6 +237,20 @@ namespace EuskalIA.Server.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(new { updated = exercises.Count, status = req.Status });
+        }
+
+        [HttpGet("ai-logs")]
+        public async Task<IActionResult> GetAiLogs([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+        {
+            var query = _context.AigcLogs.AsQueryable();
+            var total = await query.CountAsync();
+            var items = await query
+                .OrderByDescending(l => l.Timestamp)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return Ok(new { total, page, pageSize, items });
         }
 
 

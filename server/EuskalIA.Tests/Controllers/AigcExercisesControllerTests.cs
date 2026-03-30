@@ -2,15 +2,20 @@ using EuskalIA.Server.Controllers;
 using EuskalIA.Server.Data;
 using EuskalIA.Server.DTOs;
 using EuskalIA.Server.Models;
+using EuskalIA.Server.Services.AI;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
 
 namespace EuskalIA.Tests.Controllers
 {
     public class AigcExercisesControllerTests : TestBase
     {
+        private Mock<IAIService> _mockAiService = new Mock<IAIService>();
+        private Mock<IKnowledgeService> _mockKnowledgeService = new Mock<IKnowledgeService>();
+
         private AigcExercisesController CreateController(AppDbContext context)
         {
-            return new AigcExercisesController(context);
+            return new AigcExercisesController(context, _mockAiService.Object, _mockKnowledgeService.Object);
         }
 
         [Fact]
@@ -108,6 +113,29 @@ namespace EuskalIA.Tests.Controllers
             Assert.Equal(1, context.AigcExercises.Count());
             var dbEntity = context.AigcExercises.First();
             Assert.Equal("BETA", dbEntity.Status);
+        }
+        [Fact]
+        public async Task GetSessionExercises_WhenEmpty_TriggersSyncGeneration()
+        {
+            // Arrange
+            using var context = GetDatabaseContext();
+            var controller = CreateController(context);
+            var levelId = "B1";
+
+            _mockKnowledgeService.Setup(k => k.GetNextContextAsync(levelId))
+                .ReturnsAsync(("context", "book", 1));
+            
+            _mockAiService.Setup(a => a.GenerateAigcExercisesAsync(levelId, "context", It.IsAny<int>()))
+                .ReturnsAsync(new List<AigcExercise> { 
+                    new AigcExercise { ExerciseCode = "new1", LevelId = levelId, TemplateType = "T1", JsonSchema = "{}" } 
+                });
+
+            // Act
+            var result = await controller.GetSessionExercises(levelId, 1);
+
+            // Assert
+            _mockKnowledgeService.Verify(k => k.GetNextContextAsync(levelId), Times.AtLeastOnce());
+            _mockAiService.Verify(a => a.GenerateAigcExercisesAsync(levelId, "context", It.IsAny<int>()), Times.AtLeastOnce());
         }
     }
 }

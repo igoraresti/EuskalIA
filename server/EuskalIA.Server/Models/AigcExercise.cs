@@ -32,6 +32,11 @@ namespace EuskalIA.Server.Models
         [Required]
         public string JsonSchema { get; set; } = string.Empty;
 
+        [MaxLength(255)]
+        public string? SourceMaterial { get; set; } // Book filename
+        
+        public int? SourcePage { get; set; } // Page number in the book
+
         public float SuccessRate { get; set; } = 0.0f;
         
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

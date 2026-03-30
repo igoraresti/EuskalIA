@@ -22,6 +22,7 @@
     </PackageReference>
     <PackageReference Include="MailKit" Version="4.15.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="PdfPig" Version="0.1.14" />
   </ItemGroup>
 
 </Project>

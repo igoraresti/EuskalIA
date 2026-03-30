@@ -43,5 +43,21 @@ namespace EuskalIA.Server.Services.AI
 
             return Task.FromResult(exercises);
         }
+
+        public Task<List<AigcExercise>> GenerateAigcExercisesAsync(string levelId, string context, int count)
+        {
+            var list = new List<AigcExercise>();
+            for (int i = 0; i < count; i++)
+            {
+                list.Add(new AigcExercise { 
+                    ExerciseCode = $"mock_{levelId}_{Guid.NewGuid().ToString().Substring(0,4)}",
+                    LevelId = levelId,
+                    TemplateType = "multiple_choice",
+                    JsonSchema = "{\"question\": {\"es\": \"Pregunta Mock\"}, \"options\": [\"A\", \"B\"], \"correctAnswer\": \"A\"}",
+                    Status = "BETA"
+                });
+            }
+            return Task.FromResult(list);
+        }
     }
 }

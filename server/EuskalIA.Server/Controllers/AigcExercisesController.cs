@@ -1,6 +1,7 @@
 using EuskalIA.Server.Data;
 using EuskalIA.Server.DTOs;
 using EuskalIA.Server.Models;
+using EuskalIA.Server.Services.AI;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,10 +12,14 @@ namespace EuskalIA.Server.Controllers
     public class AigcExercisesController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IAIService _aiService;
+        private readonly IKnowledgeService _knowledgeService;
 
-        public AigcExercisesController(AppDbContext context)
+        public AigcExercisesController(AppDbContext context, IAIService aiService, IKnowledgeService knowledgeService)
         {
             _context = context;
+            _aiService = aiService;
+            _knowledgeService = knowledgeService;
         }
 
         // GET: api/aigcexercises?levelId=A1
@@ -112,12 +117,36 @@ namespace EuskalIA.Server.Controllers
         {
             if (string.IsNullOrEmpty(levelId)) return BadRequest("LevelId is required");
 
-            // Use StartsWith so that "A1" matches both "A1" and "A1_UNIT_1" etc.
+            // 1. Check Inventory & Trigger AI if low
+            var userAttemptedIds = await _context.UserExerciseAttempts
+                .Where(a => a.UserId == userId)
+                .Select(a => a.ExerciseId)
+                .Distinct()
+                .ToListAsync();
+
+            var unattemptedCount = await _context.AigcExercises
+                .CountAsync(e => e.LevelId == levelId && e.Status == "APPROVED" && !userAttemptedIds.Contains(e.Id));
+
+            if (unattemptedCount < 20)
+            {
+                // Fire and forget generation for next time (or wait a bit)
+                // In a production app, this would be a background job.
+                _ = Task.Run(async () => await GenerateMoreAsync(levelId));
+            }
+
+            // 2. Fetch Session Exercises
             var allLevelExercises = await _context.AigcExercises
                 .Where(e => (e.LevelId == levelId || e.LevelId.StartsWith(levelId + "_")) && e.Status == "APPROVED")
                 .ToListAsync();
 
-            if (!allLevelExercises.Any()) return Ok(new List<AigcExerciseResponseDto>());
+            if (!allLevelExercises.Any()) 
+            {
+                // If totally empty, generate synchronously once to at least have something
+                await GenerateMoreAsync(levelId);
+                allLevelExercises = await _context.AigcExercises
+                    .Where(e => (e.LevelId == levelId || e.LevelId.StartsWith(levelId + "_")) && e.Status == "APPROVED")
+                    .ToListAsync();
+            }
 
             var userAttempts = await _context.UserExerciseAttempts
                 .Where(a => a.UserId == userId)
@@ -126,7 +155,7 @@ namespace EuskalIA.Server.Controllers
 
             var failedExerciseIds = userAttempts
                 .GroupBy(a => a.ExerciseId)
-                .Where(g => !g.First().IsCorrect) // Latest attempt was a fail
+                .Where(g => !g.First().IsCorrect) 
                 .Select(g => g.Key)
                 .ToList();
 
@@ -163,7 +192,6 @@ namespace EuskalIA.Server.Controllers
                 sessionExercises.AddRange(filler);
             }
 
-            // Shuffle the final list
             sessionExercises = sessionExercises.OrderBy(x => random.Next()).ToList();
 
             var result = sessionExercises.Select(e => new AigcExerciseResponseDto
@@ -179,6 +207,29 @@ namespace EuskalIA.Server.Controllers
             }).ToList();
 
             return Ok(result);
+        }
+
+        private async Task GenerateMoreAsync(string levelId)
+        {
+            try 
+            {
+                var context = await _knowledgeService.GetNextContextAsync(levelId);
+                var newExercises = await _aiService.GenerateAigcExercisesAsync(levelId, context.Content, 5);
+                
+                foreach (var ex in newExercises)
+                {
+                    ex.SourceMaterial = context.BookName;
+                    ex.SourcePage = context.PageNumber;
+                    ex.Status = "APPROVED"; // Auto-approve for now or set to BETA
+                }
+
+                _context.AigcExercises.AddRange(newExercises);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Log and swallow so the user request doesn't fail
+            }
         }
 
         // POST: api/aigcexercises/attempt

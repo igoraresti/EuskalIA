@@ -22,7 +22,7 @@ EuskalIA no es solo un clon de aplicaciones tradicionales de idiomas. Es un ecos
 
 - **🔐 Social Authentication Segura:** Flujos OAuth integrados para Google y Facebook. Registro automático y generación de alias ("Nicknames") aleatorios respetuosos con la privacidad en un solo clic.
 - **🌍 Internacionalización (i18n):** Interfaz disponible y traducida dinámicamente en **Español, Euskera, Inglés, Francés y Polaco**.
-- **🧠 Generación de Ejercicios por IA:** Integrado con modelos generativos para adaptar la educación dinámicamente y no depender de un banco de preguntas estático. (Framework listo vía `MockAIService`).
+- **🧠 Generación Dinámica de Ejercicios por IA (RAG):** Integración real con **Google Gemini 1.5 Flash**. El sistema "lee" libros de texto en PDF mediante una arquitectura RAG Lite para generar ejercicios contextuales y pedagógicos basados en el temario real del usuario.
 - **📅 Repaso Espaciado (SRS):** Sistema inteligente basado en el algoritmo SM-2 que programa repasos automáticos según el nivel de dominio del usuario, maximizando la retención a largo plazo.
 - **🔔 Notificaciones Push:** Recordatorios diarios personalizados y localizados (según el idioma del usuario) para realizar repasos pendientes y mantener rachas, integrados mediante Expo Push API.
 - **🏆 Gamificación Avanzada:** Sistema de **Rachas (Streaks)** dinámico que premia la constancia diaria y un **Cuadro de Logros** con medallas desbloqueables (Madrugador, Erudito, etc.) para motivar el progreso.
@@ -55,10 +55,10 @@ El repositorio es un **Monorepo** que alberga ambas partes fundamentales de la a
 ### 1. Servidor API (`/server`)
 - **Framework:** `ASP.NET Core 10.0 Web API`.
 - **OR/M:** `Entity Framework Core`
-- **Lógica de Negocio:** Servicios desacoplados para Auth, AI, Email y **SRS (Algoritmo SM-2)**.
+- **Lógica de Negocio:** Servicios desacoplados para Auth, AI (**Gemini 1.5 Flash**), Conocimiento (**PdfPig**), Email y **SRS (Algoritmo SM-2)**.
 - **Autenticación:** Sistema de claims basado en `JWT Bearer`. Separación de roles (User/Admin).
 - **Base de Datos:** SQL Server Express (2022). Entorno de desarrollo contenedorizado con Docker.
-- **Testeo:** Suite robusta con **44 tests automáticos** usando `xUnit` y un proveedor en memoria In-Memory DB.
+- **Testeo:** Suite robusta con **49 tests automáticos** usando `xUnit` y un proveedor en memoria In-Memory DB.
 
 ### 2. Cliente Móvil y Web (`/app`)
 - **Framework:** `React Native` gestionado nativamente a través de `Expo SDK`.
@@ -111,9 +111,13 @@ Ambos métodos devolverán una URL HTTPS válida y pública de forma temporal (e
 Para hacer que Axios llame a esta nueva URL en vez de a `localhost`, debes crear un archivo `.env` en el directorio cliente (`/app`) inyectando tu URL del túnel.
 
 1. Crea / edita el archivo `app/.env`:
-   ```env
-   EXPO_PUBLIC_API_URL=https://abcd-12.ngrok-free.app/api
-   ```
+    ```env
+    EXPO_PUBLIC_API_URL=https://abcd-12.ngrok-free.app/api
+    
+    # AI - Google Gemini
+    GeminiSettings__ApiKey=AIzaSy...
+    GeminiSettings__Model=gemini-1.5-flash
+    ```
 2. Reinicia la caché de tu bundler en Expo:
    ```bash
    npx expo start --clear

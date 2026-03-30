@@ -17,6 +17,8 @@ namespace EuskalIA.Server.Data
         public DbSet<UserExerciseAttempt> UserExerciseAttempts { get; set; }
         public DbSet<Achievement> Achievements { get; set; }
         public DbSet<UserAchievement> UserAchievements { get; set; }
+        public DbSet<BookProgress> BookProgresses { get; set; }
+        public DbSet<AigcLog> AigcLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

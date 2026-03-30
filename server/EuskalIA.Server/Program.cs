@@ -33,8 +33,21 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString);
 });
 
-// Domain Services
-builder.Services.AddScoped<IAIService, MockAIService>();
+// AI & Knowledge Infrastructure
+builder.Services.Configure<GeminiSettings>(builder.Configuration.GetSection("GeminiSettings"));
+builder.Services.AddScoped<IKnowledgeService, KnowledgeService>();
+builder.Services.AddHttpClient<GeminiAIService>();
+
+var geminiApiKey = builder.Configuration["GeminiSettings:ApiKey"];
+if (!string.IsNullOrEmpty(geminiApiKey))
+{
+    builder.Services.AddScoped<IAIService, GeminiAIService>();
+}
+else
+{
+    builder.Services.AddScoped<IAIService, MockAIService>();
+}
+
 builder.Services.AddScoped<IEncryptionService, EncryptionService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ISrsService, SrsService>();
