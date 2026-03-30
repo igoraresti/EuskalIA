@@ -8,6 +8,7 @@ using EuskalIA.Server.Services.Encryption;
 using Microsoft.Extensions.Localization;
 using Microsoft.AspNetCore.Authorization;
 using EuskalIA.Server.Services.Auth;
+using EuskalIA.Server.Services;
 using System.Linq;
 
 namespace EuskalIA.Server.Controllers

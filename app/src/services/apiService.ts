@@ -424,5 +424,15 @@ export const apiService = {
             return [];
         }
     },
+
+    getUserWeaknesses: async (userId: number, topN: number = 3) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/analytics/weaknesses/${userId}?topN=${topN}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching user weaknesses:', error);
+            return [];
+        }
+    },
 };
 

@@ -25,6 +25,7 @@ EuskalIA no es solo un clon de aplicaciones tradicionales de idiomas. Es un ecos
 - **📅 Repaso Espaciado (SRS):** Sistema inteligente basado en el algoritmo SM-2 que programa repasos automáticos según el nivel de dominio del usuario, maximizando la retención a largo plazo.
 - **🔔 Notificaciones Push:** Recordatorios diarios personalizados y localizados (según el idioma del usuario) para realizar repasos pendientes y mantener rachas, integrados mediante Expo Push API.
 - **🏆 Gamificación Avanzada:** Sistema de **Rachas (Streaks)** dinámico que premia la constancia diaria y un **Cuadro de Logros** con medallas desbloqueables (Madrugador, Erudito, etc.) para motivar el progreso.
+- **📊 Análisis de Errores:** Dashboard inteligente que identifica los temas donde el usuario comete más fallos (ej: declinaciones, verbos) basándose en el historial de los últimos 30 días, permitiendo un refuerzo dirigido.
 - **📊 Sistema de Clasificación (Leaderboards):** Ranking Global y Personal donde competir por el mayor XP acumulado.
 - **🛡️ Panel de Administración (Admin Dashboard):** Exclusivo para usuarios con rol `Admin`. Interfaz web integrada para ver métricas, listar usuarios y activar/desactivar cuentas conflictivas.
 - **🗑️ Gestión de Privacidad (Deactivation Flow):** Flujo completo automatizado donde un usuario puede solicitar la desactivación de su cuenta. Tras confirmarlo por Email (con token seguro + PIN), desaparece de forma segura sin romper la base de datos (Soft Delete).
@@ -37,11 +38,11 @@ La arquitectura Frontend React Native (Expo) está dividida en pantallas fluidas
 | :--- | :--- |
 | **Onboarding** | La puerta de entrada. Presenta el logo de forma atractiva con animaciones suaves usando `react-native-reanimated`. |
 | **Login / Registro** | Experiencia unificada con validaciones, control de vista de contraseñas, olvidé mi contraseña y botones nativos para Google y Facebook. El registro permite seleccionar el idioma materno desde el inicio. |
-| **Home (Dashboard)** | El núcleo del progreso. Muestra en una cabecera flotante las estadísticas (Racha de fuego 🔥, Monedas 🪙 y Bandera de idioma 🇪🇸). Debajo, un listado de las Lecciones del curso disponibles. |
+| **Home (Dashboard)** | El núcleo del progreso. Muestra estadísticas (Racha 🔥, XP ⭐) y un **Dashboard de Debilidades** con los temas a reforzar. Debajo, el listado de niveles (A1-B1). |
 | **Lesson (Quiz UI)** | Pantalla inmersiva para contestar ejercicios. Incluye barras de progreso (`ProgressBar`), opciones interactivas y modales de éxito/fracaso con el característico estilete gamificado. |
 | **Review (SRS)** | Sesión de refuerzo personalizada activada por el sistema de repaso espaciado. Enfocada en temas con menor dominio detectado por el algoritmo. |
 | **Leaderboard** | Un podio visual donde competir con el resto del mundo clasificando por mayor cantidad de XP ganada al resolver lecciones. |
-| **Profile** | Un rincón personal. Permite visualizar el avatar, consultar cuándo te uniste, cambiar tu `Username/Nickname`, re-seleccionar tu idioma (aplicación en tiempo real de traducciones) y un botón de peligro para solicitar la desactivación de cuenta. |
+| **Profile** | Un rincón personal. Permite visualizar el avatar, consultar cuándo te uniste, cambiar tu `Username/Nickname`, consultar tus **Logros y Medallas** y un botón de peligro para solicitar la desactivación de cuenta. |
 | **Admin Panel** | *Sólo accesible por el Rol Admin, oculto al resto*. Muestra estadísticas críticas del servidor (usuarios totales, número de lecciones) y una tabla paginada de todos los jugadores con poder absoluto de "baneo temporal" (Toggle Active). |
 
 ---
@@ -55,8 +56,8 @@ El repositorio es un **Monorepo** que alberga ambas partes fundamentales de la a
 - **OR/M:** `Entity Framework Core`
 - **Lógica de Negocio:** Servicios desacoplados para Auth, AI, Email y **SRS (Algoritmo SM-2)**.
 - **Autenticación:** Sistema de claims basado en `JWT Bearer`. Separación de roles (User/Admin).
-- **Base de Datos:** SQLite automatizado. En el primer arranque crea el archivo `euskalia.db` e inyecta usuarios de prueba (incluido un usuario Admin root `igoraresti`).
-- **Testeo:** Suite completa usando `xUnit` y un proveedor en memoria In-Memory DB.
+- **Base de Datos:** SQLite automatizado. En el primer arranque crea el archivo `euskalia.db` e inyecta usuarios de prueba.
+- **Testeo:** Suite robusta con **44 tests automáticos** usando `xUnit` y un proveedor en memoria In-Memory DB.
 
 ### 2. Cliente Móvil y Web (`/app`)
 - **Framework:** `React Native` gestionado nativamente a través de `Expo SDK`.

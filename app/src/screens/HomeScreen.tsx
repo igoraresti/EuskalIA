@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Act
 import { LessonProgressService } from '../services/LessonProgressService';
 import { useTranslation } from 'react-i18next';
 import { COLORS, SPACING, TYPOGRAPHY } from '../theme';
-import { BookOpen, Trophy, MessageCircle, User as UserIcon, Shield, Clock } from 'lucide-react-native';
+import { BookOpen, Trophy, MessageCircle, User as UserIcon, Shield, Clock, AlertTriangle } from 'lucide-react-native';
 import { apiService } from '../services/apiService';
 import { useAuth } from '../context/AuthContext';
 
@@ -16,6 +16,7 @@ export const HomeScreen = ({ navigation }: any) => {
     const [globalRank, setGlobalRank] = useState<{ rank: number; total: number } | null>(null);
     const [loading, setLoading] = useState(true);
     const [srsStatus, setSrsStatus] = useState<{ pendingCount: number }>({ pendingCount: 0 });
+    const [weaknesses, setWeaknesses] = useState<any[]>([]);
 
     // Resume-conflict dialog state
     const [resumeDialog, setResumeDialog] = useState<{
@@ -63,16 +64,18 @@ export const HomeScreen = ({ navigation }: any) => {
 
             setLoading(true);
             try {
-                const [lessonsData, progressData, rankData, srsData] = await Promise.all([
+                const [lessonsData, progressData, rankData, srsData, weaknessesData] = await Promise.all([
                     apiService.getLessons(),
                     apiService.getUserProgress(user.id),
                     apiService.getGlobalRank(user.id),
-                    apiService.getSrsStatus(user.id)
+                    apiService.getSrsStatus(user.id),
+                    apiService.getUserWeaknesses(user.id)
                 ]);
 
                 setLessons(lessonsData);
                 setGlobalRank(rankData);
                 setSrsStatus(srsData);
+                setWeaknesses(weaknessesData);
                 if (progressData && progressData.progress) {
                     setProgress(progressData.progress);
                     setLessonScores(progressData.lessonScores || []);
@@ -155,6 +158,31 @@ export const HomeScreen = ({ navigation }: any) => {
                                 <Text style={styles.reviewBadgeText}>{srsStatus.pendingCount}</Text>
                             </View>
                         </TouchableOpacity>
+                    )}
+
+                    {weaknesses.length > 0 && (
+                        <View style={styles.weaknessesSection}>
+                            <View style={styles.sectionHeader}>
+                                <AlertTriangle color={COLORS.secondary} size={20} />
+                                <Text style={styles.sectionTitle}>Temas a Reforzar</Text>
+                            </View>
+                            <View style={styles.weaknessList}>
+                                {weaknesses.map((w: any, i: number) => (
+                                    <View key={i} style={styles.weaknessItem}>
+                                        <Text style={styles.weaknessTopic} numberOfLines={1}>{w.topic}</Text>
+                                        <View style={styles.weaknessBarContainer}>
+                                            <View 
+                                                style={[
+                                                    styles.weaknessBar, 
+                                                    { width: `${Math.min(100, (w.failureRate * 100))}%` }
+                                                ]} 
+                                            />
+                                        </View>
+                                        <Text style={styles.weaknessCount}>{w.failureCount} fallos</Text>
+                                    </View>
+                                ))}
+                            </View>
+                        </View>
                     )}
 
                     <View style={styles.levelsContainer}>
@@ -448,6 +476,64 @@ const styles = StyleSheet.create({
         color: COLORS.white,
         fontSize: 14,
         fontWeight: '900',
+    },
+    weaknessesSection: {
+        width: '90%',
+        backgroundColor: COLORS.white,
+        borderRadius: 20,
+        padding: 16,
+        marginBottom: 32,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+        borderBottomWidth: 4,
+        borderBottomColor: COLORS.border,
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 16,
+        gap: 8,
+    },
+    sectionTitle: {
+        fontSize: 16,
+        fontWeight: '900',
+        color: COLORS.text,
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+    },
+    weaknessList: {
+        gap: 12,
+    },
+    weaknessItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 12,
+    },
+    weaknessTopic: {
+        width: 80,
+        fontSize: 14,
+        fontWeight: '700',
+        color: COLORS.text,
+    },
+    weaknessBarContainer: {
+        flex: 1,
+        height: 8,
+        backgroundColor: '#F3F4F6',
+        borderRadius: 4,
+        overflow: 'hidden',
+    },
+    weaknessBar: {
+        height: '100%',
+        backgroundColor: COLORS.secondary,
+        borderRadius: 4,
+    },
+    weaknessCount: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: COLORS.textSecondary,
+        minWidth: 50,
+        textAlign: 'right',
     },
 });
 

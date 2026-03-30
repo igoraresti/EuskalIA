@@ -36,6 +36,7 @@ builder.Services.AddScoped<IEncryptionService, EncryptionService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ISrsService, SrsService>();
 builder.Services.AddScoped<IGamificationService, GamificationService>();
+builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 builder.Services.AddHttpClient<ISocialAuthService, SocialAuthService>();
 
 // Email Infrastructure

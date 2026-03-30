@@ -8,6 +8,7 @@ using EuskalIA.Server.Services.Email;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using EuskalIA.Server.Services.Auth;
+using EuskalIA.Server.Services;
 using Moq;
 using Xunit;
 
@@ -19,6 +20,7 @@ namespace EuskalIA.Tests.Controllers
         private readonly Mock<IEmailService> _mockEmail;
         private readonly Mock<IJwtService> _mockJwt;
         private readonly Mock<IStringLocalizer<UsersController>> _mockLocalizer;
+        private readonly Mock<IGamificationService> _mockGamification;
 
         public UsersControllerTests()
         {
@@ -26,6 +28,7 @@ namespace EuskalIA.Tests.Controllers
             _mockEmail = new Mock<IEmailService>();
             _mockJwt = new Mock<IJwtService>();
             _mockLocalizer = new Mock<IStringLocalizer<UsersController>>();
+            _mockGamification = new Mock<IGamificationService>();
             
             _mockEncrypt.Setup(e => e.Encrypt(It.IsAny<string>())).Returns((string s) => s);
             _mockEncrypt.Setup(e => e.Decrypt(It.IsAny<string>())).Returns((string s) => s);
@@ -34,7 +37,7 @@ namespace EuskalIA.Tests.Controllers
 
         private UsersController GetController(EuskalIA.Server.Data.AppDbContext context)
         {
-            return new UsersController(context, _mockEncrypt.Object, _mockEmail.Object, _mockJwt.Object, _mockLocalizer.Object);
+            return new UsersController(context, _mockEncrypt.Object, _mockEmail.Object, _mockJwt.Object, _mockLocalizer.Object, _mockGamification.Object);
         }
 
         [Fact]
@@ -68,10 +71,15 @@ namespace EuskalIA.Tests.Controllers
 
             // Act
             var result = await controller.AddXP(1, new XPUpdateDto { XP = 1500, LessonTitle = "Test" });
-
+            
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var updatedProgress = Assert.IsType<Progress>(okResult.Value);
+            // Controller returns anonymous object { Progress, NewlyEarned }
+            // Use reflection to access across assembly boundaries
+            var value = okResult.Value!;
+            var progressProp = value.GetType().GetProperty("Progress");
+            var updatedProgress = Assert.IsType<Progress>(progressProp!.GetValue(value));
+            
             Assert.Equal(1500, updatedProgress.XP);
             Assert.Equal(2, updatedProgress.Level);
         }
