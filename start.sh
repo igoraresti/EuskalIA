@@ -14,10 +14,12 @@ fi
 echo "Using Node from: $(which node)"
 node --version
 
-# Kill processes on backend HTTPS port 7229, HTTP port 5235, and frontend port 8081
-lsof -ti:7229 | xargs kill -9 2>/dev/null
-lsof -ti:5235 | xargs kill -9 2>/dev/null
-lsof -ti:8081 | xargs kill -9 2>/dev/null
+echo "--- Asegurando Base de Datos (Docker SQL Server) ---"
+./server/start-db.sh
+if [ $? -ne 0 ]; then
+  echo "Error al levantar la base de datos. Abortando."
+  exit 1
+fi
 
 echo "--- Iniciando Servidor .NET (Backend) ---"
 cd server/EuskalIA.Server

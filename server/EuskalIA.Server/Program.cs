@@ -22,12 +22,15 @@ builder.Services.AddControllers()
     });
 builder.Services.AddOpenApi();
 
-// Always use SQLite — path is configured via ConnectionStrings:DefaultConnection
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=euskalia.db";
+// Connection String: Prefer environment variable DB_CONNECTION_STRING (Production)
+// Fallback to ConnectionStrings:DefaultConnection (Development/Docker)
+var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") 
+    ?? builder.Configuration.GetConnectionString("DefaultConnection") 
+    ?? "Server=localhost,1433;Database=EuskalIA;User Id=sa;Password=YourStrong!Pass123;Encrypt=False";
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    options.UseSqlite(connectionString);
+    options.UseSqlServer(connectionString);
 });
 
 // Domain Services
@@ -164,6 +167,13 @@ app.Use(async (context, next) =>
         throw;
     }
 });
+
+// Automatic migrations on startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
 app.UseCors("AllowAll");
 app.UseHttpsRedirection(); 

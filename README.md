@@ -7,8 +7,9 @@
 
   [![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactnative.dev/)
   [![Expo](https://img.shields.io/badge/EXPO-000020?style=for-the-badge&logo=expo&logoColor=white)](https://expo.dev/)
-  [![.NET](https://img.shields.io/badge/.NET_9-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
-  [![SQLite](https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white)](https://sqlite.org/)
+  [![.NET](https://img.shields.io/badge/.NET_10-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
+  [![SQL Server](https://img.shields.io/badge/SQL_Server-CC2927?style=for-the-badge&logo=microsoft-sql-server&logoColor=white)](https://www.microsoft.com/sql-server/)
+  [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 </div>
 
 <br/>
@@ -56,7 +57,7 @@ El repositorio es un **Monorepo** que alberga ambas partes fundamentales de la a
 - **OR/M:** `Entity Framework Core`
 - **Lógica de Negocio:** Servicios desacoplados para Auth, AI, Email y **SRS (Algoritmo SM-2)**.
 - **Autenticación:** Sistema de claims basado en `JWT Bearer`. Separación de roles (User/Admin).
-- **Base de Datos:** SQLite automatizado. En el primer arranque crea el archivo `euskalia.db` e inyecta usuarios de prueba.
+- **Base de Datos:** SQL Server Express (2022). Entorno de desarrollo contenedorizado con Docker.
 - **Testeo:** Suite robusta con **44 tests automáticos** usando `xUnit` y un proveedor en memoria In-Memory DB.
 
 ### 2. Cliente Móvil y Web (`/app`)
@@ -118,6 +119,36 @@ Para hacer que Axios llame a esta nueva URL en vez de a `localhost`, debes crear
    npx expo start --clear
    ```
 *(El archivo `config.ts` ha sido integrado para recibir automáticamente esta variable de entorno de existir).*
+
+---
+
+### 🗄️ Configuración de Base de Datos (SQL Server + Docker)
+
+Desde la versión 2.0, EuskalIA utiliza **SQL Server Express** en lugar de SQLite para mayor escalabilidad y fidelidad a entornos productivos.
+
+#### 1. Levantar el entorno de Desarrollo (Docker)
+Para facilitar el despliegue, hemos automatizado la creación del contenedor:
+
+1. Asegúrate de tener **Docker Desktop** iniciado.
+2. Ejecuta el script de arranque:
+   ```bash
+   ./server/start-db.sh
+   ```
+   Este script:
+   - Descarga la imagen oficial de MS SQL Server 2022.
+   - Crea el contenedor `euskalia-sqlserver`.
+   - Espera a que el motor esté listo para recibir conexiones.
+   - Ejecuta `db-init/init.sql` para cargar datos iniciales.
+
+#### 2. Configuración en Producción
+En producción, la API buscará automáticamente la cadena de conexión en la variable de entorno `DB_CONNECTION_STRING`. Si no existe, recurrirá a la configuración de `appsettings.Production.json`.
+
+#### 3. Migraciones
+Si realizas cambios en el modelo (`Models/*.cs`), genera una nueva migración:
+```bash
+dotnet ef migrations add <NombreMigracion> --project server/EuskalIA.Server/EuskalIA.Server.csproj
+```
+Las migraciones se aplican **automáticamente** al arrancar la aplicación (`dotnet run`).
 
 ---
 
