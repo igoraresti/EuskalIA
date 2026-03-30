@@ -404,5 +404,25 @@ export const apiService = {
             return false;
         }
     },
+
+    getUserAchievements: async (userId: number) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/gamification/achievements/${userId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching user achievements:', error);
+            return [];
+        }
+    },
+
+    checkAchievements: async (userId: number) => {
+        try {
+            const response = await axios.post(`${BASE_URL}/gamification/check-achievements/${userId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error checking achievements:', error);
+            return [];
+        }
+    },
 };
 

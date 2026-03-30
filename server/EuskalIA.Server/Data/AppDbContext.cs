@@ -15,6 +15,8 @@ namespace EuskalIA.Server.Data
         public DbSet<UserSrsNode> UserSrsNodes { get; set; }
         public DbSet<AigcExercise> AigcExercises { get; set; }
         public DbSet<UserExerciseAttempt> UserExerciseAttempts { get; set; }
+        public DbSet<Achievement> Achievements { get; set; }
+        public DbSet<UserAchievement> UserAchievements { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -27,6 +29,14 @@ namespace EuskalIA.Server.Data
                 .HasMany(l => l.Exercises)
                 .WithOne(e => e.Lesson)
                 .HasForeignKey(e => e.LessonId);
+
+            // Seed Achievements
+            modelBuilder.Entity<Achievement>().HasData(
+                new Achievement { Id = 1, Code = "MADRUGADOR", Name = "Madrugador", Description = "Completa tu primera lección", Icon = "Sun", Category = "LESSONS", TargetValue = 1 },
+                new Achievement { Id = 2, Code = "CONSTANCIA", Name = "Constancia", Description = "Alcanza una racha de 7 días", Icon = "Flame", Category = "STREAK", TargetValue = 7 },
+                new Achievement { Id = 3, Code = "ERUDITO", Name = "Erudito", Description = "Consigue 1000 XP totales", Icon = "BookOpen", Category = "XP", TargetValue = 1000 },
+                new Achievement { Id = 4, Code = "MAESTRO", Name = "Maestro", Description = "Completa 10 lecciones", Icon = "Award", Category = "LESSONS", TargetValue = 10 }
+            );
         }
     }
 }

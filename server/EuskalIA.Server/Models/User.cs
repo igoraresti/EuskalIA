@@ -40,5 +40,8 @@ namespace EuskalIA.Server.Models
         
         // Navigation property for exercise attempts
         public ICollection<UserExerciseAttempt> ExerciseAttempts { get; set; } = new List<UserExerciseAttempt>();
+        
+        // Navigation property for achievements
+        public ICollection<UserAchievement> Achievements { get; set; } = new List<UserAchievement>();
     }
 }

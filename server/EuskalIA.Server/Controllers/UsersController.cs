@@ -22,13 +22,16 @@ namespace EuskalIA.Server.Controllers
         private readonly IJwtService _jwtService;
         private readonly IStringLocalizer<UsersController> _localizer;
 
-        public UsersController(AppDbContext context, IEncryptionService encryptionService, IEmailService emailService, IJwtService jwtService, IStringLocalizer<UsersController> localizer)
+        private readonly IGamificationService _gamificationService;
+
+        public UsersController(AppDbContext context, IEncryptionService encryptionService, IEmailService emailService, IJwtService jwtService, IStringLocalizer<UsersController> localizer, IGamificationService gamificationService)
         {
             _context = context;
             _encryptionService = encryptionService;
             _emailService = emailService;
             _jwtService = jwtService;
             _localizer = localizer;
+            _gamificationService = gamificationService;
         }
 
         [Authorize]
@@ -170,7 +173,12 @@ namespace EuskalIA.Server.Controllers
             progress.Level = (progress.XP / 1000) + 1;
             
             await _context.SaveChangesAsync();
-            return Ok(progress);
+
+            // Trigger gamification updates: streak and achievement checks
+            await _gamificationService.UpdateStreakAsync(id);
+            var newlyEarned = await _gamificationService.CheckAchievementsAsync(id);
+
+            return Ok(new { Progress = progress, NewlyEarned = newlyEarned });
         }
 
         [Authorize]

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, TextInput, Alert, ActivityIndicator, Platform, Modal } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { COLORS, SPACING, TYPOGRAPHY } from '../theme';
-import { User, Mail, Lock, Calendar, BookOpen, Trash2, LogOut, Save, ChevronLeft, Globe, Check } from 'lucide-react-native';
+import { User, Mail, Lock, Calendar, BookOpen, Trash2, LogOut, Save, ChevronLeft, Globe, Check, Sun, Flame, Award, Trophy } from 'lucide-react-native';
 import { apiService } from '../services/apiService';
 import { useAuth } from '../context/AuthContext';
 import { LanguageSelector } from '../components/LanguageSelector';
@@ -15,6 +15,7 @@ export const ProfileScreen = ({ navigation }: any) => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [achievements, setAchievements] = useState<any[]>([]);
 
     // Deletion states
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -56,6 +57,12 @@ export const ProfileScreen = ({ navigation }: any) => {
                     } else {
                         setProgress(progressData);
                     }
+                }
+
+                // Fetch achievements
+                const achievementsData = await apiService.getUserAchievements(authUser.id);
+                if (achievementsData) {
+                    setAchievements(achievementsData);
                 }
             } catch (err) {
                 console.error("Error loading profile", err);
@@ -267,6 +274,50 @@ export const ProfileScreen = ({ navigation }: any) => {
                         </View>
                     </View>
                 </View>
+
+                {/* Achievements Section */}
+                {!showDeleteModal && (
+                    <View style={styles.formSection}>
+                        <View style={styles.sectionHeader}>
+                            <Trophy color={COLORS.primary} size={22} />
+                            <Text style={[styles.formTitle, { marginBottom: 0, marginLeft: 10 }]}>{t('profile.achievements', 'Logros y Medallas')}</Text>
+                        </View>
+                        
+                        <View style={styles.achievementsGrid}>
+                            {achievements.map((achievement) => {
+                                const IconComponent = achievement.isEarned ? 
+                                    (achievement.icon === 'Sun' ? Sun : 
+                                     achievement.icon === 'Flame' ? Flame : 
+                                     achievement.icon === 'BookOpen' ? BookOpen : Award) : Trophy;
+                                
+                                return (
+                                    <View key={achievement.id} style={styles.achievementItem}>
+                                        <View style={[
+                                            styles.achievementIconContainer,
+                                            !achievement.isEarned && styles.achievementIconLocked
+                                        ]}>
+                                            {achievement.isEarned ? (
+                                                <IconComponent color={COLORS.white} size={24} />
+                                            ) : (
+                                                <Lock color={COLORS.textSecondary} size={20} />
+                                            )}
+                                        </View>
+                                        <Text style={[
+                                            styles.achievementName,
+                                            !achievement.isEarned && styles.achievementTextLocked
+                                        ]}>{achievement.name}</Text>
+                                        <Text style={styles.achievementDesc} numberOfLines={2}>
+                                            {achievement.description}
+                                        </Text>
+                                    </View>
+                                );
+                            })}
+                            {achievements.length === 0 && (
+                                <Text style={styles.emptyText}>No hay logros configurados aún.</Text>
+                            )}
+                        </View>
+                    </View>
+                )}
 
                 {/* Verification View for Deletion */}
                 {showDeleteModal && (
@@ -542,6 +593,59 @@ const styles = StyleSheet.create({
         borderRadius: 24,
         padding: SPACING.xl,
         marginBottom: SPACING.xl,
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: SPACING.lg,
+    },
+    achievementsGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        gap: 15,
+    },
+    achievementItem: {
+        width: '47%',
+        alignItems: 'center',
+        backgroundColor: '#F9FAFB',
+        padding: 15,
+        borderRadius: 16,
+        marginBottom: 5,
+    },
+    achievementIconContainer: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: COLORS.primary,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    achievementIconLocked: {
+        backgroundColor: '#E5E7EB',
+    },
+    achievementName: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: COLORS.text,
+        textAlign: 'center',
+        marginBottom: 4,
+    },
+    achievementTextLocked: {
+        color: COLORS.textSecondary,
+    },
+    achievementDesc: {
+        fontSize: 11,
+        color: COLORS.textSecondary,
+        textAlign: 'center',
+        lineHeight: 14,
+    },
+    emptyText: {
+        textAlign: 'center',
+        color: COLORS.textSecondary,
+        width: '100%',
+        padding: 20,
     },
     formTitle: {
         fontSize: 18,
