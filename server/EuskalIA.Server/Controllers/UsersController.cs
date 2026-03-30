@@ -386,5 +386,21 @@ namespace EuskalIA.Server.Controllers
 
             return Ok(new { message = _localizer["LanguageUpdated"].Value, language = user.Language });
         }
+
+        [Authorize]
+        [HttpPost("{id}/push-token")]
+        public async Task<IActionResult> UpdatePushToken(int id, [FromBody] PushTokenDto pushTokenDto)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.ExpoPushToken = pushTokenDto.Token;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Push token updated successfully" });
+        }
     }
 }

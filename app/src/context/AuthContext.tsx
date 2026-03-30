@@ -3,6 +3,7 @@ import { apiService } from '../services/apiService';
 import { Alert, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '../i18n';
+import { registerForPushNotificationsAsync } from '../services/notificationService';
 
 interface AuthContextType {
     user: any | null;
@@ -44,6 +45,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     if (parsedUser.language) {
                         i18n.changeLanguage(parsedUser.language);
                     }
+                    // Register for push notifications if we have a user
+                    registerForPushNotificationsAsync(parsedUser.id);
                 }
             } catch (e) {
                 console.error("Error reading value", e);
@@ -77,6 +80,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 await AsyncStorage.setItem('@user', JSON.stringify(userData));
                 await AsyncStorage.setItem('@token', token);
                 console.log('Successfully saved user and token to storage');
+                // Register for push notifications
+                registerForPushNotificationsAsync(userData.id);
             } catch (e) {
                 console.error("Error saving user or token", e);
             }
@@ -114,6 +119,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 await AsyncStorage.setItem('@user', JSON.stringify(userData));
                 await AsyncStorage.setItem('@token', token);
                 console.log('Successfully saved user and token to storage after social login');
+                // Register for push notifications
+                registerForPushNotificationsAsync(userData.id);
             } catch (e) {
                 console.error("Error saving user or token", e);
             }

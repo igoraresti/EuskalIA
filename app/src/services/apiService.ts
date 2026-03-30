@@ -394,5 +394,15 @@ export const apiService = {
             return false;
         }
     },
+
+    updatePushToken: async (userId: number, token: string) => {
+        try {
+            await axios.post(`${BASE_URL}/users/${userId}/push-token`, { token });
+            return true;
+        } catch (error) {
+            console.error('Error updating push token:', error);
+            return false;
+        }
+    },
 };
 

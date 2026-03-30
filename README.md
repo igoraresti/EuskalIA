@@ -23,6 +23,7 @@ EuskalIA no es solo un clon de aplicaciones tradicionales de idiomas. Es un ecos
 - **🌍 Internacionalización (i18n):** Interfaz disponible y traducida dinámicamente en **Español, Euskera, Inglés, Francés y Polaco**.
 - **🧠 Generación de Ejercicios por IA:** Integrado con modelos generativos para adaptar la educación dinámicamente y no depender de un banco de preguntas estático. (Framework listo vía `MockAIService`).
 - **📅 Repaso Espaciado (SRS):** Sistema inteligente basado en el algoritmo SM-2 que programa repasos automáticos según el nivel de dominio del usuario, maximizando la retención a largo plazo.
+- **🔔 Notificaciones Push:** Recordatorios diarios personalizados y localizados (según el idioma del usuario) para realizar repasos pendientes y mantener rachas, integrados mediante Expo Push API.
 - **🏆 Sistema de Gamificación (Leaderboards):** Ranking Global y Personal. Gana puntos de experiencia (XP), mantén rachas de días seguidos ("Streaks") y gana *Txanponak* (monedas virtuales).
 - **🛡️ Panel de Administración (Admin Dashboard):** Exclusivo para usuarios con rol `Admin`. Interfaz web integrada para ver métricas, listar usuarios y activar/desactivar cuentas conflictivas.
 - **🗑️ Gestión de Privacidad (Deactivation Flow):** Flujo completo automatizado donde un usuario puede solicitar la desactivación de su cuenta. Tras confirmarlo por Email (con token seguro + PIN), desaparece de forma segura sin romper la base de datos (Soft Delete).

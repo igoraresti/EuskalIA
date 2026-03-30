@@ -29,6 +29,9 @@ namespace EuskalIA.Server.Models
         // Role-based access
         public string Role { get; set; } = "User";
         
+        // Push notification token for Expo
+        public string? ExpoPushToken { get; set; }
+        
         // Navigation property
         public Progress? Progress { get; set; }
         

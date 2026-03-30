@@ -4,6 +4,7 @@ using EuskalIA.Server.Services.AI;
 using EuskalIA.Server.Services.Encryption;
 using EuskalIA.Server.Services.Auth;
 using EuskalIA.Server.Services;
+using EuskalIA.Server.Services.Notifications;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -40,6 +41,10 @@ builder.Services.AddHttpClient<ISocialAuthService, SocialAuthService>();
 builder.Services.AddSingleton<IEmailQueue, EmailQueue>();
 builder.Services.AddHostedService<EmailBackgroundSender>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+
+// Notifications Infrastructure
+builder.Services.AddHttpClient<INotificationService, NotificationService>();
+builder.Services.AddHostedService<SrsReminderService>();
 
 // Localization
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
