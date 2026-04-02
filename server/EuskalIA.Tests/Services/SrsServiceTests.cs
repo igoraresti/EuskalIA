@@ -1,6 +1,8 @@
 using EuskalIA.Server.Models;
 using EuskalIA.Server.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
 using Xunit;
 
 namespace EuskalIA.Tests.Services
@@ -12,7 +14,8 @@ namespace EuskalIA.Tests.Services
         {
             // Arrange
             var context = GetDatabaseContext();
-            var service = new SrsService(context);
+            var mockLogger = new Mock<ILogger<SrsService>>();
+            var service = new SrsService(context, mockLogger.Object);
             int userId = 1;
             string topic = "NORK";
 
@@ -33,7 +36,8 @@ namespace EuskalIA.Tests.Services
         {
             // Arrange
             var context = GetDatabaseContext();
-            var service = new SrsService(context);
+            var mockLogger = new Mock<ILogger<SrsService>>();
+            var service = new SrsService(context, mockLogger.Object);
             int userId = 1;
             string topic = "NOR-NORK";
 
@@ -62,7 +66,8 @@ namespace EuskalIA.Tests.Services
         {
             // Arrange
             var context = GetDatabaseContext();
-            var service = new SrsService(context);
+            var mockLogger = new Mock<ILogger<SrsService>>();
+            var service = new SrsService(context, mockLogger.Object);
             int userId = 1;
             string topic = "ZEOZER";
 
@@ -94,7 +99,8 @@ namespace EuskalIA.Tests.Services
         {
             // Arrange
             var context = GetDatabaseContext();
-            var service = new SrsService(context);
+            var mockLogger = new Mock<ILogger<SrsService>>();
+            var service = new SrsService(context, mockLogger.Object);
             int userId = 1;
 
             context.UserSrsNodes.AddRange(new List<UserSrsNode>
@@ -110,6 +116,73 @@ namespace EuskalIA.Tests.Services
 
             // Assert
             Assert.Equal(2, count);
+        }
+
+        [Fact]
+        public async Task GetDueNodesAsync_ReturnsOnlyDueNodes()
+        {
+            // Arrange
+            var context = GetDatabaseContext();
+            var mockLogger = new Mock<ILogger<SrsService>>();
+            var service = new SrsService(context, mockLogger.Object);
+            int userId = 1;
+
+            context.UserSrsNodes.AddRange(new List<UserSrsNode>()
+            {
+                new UserSrsNode { UserId = userId, ConceptId = "Due1", NextReviewDate = DateTime.UtcNow.AddMinutes(-5) },
+                new UserSrsNode { UserId = userId, ConceptId = "NotDue1", NextReviewDate = DateTime.UtcNow.AddDays(1) },
+                new UserSrsNode { UserId = userId, ConceptId = "Due2", NextReviewDate = null } // Should be due
+            });
+            await context.SaveChangesAsync();
+
+            // Act
+            var dueNodes = await service.GetDueNodesAsync(userId);
+
+            // Assert
+            Assert.Equal(2, dueNodes.Count);
+            Assert.Contains(dueNodes, n => n.ConceptId == "Due1");
+            Assert.Contains(dueNodes, n => n.ConceptId == "Due2");
+        }
+
+        [Fact]
+        public async Task UpdateSrsNodeAsync_ClampsMasteryAndEase()
+        {
+            // Arrange
+            var context = GetDatabaseContext();
+            var mockLogger = new Mock<ILogger<SrsService>>();
+            var service = new SrsService(context, mockLogger.Object);
+            int userId = 1;
+
+            var node = new UserSrsNode
+            {
+                UserId = userId,
+                ConceptId = "ClampTest",
+                MasteryLevel = 4.8f,
+                RiskFactor = 2.45f,
+                LastReviewDate = DateTime.UtcNow.AddDays(-20),
+                NextReviewDate = DateTime.UtcNow
+            };
+            context.UserSrsNodes.Add(node);
+            await context.SaveChangesAsync();
+
+            // Act: Success should clamp mastery at 5.0 and EF at 2.5
+            await service.UpdateSrsNodeAsync(userId, "ClampTest", true);
+
+            // Assert
+            node = await context.UserSrsNodes.FirstAsync(n => n.ConceptId == "ClampTest");
+            Assert.Equal(5.0f, node.MasteryLevel);
+            Assert.Equal(2.5f, node.RiskFactor);
+
+            // Act: Failures should clamp at 0.0 and 1.3
+            node.RiskFactor = 1.4f;
+            node.MasteryLevel = 0.5f;
+            await context.SaveChangesAsync();
+            await service.UpdateSrsNodeAsync(userId, "ClampTest", false);
+            await service.UpdateSrsNodeAsync(userId, "ClampTest", false);
+
+            node = await context.UserSrsNodes.FirstAsync(n => n.ConceptId == "ClampTest");
+            Assert.Equal(0.0f, node.MasteryLevel);
+            Assert.Equal(1.3f, node.RiskFactor);
         }
     }
 }

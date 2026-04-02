@@ -4,6 +4,7 @@ using EuskalIA.Server.Models;
 using EuskalIA.Server.Services.AI;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace EuskalIA.Server.Controllers
 {
@@ -14,12 +15,14 @@ namespace EuskalIA.Server.Controllers
         private readonly AppDbContext _context;
         private readonly IAIService _aiService;
         private readonly IKnowledgeService _knowledgeService;
+        private readonly ILogger<AigcExercisesController> _logger;
 
-        public AigcExercisesController(AppDbContext context, IAIService aiService, IKnowledgeService knowledgeService)
+        public AigcExercisesController(AppDbContext context, IAIService aiService, IKnowledgeService knowledgeService, ILogger<AigcExercisesController> logger)
         {
             _context = context;
             _aiService = aiService;
             _knowledgeService = knowledgeService;
+            _logger = logger;
         }
 
         // GET: api/aigcexercises?levelId=A1
@@ -115,6 +118,7 @@ namespace EuskalIA.Server.Controllers
         [HttpGet("session")]
         public async Task<ActionResult<IEnumerable<AigcExerciseResponseDto>>> GetSessionExercises([FromQuery] string levelId, [FromQuery] int userId)
         {
+            _logger.LogInformation("Generating session for user {UserId} at level {LevelId}.", userId, levelId);
             if (string.IsNullOrEmpty(levelId)) return BadRequest("LevelId is required");
 
             // 1. Check Inventory & Trigger AI if low
@@ -129,6 +133,7 @@ namespace EuskalIA.Server.Controllers
 
             if (unattemptedCount < 20)
             {
+                _logger.LogInformation("Unattempted count for level {LevelId} is low ({Count}). Triggering background generation.", levelId, unattemptedCount);
                 // Fire and forget generation for next time (or wait a bit)
                 // In a production app, this would be a background job.
                 _ = Task.Run(async () => await GenerateMoreAsync(levelId));
@@ -225,9 +230,11 @@ namespace EuskalIA.Server.Controllers
 
                 _context.AigcExercises.AddRange(newExercises);
                 await _context.SaveChangesAsync();
+                _logger.LogInformation("Successfully generated {Count} more exercises for level {LevelId}.", newExercises.Count, levelId);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error during background exercise generation for level {LevelId}.", levelId);
                 // Log and swallow so the user request doesn't fail
             }
         }
@@ -236,6 +243,7 @@ namespace EuskalIA.Server.Controllers
         [HttpPost("attempt")]
         public async Task<IActionResult> RecordAttempt([FromBody] AigcExerciseAttemptDto dto)
         {
+            _logger.LogInformation("Recording attempt for user {UserId} on exercise {ExerciseId}. Correct: {IsCorrect}.", dto.UserId, dto.ExerciseId, dto.IsCorrect);
             var attempt = new UserExerciseAttempt
             {
                 UserId = dto.UserId,

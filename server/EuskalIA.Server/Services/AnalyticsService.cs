@@ -1,6 +1,7 @@
 using EuskalIA.Server.Data;
 using EuskalIA.Server.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace EuskalIA.Server.Services
 {
@@ -26,14 +27,17 @@ namespace EuskalIA.Server.Services
     public class AnalyticsService : IAnalyticsService
     {
         private readonly AppDbContext _context;
+        private readonly ILogger<AnalyticsService> _logger;
 
-        public AnalyticsService(AppDbContext context)
+        public AnalyticsService(AppDbContext context, ILogger<AnalyticsService> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<List<WeaknessDto>> GetUserWeaknessesAsync(int userId, int topN = 3)
         {
+            _logger.LogInformation("Calculating top {TopN} weaknesses for user {UserId}.", topN, userId);
             var cutoff = DateTime.UtcNow.AddDays(-30);
 
             // Fetch recent attempts with their exercises
@@ -43,7 +47,10 @@ namespace EuskalIA.Server.Services
                 .ToListAsync();
 
             if (!attempts.Any())
+            {
+                _logger.LogInformation("No recent exercise attempts found for user {UserId}.", userId);
                 return new List<WeaknessDto>();
+            }
 
             // Expand topics (each exercise stores topics as comma-separated string)
             var topicAttempts = new Dictionary<string, (int failures, int total)>(StringComparer.OrdinalIgnoreCase);
@@ -71,7 +78,7 @@ namespace EuskalIA.Server.Services
                 }
             }
 
-            return topicAttempts
+            var results = topicAttempts
                 .Where(kv => kv.Value.failures > 0) // Only topics with at least one failure
                 .OrderByDescending(kv => kv.Value.failures)
                 .Take(topN)
@@ -82,6 +89,9 @@ namespace EuskalIA.Server.Services
                     TotalAttempts = kv.Value.total
                 })
                 .ToList();
+
+            _logger.LogInformation("Identified {Count} weakness topics for user {UserId}.", results.Count, userId);
+            return results;
         }
     }
 }

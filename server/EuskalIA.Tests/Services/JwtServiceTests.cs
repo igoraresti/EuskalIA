@@ -1,6 +1,7 @@
 using Xunit;
 using Moq;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using EuskalIA.Server.Models;
 using EuskalIA.Server.Services.Auth;
 using System.Security.Claims;
@@ -26,7 +27,8 @@ namespace EuskalIA.Tests.Services
                 .AddInMemoryCollection(inMemorySettings!)
                 .Build();
 
-            _jwtService = new JwtService(_configuration);
+            var mockLogger = new Mock<ILogger<JwtService>>();
+            _jwtService = new JwtService(_configuration, mockLogger.Object);
         }
 
         [Fact]

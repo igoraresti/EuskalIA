@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using EuskalIA.Server.Data;
 using EuskalIA.Server.Models;
 using EuskalIA.Server.DTOs;
@@ -16,11 +17,13 @@ namespace EuskalIA.Server.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IEncryptionService _encryptionService;
+        private readonly ILogger<AdminController> _logger;
 
-        public AdminController(AppDbContext context, IEncryptionService encryptionService)
+        public AdminController(AppDbContext context, IEncryptionService encryptionService, ILogger<AdminController> logger)
         {
             _context = context;
             _encryptionService = encryptionService;
+            _logger = logger;
         }
 
         // ── Users ─────────────────────────────────────────────────────────────
@@ -106,10 +109,15 @@ namespace EuskalIA.Server.Controllers
         public async Task<IActionResult> ToggleUserActive(int id)
         {
             var user = await _context.Users.FindAsync(id);
-            if (user == null) return NotFound();
+            if (user == null)
+            {
+                _logger.LogWarning("Admin tried to toggle active status for non-existent user {UserId}.", id);
+                return NotFound();
+            }
 
             user.IsActive = !user.IsActive;
             await _context.SaveChangesAsync();
+            _logger.LogInformation("Admin toggled active status for user {Username} (ID: {UserId}) to {IsActive}.", user.Username, id, user.IsActive);
 
             return Ok(new { isActive = user.IsActive });
         }
@@ -208,12 +216,17 @@ namespace EuskalIA.Server.Controllers
         public async Task<IActionResult> DeleteExercise(Guid id)
         {
             var exercise = await _context.AigcExercises.FindAsync(id);
-            if (exercise == null) return NotFound();
+            if (exercise == null)
+            {
+                _logger.LogWarning("Admin tried to delete non-existent exercise {ExerciseId}.", id);
+                return NotFound();
+            }
 
             var attempts = _context.UserExerciseAttempts.Where(a => a.ExerciseId == id);
             _context.UserExerciseAttempts.RemoveRange(attempts);
             _context.AigcExercises.Remove(exercise);
             await _context.SaveChangesAsync();
+            _logger.LogInformation("Admin deleted exercise {ExerciseCode} (ID: {ExerciseId}).", exercise.ExerciseCode, id);
 
             return Ok(new { deleted = exercise.ExerciseCode });
         }
@@ -225,7 +238,10 @@ namespace EuskalIA.Server.Controllers
         {
             var validStatuses = new[] { "BETA", "APPROVED", "REJECTED" };
             if (!validStatuses.Contains(req.Status))
+            {
+                _logger.LogWarning("Admin tried to update exercises to invalid status {Status}.", req.Status);
                 return BadRequest($"Status must be one of: {string.Join(", ", validStatuses)}");
+            }
 
             var exercises = await _context.AigcExercises
                 .Where(e => req.Ids.Contains(e.Id))
@@ -235,6 +251,7 @@ namespace EuskalIA.Server.Controllers
                 ex.Status = req.Status;
 
             await _context.SaveChangesAsync();
+            _logger.LogInformation("Admin updated status to {Status} for {Count} exercises.", req.Status, exercises.Count);
 
             return Ok(new { updated = exercises.Count, status = req.Status });
         }
@@ -326,6 +343,7 @@ namespace EuskalIA.Server.Controllers
 
             if (req.Confirm && toInsert.Count > 0)
             {
+                _logger.LogInformation("Admin confirmed import of {Count} exercises.", toInsert.Count);
                 var counters = new Dictionary<string, int>();
                 foreach (var item in toInsert)
                 {

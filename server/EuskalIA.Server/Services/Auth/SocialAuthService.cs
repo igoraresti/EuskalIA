@@ -1,4 +1,5 @@
 using EuskalIA.Server.Models;
+using Microsoft.Extensions.Logging;
 using Google.Apis.Auth;
 using Newtonsoft.Json;
 using System.Net.Http;
@@ -9,15 +10,18 @@ namespace EuskalIA.Server.Services.Auth
     {
         private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;
+        private readonly ILogger<SocialAuthService> _logger;
 
-        public SocialAuthService(IConfiguration configuration, HttpClient httpClient)
+        public SocialAuthService(IConfiguration configuration, HttpClient httpClient, ILogger<SocialAuthService> logger)
         {
             _configuration = configuration;
             _httpClient = httpClient;
+            _logger = logger;
         }
 
         public async Task<User?> ValidateGoogleTokenAsync(string token)
         {
+            _logger.LogInformation("Validating Google token.");
             try
             {
                 // Google Access Tokens usually start with "ya29."
@@ -58,14 +62,16 @@ namespace EuskalIA.Server.Services.Auth
                     };
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Error validating Google token.");
                 return null;
             }
         }
 
         public async Task<User?> ValidateFacebookTokenAsync(string token)
         {
+            _logger.LogInformation("Validating Facebook token.");
             try
             {
                 // 1. Verify token with Facebook Graph API
@@ -98,8 +104,9 @@ namespace EuskalIA.Server.Services.Auth
                     IsVerified = true
                 };
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Error validating Facebook token.");
                 return null;
             }
         }

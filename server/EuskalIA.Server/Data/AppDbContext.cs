@@ -1,11 +1,17 @@
 using Microsoft.EntityFrameworkCore;
 using EuskalIA.Server.Models;
+using Microsoft.Extensions.Logging;
 
 namespace EuskalIA.Server.Data
 {
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+        private readonly ILogger<AppDbContext> _logger;
+
+        public AppDbContext(DbContextOptions<AppDbContext> options, ILogger<AppDbContext> logger) : base(options)
+        {
+            _logger = logger;
+        }
 
         public DbSet<User> Users { get; set; }
         public DbSet<Progress> Progresses { get; set; }
@@ -22,6 +28,7 @@ namespace EuskalIA.Server.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            _logger.LogInformation("Configuring database model in OnModelCreating.");
             modelBuilder.Entity<User>()
                 .HasOne(u => u.Progress)
                 .WithOne(p => p.User)
@@ -39,6 +46,18 @@ namespace EuskalIA.Server.Data
                 new Achievement { Id = 3, Code = "ERUDITO", Name = "Erudito", Description = "Consigue 1000 XP totales", Icon = "BookOpen", Category = "XP", TargetValue = 1000 },
                 new Achievement { Id = 4, Code = "MAESTRO", Name = "Maestro", Description = "Completa 10 lecciones", Icon = "Award", Category = "LESSONS", TargetValue = 10 }
             );
+        }
+
+        public override int SaveChanges()
+        {
+            _logger.LogInformation("Saving changes to the database.");
+            return base.SaveChanges();
+        }
+
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Saving changes to the database asynchronously.");
+            return await base.SaveChangesAsync(cancellationToken);
         }
     }
 }

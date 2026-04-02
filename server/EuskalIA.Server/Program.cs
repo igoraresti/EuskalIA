@@ -122,36 +122,9 @@ using (var scope = app.Services.CreateScope())
     var encryptionService = scope.ServiceProvider.GetRequiredService<IEncryptionService>();
     db.Database.Migrate();
 
-    if (!db.Users.Any())
-    {
-        var adminPassword = encryptionService.Encrypt("1234");
-        var user = new EuskalIA.Server.Models.User
-        {
-            Username = "igoraresti",
-            Nickname = encryptionService.Encrypt("adminigor"),
-            Email = encryptionService.Encrypt("igor@euskalia.eus"),
-            Password = adminPassword,
-            JoinedAt = DateTime.UtcNow.AddMonths(-2),
-            IsVerified = true,
-            Language = "es",
-            Role = "Admin"
-        };
-        db.Users.Add(user);
-        db.SaveChanges();
-    }
-    else
-    {
-        // Migration: ensure igoraresti has Admin role
-        var adminUser = db.Users.FirstOrDefault(u => u.Username == "igoraresti");
-        if (adminUser != null && adminUser.Role != "Admin")
-        {
-            adminUser.Role = "Admin";
-            db.SaveChanges();
-        }
-    }
-    
     // Seed AIGC Sample Exercise
-    EuskalIA.Server.Utils.AigcSeeder.SeedAigcExercises(db);
+    var seederLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    EuskalIA.Server.Utils.AigcSeeder.SeedAigcExercises(db, seederLogger);
 }
 
 // Configure the HTTP request pipeline.

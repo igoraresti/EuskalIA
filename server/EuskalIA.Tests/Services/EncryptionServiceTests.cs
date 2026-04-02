@@ -1,5 +1,7 @@
 using EuskalIA.Server.Services.Encryption;
 using Xunit;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace EuskalIA.Tests.Services
 {
@@ -8,7 +10,8 @@ namespace EuskalIA.Tests.Services
         [Fact]
         public void EncryptionService_EncryptsAndDecrypts()
         {
-            var service = new EncryptionService();
+            var mockLogger = new Mock<ILogger<EncryptionService>>();
+            var service = new EncryptionService(mockLogger.Object);
             var original = "Hello World";
             var encrypted = service.Encrypt(original);
             var decrypted = service.Decrypt(encrypted);

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 using System.Globalization;
 using System.IO;
 namespace EuskalIA.Server.Services.Email
@@ -9,16 +10,19 @@ namespace EuskalIA.Server.Services.Email
         private readonly IEmailQueue _emailQueue;
         private readonly IStringLocalizer<EmailService> _localizer;
         private readonly IWebHostEnvironment _env;
+        private readonly ILogger<EmailService> _logger;
 
-        public EmailService(IEmailQueue emailQueue, IStringLocalizer<EmailService> localizer, IWebHostEnvironment env)
+        public EmailService(IEmailQueue emailQueue, IStringLocalizer<EmailService> localizer, IWebHostEnvironment env, ILogger<EmailService> logger)
         {
             _emailQueue = emailQueue;
             _localizer = localizer;
             _env = env;
+            _logger = logger;
         }
 
         public async Task SendVerificationEmailAsync(string email, string username, string token, string language)
         {
+            _logger.LogInformation("Preparing verification email for {Email} ({Username}) in language {Language}.", email, username, language);
             // Temporarily switch culture to get correct localized strings
             var originalCulture = CultureInfo.CurrentCulture;
             var originalUICulture = CultureInfo.CurrentUICulture;
@@ -58,6 +62,12 @@ namespace EuskalIA.Server.Services.Email
                 };
 
                 await _emailQueue.EnqueueAsync(message);
+                _logger.LogInformation("Verification email for {Email} enqueued successfully.", email);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while preparing/enqueuing verification email for {Email}.", email);
+                throw;
             }
             finally
             {
@@ -68,6 +78,7 @@ namespace EuskalIA.Server.Services.Email
 
         public async Task SendDeactivationEmailAsync(string email, string username, string token)
         {
+            _logger.LogInformation("Preparing deactivation email for {Email} ({Username}).", email, username);
             var language = CultureInfo.CurrentUICulture.Name.Substring(0, 2); // Get current requested language
 
             var deactivationUrl = $"http://localhost:8081/confirm-deactivation?token={token}";
@@ -94,6 +105,7 @@ namespace EuskalIA.Server.Services.Email
             };
 
             await _emailQueue.EnqueueAsync(message);
+            _logger.LogInformation("Deactivation email for {Email} ({Username}) enqueued successfully.", email, username);
         }
     }
 }

@@ -5,6 +5,7 @@ using EuskalIA.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace EuskalIA.Server.Controllers
 {
@@ -15,11 +16,13 @@ namespace EuskalIA.Server.Controllers
     {
         private readonly ISrsService _srsService;
         private readonly AppDbContext _context;
+        private readonly ILogger<SrsController> _logger;
 
-        public SrsController(ISrsService srsService, AppDbContext context)
+        public SrsController(ISrsService srsService, AppDbContext context, ILogger<SrsController> logger)
         {
             _srsService = srsService;
             _context = context;
+            _logger = logger;
         }
 
         [HttpGet("status/{userId}")]
@@ -32,6 +35,7 @@ namespace EuskalIA.Server.Controllers
         [HttpGet("session/{userId}")]
         public async Task<ActionResult<IEnumerable<Exercise>>> GetReviewSession(int userId)
         {
+            _logger.LogInformation("Creating review session for user {UserId}.", userId);
             var dueNodes = await _srsService.GetDueNodesAsync(userId);
             if (!dueNodes.Any()) return Ok(new List<Exercise>());
 
@@ -51,6 +55,7 @@ namespace EuskalIA.Server.Controllers
         [HttpPost("record")]
         public async Task<IActionResult> RecordReviewResult([FromBody] SrsReviewResultDto dto)
         {
+            _logger.LogInformation("Recording SRS review for user {UserId} on topic {Topic}. Correct: {IsCorrect}.", dto.UserId, dto.Topic, dto.IsCorrect);
             await _srsService.UpdateSrsNodeAsync(dto.UserId, dto.Topic, dto.IsCorrect);
             return Ok();
         }

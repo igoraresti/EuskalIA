@@ -97,8 +97,44 @@ namespace EuskalIA.Tests.Services
                 )
                 .ReturnsAsync(new HttpResponseMessage
                 {
-                    StatusCode = HttpStatusCode.InternalServerError
+                    StatusCode = HttpStatusCode.InternalServerError,
+                    Content = new StringContent("Error body")
                 });
+
+            var httpClient = new HttpClient(handlerMock.Object);
+            var service = new GeminiAIService(httpClient, _mockOptions.Object, _mockLogger.Object, _mockScopeFactory.Object);
+
+            // Act
+            var result = await service.GenerateAigcExercisesAsync("A1", "Context text", 1);
+
+            // Assert
+            result.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task GenerateAigcExercisesAsync_WhenApiKeyMissing_ReturnsEmptyList()
+        {
+            // Arrange
+            _settings.ApiKey = "";
+            var httpClient = new HttpClient(new Mock<HttpMessageHandler>().Object);
+            var service = new GeminiAIService(httpClient, _mockOptions.Object, _mockLogger.Object, _mockScopeFactory.Object);
+
+            // Act
+            var result = await service.GenerateAigcExercisesAsync("A1", "Context text", 1);
+
+            // Assert
+            result.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task GenerateAigcExercisesAsync_WhenJsonIsInvalid_ReturnsEmptyList()
+        {
+            // Arrange
+            var mockResponseJson = new { candidates = new[] { new { content = new { parts = new[] { new { text = "invalid-json" } } } } } };
+            
+            var handlerMock = new Mock<HttpMessageHandler>();
+            handlerMock.Protected().Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage { StatusCode = HttpStatusCode.OK, Content = new StringContent(JsonSerializer.Serialize(mockResponseJson)) });
 
             var httpClient = new HttpClient(handlerMock.Object);
             var service = new GeminiAIService(httpClient, _mockOptions.Object, _mockLogger.Object, _mockScopeFactory.Object);

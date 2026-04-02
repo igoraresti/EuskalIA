@@ -69,7 +69,7 @@ namespace EuskalIA.Server.Services.AI
                 return new List<AigcExercise>();
             }
 
-            _logger.LogInformation($"Generating {count} exercises for level {levelId} using Gemini.");
+            _logger.LogInformation("Generating {Count} exercises for level {LevelId} with Gemini model {Model}.", count, levelId, _settings.Model);
 
             var url = $"https://generativelanguage.googleapis.com/v1beta/models/{_settings.Model}:generateContent?key={_settings.ApiKey}";
 
@@ -135,6 +135,7 @@ Solo devuelve el JSON, sin bloques de código ni explicaciones.";
                 if (!response.IsSuccessStatusCode)
                 {
                     var errorBody = await response.Content.ReadAsStringAsync();
+                    _logger.LogWarning("Gemini API call failed with status {StatusCode}: {ErrorBody}", response.StatusCode, errorBody);
                     string status = response.StatusCode == System.Net.HttpStatusCode.TooManyRequests ? "QUOTA_EXHAUSTED" : "ERROR";
                     await LogAsync(levelId, "Generation", status, $"HTTP {(int)response.StatusCode}: {errorBody}");
                     return new List<AigcExercise>();
@@ -163,7 +164,8 @@ Solo devuelve el JSON, sin bloques de código ni explicaciones.";
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error calling Gemini API or parsing response.");
+                _logger.LogError(ex, "Unexpected error in GeminiAIService while generating exercises for level {LevelId}.", levelId);
+                await LogAsync(levelId, "Generation", "ERROR", ex.Message);
                 return new List<AigcExercise>();
             }
         }

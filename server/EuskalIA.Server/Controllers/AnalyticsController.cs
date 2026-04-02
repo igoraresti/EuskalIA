@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using EuskalIA.Server.Services;
 
 namespace EuskalIA.Server.Controllers
@@ -12,10 +13,12 @@ namespace EuskalIA.Server.Controllers
     public class AnalyticsController : ControllerBase
     {
         private readonly IAnalyticsService _analyticsService;
+        private readonly ILogger<AnalyticsController> _logger;
 
-        public AnalyticsController(IAnalyticsService analyticsService)
+        public AnalyticsController(IAnalyticsService analyticsService, ILogger<AnalyticsController> logger)
         {
             _analyticsService = analyticsService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -25,6 +28,7 @@ namespace EuskalIA.Server.Controllers
         [HttpGet("weaknesses/{userId}")]
         public async Task<IActionResult> GetWeaknesses(int userId, [FromQuery] int topN = 3)
         {
+            _logger.LogInformation("Fetching top {TopN} weaknesses for user {UserId}.", topN, userId);
             var weaknesses = await _analyticsService.GetUserWeaknessesAsync(userId, topN);
             return Ok(weaknesses);
         }

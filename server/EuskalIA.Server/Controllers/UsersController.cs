@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using EuskalIA.Server.Services.Auth;
 using EuskalIA.Server.Services;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace EuskalIA.Server.Controllers
 {
@@ -24,8 +25,16 @@ namespace EuskalIA.Server.Controllers
         private readonly IStringLocalizer<UsersController> _localizer;
 
         private readonly IGamificationService _gamificationService;
+        private readonly ILogger<UsersController> _logger;
 
-        public UsersController(AppDbContext context, IEncryptionService encryptionService, IEmailService emailService, IJwtService jwtService, IStringLocalizer<UsersController> localizer, IGamificationService gamificationService)
+        public UsersController(
+            AppDbContext context, 
+            IEncryptionService encryptionService, 
+            IEmailService emailService, 
+            IJwtService jwtService, 
+            IStringLocalizer<UsersController> localizer, 
+            IGamificationService gamificationService,
+            ILogger<UsersController> logger)
         {
             _context = context;
             _encryptionService = encryptionService;
@@ -33,6 +42,7 @@ namespace EuskalIA.Server.Controllers
             _jwtService = jwtService;
             _localizer = localizer;
             _gamificationService = gamificationService;
+            _logger = logger;
         }
 
         [Authorize]
@@ -57,6 +67,7 @@ namespace EuskalIA.Server.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<User>> Login([FromBody] LoginDto loginDto)
         {
+            _logger.LogInformation("Login attempt for user {Username}.", loginDto.Username);
             // Naive implementation: fetch all users and check (since we need to decrypt to check)
             // In a real app, we would hash passwords one-way and query by hash or username.
             // Given the current encryption service, we can encrypt the input username to find the user?
@@ -67,7 +78,10 @@ namespace EuskalIA.Server.Controllers
 
             var decryptedPassword = _encryptionService.Decrypt(user.Password);
             if (decryptedPassword != loginDto.Password) 
+            {
+                _logger.LogWarning("Failed login for user {Username}: Invalid password.", loginDto.Username);
                 return Unauthorized(new { message = _localizer["InvalidCredentials"].Value });
+            }
 
             // Check if user is verified
             if (!user.IsVerified)
@@ -75,7 +89,12 @@ namespace EuskalIA.Server.Controllers
 
             // Check if user is active
             if (!user.IsActive)
+            {
+                _logger.LogWarning("Failed login for user {Username}: Account deactivated.", loginDto.Username);
                 return Unauthorized(new { message = _localizer["AccountDeactivated"].Value });
+            }
+
+            _logger.LogInformation("User {Username} logged in successfully.", loginDto.Username);
 
             var token = _jwtService.GenerateToken(user);
 
@@ -102,24 +121,7 @@ namespace EuskalIA.Server.Controllers
         {
             var user = await _context.Users.Include(u => u.Progress).FirstOrDefaultAsync(u => u.Id == id);
             
-            // Auto-create dummy user 1 if missing (legacy logic preserved)
-            if (user == null && id == 1)
-            {
-                user = new User 
-                { 
-                    Username = "Igor Aresti", 
-                    Nickname = _encryptionService.Encrypt("igoraresti"),
-                    Email = _encryptionService.Encrypt("igor@euskalia.eus"),
-                    Password = _encryptionService.Encrypt("1234"),
-                    JoinedAt = DateTime.UtcNow.AddMonths(-2)
-                };
-                _context.Users.Add(user);
-                await _context.SaveChangesAsync();
-            }
-            else if (user == null)
-            {
-                return NotFound();
-            }
+            if (user == null) return NotFound();
 
             if (user.Progress == null)
             {
@@ -195,6 +197,7 @@ namespace EuskalIA.Server.Controllers
             if (!string.IsNullOrEmpty(profile.Password)) user.Password = _encryptionService.Encrypt(profile.Password);
 
             await _context.SaveChangesAsync();
+            _logger.LogInformation("Profile updated for user {Username} (ID: {UserId}).", user.Username, id);
             return Ok(new { Message = _localizer["ProfileUpdated"].Value });
         }
 
@@ -335,10 +338,12 @@ namespace EuskalIA.Server.Controllers
 
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
-
+            _logger.LogInformation("New user registered: {Username} (ID: {UserId}).", newUser.Username, newUser.Id);
+ 
             // Send verification email
             await _emailService.SendVerificationEmailAsync(registerDto.Email, registerDto.Username, verificationToken, registerDto.Language ?? "es");
-
+            _logger.LogInformation("Verification email sent for user {Username} (ID: {UserId}).", newUser.Username, newUser.Id);
+ 
             return Ok(new { message = _localizer["RegistrationSuccess"].Value });
         }
 

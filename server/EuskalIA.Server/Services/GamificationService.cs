@@ -17,8 +17,13 @@ namespace EuskalIA.Server.Services
 
         public async Task<int> UpdateStreakAsync(int userId)
         {
+            _logger.LogInformation("Updating streak for user {UserId}.", userId);
             var progress = await _context.Progresses.FirstOrDefaultAsync(p => p.UserId == userId);
-            if (progress == null) return 0;
+            if (progress == null)
+            {
+                _logger.LogWarning("Progress not found for user {UserId} while updating streak.", userId);
+                return 0;
+            }
 
             var today = DateTime.UtcNow.Date;
             var lastLessonDate = progress.LastLessonDate.Date;
@@ -42,13 +47,19 @@ namespace EuskalIA.Server.Services
 
             progress.LastLessonDate = DateTime.UtcNow;
             await _context.SaveChangesAsync();
+            _logger.LogInformation("User {UserId} streak updated to {Streak}.", userId, progress.Streak);
             return progress.Streak;
         }
 
         public async Task<List<Achievement>> CheckAchievementsAsync(int userId)
         {
+            _logger.LogInformation("Checking achievements for user {UserId}.", userId);
             var progress = await _context.Progresses.Include(p => p.User).FirstOrDefaultAsync(p => p.UserId == userId);
-            if (progress == null) return new List<Achievement>();
+            if (progress == null)
+            {
+                _logger.LogWarning("Progress not found for user {UserId} while checking achievements.", userId);
+                return new List<Achievement>();
+            }
 
             var earnedAchievementIds = await _context.UserAchievements
                 .Where(ua => ua.UserId == userId)
@@ -94,6 +105,10 @@ namespace EuskalIA.Server.Services
             if (newlyEarned.Any())
             {
                 await _context.SaveChangesAsync();
+                foreach (var ach in newlyEarned)
+                {
+                    _logger.LogInformation("User {UserId} earned achievement {AchievementCode}.", userId, ach.Code);
+                }
             }
 
             return newlyEarned;

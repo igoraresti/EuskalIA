@@ -5,6 +5,7 @@ using EuskalIA.Server.Models;
 using EuskalIA.Server.Services.AI;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using Microsoft.Extensions.Logging;
 
 namespace EuskalIA.Tests.Controllers
 {
@@ -15,7 +16,8 @@ namespace EuskalIA.Tests.Controllers
 
         private AigcExercisesController CreateController(AppDbContext context)
         {
-            return new AigcExercisesController(context, _mockAiService.Object, _mockKnowledgeService.Object);
+            var mockLogger = new Mock<ILogger<AigcExercisesController>>();
+            return new AigcExercisesController(context, _mockAiService.Object, _mockKnowledgeService.Object, mockLogger.Object);
         }
 
         [Fact]

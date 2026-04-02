@@ -11,6 +11,7 @@ using EuskalIA.Server.Services.Auth;
 using EuskalIA.Server.Services;
 using Moq;
 using Xunit;
+using Microsoft.Extensions.Logging;
 
 namespace EuskalIA.Tests.Controllers
 {
@@ -37,14 +38,19 @@ namespace EuskalIA.Tests.Controllers
 
         private UsersController GetController(EuskalIA.Server.Data.AppDbContext context)
         {
-            return new UsersController(context, _mockEncrypt.Object, _mockEmail.Object, _mockJwt.Object, _mockLocalizer.Object, _mockGamification.Object);
+            var mockLogger = new Mock<ILogger<UsersController>>();
+            return new UsersController(context, _mockEncrypt.Object, _mockEmail.Object, _mockJwt.Object, _mockLocalizer.Object, _mockGamification.Object, mockLogger.Object);
         }
 
         [Fact]
-        public async Task GetProgress_CreatesUserAndProgress_WhenNew()
+        public async Task GetProgress_ReturnsProgress_WhenUserExists()
         {
             // Arrange
             var context = GetDatabaseContext();
+            var user = new User { Id = 1, Username = "Igor Aresti", Email = "igor@euskalia.eus", Nickname = "igor" };
+            context.Users.Add(user);
+            await context.SaveChangesAsync();
+            
             var controller = GetController(context);
 
             // Act
@@ -53,7 +59,7 @@ namespace EuskalIA.Tests.Controllers
             // Assert
             var actionResult = Assert.IsType<OkObjectResult>(result.Result);
             // The controller returns an anonymous object with { Progress, LessonScores }
-            // Let's just verify it returns OK.
+            Assert.NotNull(actionResult.Value);
         }
 
         [Fact]

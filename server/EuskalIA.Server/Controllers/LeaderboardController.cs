@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using EuskalIA.Server.Data;
 using EuskalIA.Server.Models;
 
@@ -13,15 +14,18 @@ namespace EuskalIA.Server.Controllers
     public class LeaderboardController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly ILogger<LeaderboardController> _logger;
 
-        public LeaderboardController(AppDbContext context)
+        public LeaderboardController(AppDbContext context, ILogger<LeaderboardController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         [HttpGet("world")]
         public async Task<ActionResult<IEnumerable<dynamic>>> GetWorldLeaderboard(string period = "all")
         {
+            _logger.LogInformation("Fetching world leaderboard for period {Period}.", period);
             var query = _context.Progresses
                 .Include(p => p.User)
                 .Where(p => p.User != null && p.User.IsActive)
@@ -51,6 +55,7 @@ namespace EuskalIA.Server.Controllers
         [HttpGet("me/{userId}")]
         public async Task<ActionResult<IEnumerable<dynamic>>> GetUserLeaderboard(int userId, string period = "all")
         {
+            _logger.LogInformation("Fetching relative leaderboard for user {UserId} (Period: {Period}).", userId, period);
             var allRankings = await _context.Progresses
                 .Include(p => p.User)
                 .Where(p => p.User != null && p.User.IsActive)

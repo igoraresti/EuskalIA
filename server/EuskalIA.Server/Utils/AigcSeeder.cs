@@ -1,29 +1,31 @@
 using EuskalIA.Server.Data;
 using EuskalIA.Server.Models;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace EuskalIA.Server.Utils
 {
     public static class AigcSeeder
     {
-        public static void SeedAigcExercises(AppDbContext context)
+        public static void SeedAigcExercises(AppDbContext context, ILogger logger)
         {
+            logger.LogInformation("Starting AIGC exercise seeding.");
             // Resolve the Lessons folder relative to the repo root (2 levels up from
             // the running binary: bin/Debug/net9.0 -> project -> server -> repo root)
             var projectDir = Directory.GetCurrentDirectory();
             var repoRoot = Path.GetFullPath(Path.Combine(projectDir, "..", ".."));
             var lessonsDir = Path.Combine(repoRoot, "Lessons");
-
-            SeedFromJsonFile(context, Path.Combine(lessonsDir, "a1_exercises.json"), "A1");
-            SeedFromJsonFile(context, Path.Combine(lessonsDir, "a2_exercises.json"), "A2");
-            SeedFromJsonFile(context, Path.Combine(lessonsDir, "b1_exercises.json"), "B1");
+ 
+            SeedFromJsonFile(context, Path.Combine(lessonsDir, "a1_exercises.json"), "A1", logger);
+            SeedFromJsonFile(context, Path.Combine(lessonsDir, "a2_exercises.json"), "A2", logger);
+            SeedFromJsonFile(context, Path.Combine(lessonsDir, "b1_exercises.json"), "B1", logger);
         }
-
-        private static void SeedFromJsonFile(AppDbContext context, string filePath, string level)
+ 
+        private static void SeedFromJsonFile(AppDbContext context, string filePath, string level, ILogger logger)
         {
             if (!File.Exists(filePath))
             {
-                Console.WriteLine($"[AigcSeeder] JSON not found for {level}: {filePath}");
+                logger.LogWarning("[AigcSeeder] JSON not found for {Level}: {FilePath}", level, filePath);
                 return;
             }
 
@@ -57,11 +59,11 @@ namespace EuskalIA.Server.Utils
             if (inserted > 0)
             {
                 context.SaveChanges();
-                Console.WriteLine($"[AigcSeeder] {level}: inserted {inserted} exercises.");
+                logger.LogInformation("[AigcSeeder] {Level}: inserted {InsertedCount} exercises.", level, inserted);
             }
             else
             {
-                Console.WriteLine($"[AigcSeeder] {level}: all exercises already present, skipped.");
+                logger.LogInformation("[AigcSeeder] {Level}: all exercises already present, skipped.", level);
             }
         }
 

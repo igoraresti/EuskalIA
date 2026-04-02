@@ -17,7 +17,12 @@ namespace EuskalIA.Server.Services.Notifications
 
         public async Task SendPushNotificationAsync(string pushToken, string title, string body, object? data = null)
         {
-            if (string.IsNullOrEmpty(pushToken)) return;
+            if (string.IsNullOrEmpty(pushToken))
+            {
+                _logger.LogWarning("Attempted to send push notification but pushToken is null or empty.");
+                return;
+            }
+            _logger.LogInformation("Sending push notification to token {PushToken}.", pushToken);
 
             var message = new
             {
@@ -34,6 +39,7 @@ namespace EuskalIA.Server.Services.Notifications
 
         public async Task SendPushNotificationsAsync(List<string> pushTokens, string title, string body, object? data = null)
         {
+            _logger.LogInformation("Sending batch push notifications to {Count} tokens.", pushTokens.Count);
             var messages = pushTokens
                 .Where(token => !string.IsNullOrEmpty(token))
                 .Select(token => new
@@ -47,7 +53,11 @@ namespace EuskalIA.Server.Services.Notifications
                 })
                 .ToList<object>();
 
-            if (!messages.Any()) return;
+            if (!messages.Any())
+            {
+                _logger.LogWarning("No valid push tokens found in batch.");
+                return;
+            }
 
             // Expo recommends chunks of 100 messages max
             const int chunkSize = 100;
@@ -66,12 +76,12 @@ namespace EuskalIA.Server.Services.Notifications
                 
                 if (response.IsSuccessStatusCode)
                 {
-                    _logger.LogInformation($"Successfully sent {messages.Count} push notifications to Expo.");
+                    _logger.LogInformation("Successfully sent {Count} push notifications to Expo.", messages.Count);
                 }
                 else
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError($"Failed to send push notifications to Expo. Status: {response.StatusCode}, Error: {errorContent}");
+                    _logger.LogError("Failed to send push notifications to Expo. Status: {StatusCode}, Error: {ErrorContent}", response.StatusCode, errorContent);
                 }
             }
             catch (Exception ex)

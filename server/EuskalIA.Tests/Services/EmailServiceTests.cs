@@ -2,6 +2,7 @@ using EuskalIA.Server.Services.Email;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Localization;
 using Moq;
+using Microsoft.Extensions.Logging;
 using System.Globalization;
 using Xunit;
 
@@ -44,7 +45,8 @@ namespace EuskalIA.Tests.Services
             _mockLocalizer.Setup(l => l["VerifyLinkExpiries"]).Returns(new LocalizedString("VerifyLinkExpiries", "Expires"));
             _mockLocalizer.Setup(l => l["VerifyIgnoreIfWrong"]).Returns(new LocalizedString("VerifyIgnoreIfWrong", "Ignore"));
 
-            var service = new EmailService(_mockQueue.Object, _mockLocalizer.Object, _mockEnv.Object);
+            var mockLogger = new Mock<ILogger<EmailService>>();
+            var service = new EmailService(_mockQueue.Object, _mockLocalizer.Object, _mockEnv.Object, mockLogger.Object);
             var language = "eu";
 
             // Act
@@ -61,7 +63,8 @@ namespace EuskalIA.Tests.Services
         public async Task SendDeactivationEmailAsync_EnqueuesEmail()
         {
             // Arrange
-            var service = new EmailService(_mockQueue.Object, _mockLocalizer.Object, _mockEnv.Object);
+            var mockLogger = new Mock<ILogger<EmailService>>();
+            var service = new EmailService(_mockQueue.Object, _mockLocalizer.Object, _mockEnv.Object, mockLogger.Object);
 
             // Act
             await service.SendDeactivationEmailAsync("test@example.com", "testuser", "token123");

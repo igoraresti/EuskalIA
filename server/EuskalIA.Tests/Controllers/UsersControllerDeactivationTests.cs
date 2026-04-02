@@ -12,6 +12,7 @@ using EuskalIA.Server.Services.Auth;
 using EuskalIA.Server.Services;
 using Moq;
 using Xunit;
+using Microsoft.Extensions.Logging;
 
 namespace EuskalIA.Tests.Controllers
 {
@@ -37,7 +38,8 @@ namespace EuskalIA.Tests.Controllers
 
         private UsersController GetController(EuskalIA.Server.Data.AppDbContext context)
         {
-            return new UsersController(context, _mockEncrypt.Object, _mockEmail.Object, _mockJwt.Object, _mockLocalizer.Object, _mockGamification.Object);
+            var mockLogger = new Mock<ILogger<UsersController>>();
+            return new UsersController(context, _mockEncrypt.Object, _mockEmail.Object, _mockJwt.Object, _mockLocalizer.Object, _mockGamification.Object, mockLogger.Object);
         }
 
         [Fact]

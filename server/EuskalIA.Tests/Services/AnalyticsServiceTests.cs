@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace EuskalIA.Tests.Services
 {
@@ -32,7 +34,8 @@ namespace EuskalIA.Tests.Services
             
             await context.SaveChangesAsync();
             
-            var service = new AnalyticsService(context);
+            var mockLogger = new Mock<ILogger<AnalyticsService>>();
+            var service = new AnalyticsService(context, mockLogger.Object);
             
             // Act
             var result = await service.GetUserWeaknessesAsync(userId);
@@ -71,7 +74,8 @@ namespace EuskalIA.Tests.Services
             });
             
             await context.SaveChangesAsync();
-            var service = new AnalyticsService(context);
+            var mockLogger = new Mock<ILogger<AnalyticsService>>();
+            var service = new AnalyticsService(context, mockLogger.Object);
             
             // Act
             var result = await service.GetUserWeaknessesAsync(userId);

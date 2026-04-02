@@ -1,22 +1,26 @@
 using EuskalIA.Server.Data;
 using EuskalIA.Server.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace EuskalIA.Server.Services
 {
     public class SrsService : ISrsService
     {
         private readonly AppDbContext _context;
+        private readonly ILogger<SrsService> _logger;
         private const float DefaultEaseFactor = 2.5f;
         private const float MinEaseFactor = 1.3f;
 
-        public SrsService(AppDbContext context)
+        public SrsService(AppDbContext context, ILogger<SrsService> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task UpdateSrsNodeAsync(int userId, string topic, bool isCorrect)
         {
+            _logger.LogInformation("Updating SRS node for user {UserId}, topic {Topic}, success: {IsCorrect}.", userId, topic, isCorrect);
             var node = await _context.UserSrsNodes
                 .FirstOrDefaultAsync(n => n.UserId == userId && n.ConceptId == topic);
 
@@ -65,6 +69,7 @@ namespace EuskalIA.Server.Services
             }
 
             await _context.SaveChangesAsync();
+            _logger.LogInformation("SRS node for user {UserId}, topic {Topic} updated. Next review: {NextReview}.", userId, topic, node.NextReviewDate);
         }
 
         public async Task<List<UserSrsNode>> GetDueNodesAsync(int userId)

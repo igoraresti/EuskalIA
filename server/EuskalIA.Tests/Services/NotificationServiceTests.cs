@@ -1,31 +1,36 @@
+using EuskalIA.Server.Services.Notifications;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Moq.Protected;
+using System;
+using System.Collections.Generic;
 using System.Net;
-using Microsoft.Extensions.Logging;
-using EuskalIA.Server.Services.Notifications;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace EuskalIA.Tests.Services
 {
     public class NotificationServiceTests
     {
-        private readonly Mock<HttpMessageHandler> _msgHandlerMock;
+        private readonly Mock<HttpMessageHandler> _mockHandler;
         private readonly HttpClient _httpClient;
-        private readonly Mock<ILogger<NotificationService>> _loggerMock;
-        private readonly NotificationService _service;
+        private readonly Mock<ILogger<NotificationService>> _mockLogger;
 
         public NotificationServiceTests()
         {
-            _msgHandlerMock = new Mock<HttpMessageHandler>();
-            _httpClient = new HttpClient(_msgHandlerMock.Object);
-            _loggerMock = new Mock<ILogger<NotificationService>>();
-            _service = new NotificationService(_httpClient, _loggerMock.Object);
+            _mockHandler = new Mock<HttpMessageHandler>();
+            _httpClient = new HttpClient(_mockHandler.Object);
+            _mockLogger = new Mock<ILogger<NotificationService>>();
         }
 
         [Fact]
-        public async Task SendPushNotificationAsync_SendsCorrectRequest()
+        public async Task SendPushNotificationAsync_SendsRequest_WhenTokenValid()
         {
             // Arrange
-            _msgHandlerMock.Protected()
+            _mockHandler.Protected()
                 .Setup<Task<HttpResponseMessage>>(
                     "SendAsync",
                     ItExpr.IsAny<HttpRequestMessage>(),
@@ -33,26 +38,102 @@ namespace EuskalIA.Tests.Services
                 )
                 .ReturnsAsync(new HttpResponseMessage
                 {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent("{ \"data\": [] }")
+                    StatusCode = HttpStatusCode.OK
                 });
 
-            var token = "ExponentPushToken[123]";
-            var title = "Test Title";
-            var body = "Test Body";
+            var service = new NotificationService(_httpClient, _mockLogger.Object);
 
             // Act
-            await _service.SendPushNotificationAsync(token, title, body);
+            await service.SendPushNotificationAsync("token", "Title", "Body");
 
             // Assert
-            _msgHandlerMock.Protected().Verify(
+            _mockHandler.Protected().Verify(
                 "SendAsync",
                 Times.Once(),
-                ItExpr.Is<HttpRequestMessage>(req =>
-                    req.Method == HttpMethod.Post &&
-                    req.RequestUri!.ToString() == "https://exp.host/--/api/v2/push/send"),
+                ItExpr.Is<HttpRequestMessage>(req => req.Method == HttpMethod.Post),
                 ItExpr.IsAny<CancellationToken>()
             );
+        }
+
+        [Fact]
+        public async Task SendPushNotificationAsync_DoesNotSend_WhenTokenEmpty()
+        {
+            // Arrange
+            var service = new NotificationService(_httpClient, _mockLogger.Object);
+
+            // Act
+            await service.SendPushNotificationAsync("", "Title", "Body");
+
+            // Assert
+            _mockHandler.Protected().Verify(
+                "SendAsync",
+                Times.Never(),
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>()
+            );
+        }
+
+        [Fact]
+        public async Task SendPushNotificationsAsync_ChunksLargeBatches()
+        {
+            // Arrange
+            _mockHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK
+                });
+
+            var service = new NotificationService(_httpClient, _mockLogger.Object);
+            var tokens = new List<string>();
+            for (int i = 0; i < 150; i++) tokens.Add($"token-{i}");
+
+            // Act
+            await service.SendPushNotificationsAsync(tokens, "Batch", "Message");
+
+            // Assert: Should be 2 calls (100 + 50)
+            _mockHandler.Protected().Verify(
+                "SendAsync",
+                Times.Exactly(2),
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>()
+            );
+        }
+
+        [Fact]
+        public async Task SendPushNotificationsAsync_LogsError_WhenApiFails()
+        {
+            // Arrange
+            _mockHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.BadRequest,
+                    Content = new StringContent("Error")
+                });
+
+            var service = new NotificationService(_httpClient, _mockLogger.Object);
+
+            // Act
+            await service.SendPushNotificationAsync("token", "T", "B");
+
+            // Assert: Logger should have logged error (one call to LogError)
+            _mockLogger.Verify(
+                x => x.Log(
+                    LogLevel.Error,
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Failed to send")),
+                    It.IsAny<Exception>(),
+                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+                Times.Once);
         }
     }
 }

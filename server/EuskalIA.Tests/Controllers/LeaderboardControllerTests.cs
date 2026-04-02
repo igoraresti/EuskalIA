@@ -6,6 +6,8 @@ using EuskalIA.Server.Controllers;
 using EuskalIA.Server.Models;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace EuskalIA.Tests.Controllers
 {
@@ -23,7 +25,8 @@ namespace EuskalIA.Tests.Controllers
                 context.Progresses.Add(new Progress { UserId = i, XP = i * 100, WeeklyXP = i * 10, MonthlyXP = i * 50 });
             }
             await context.SaveChangesAsync();
-            var controller = new LeaderboardController(context);
+            var mockLogger = new Mock<ILogger<LeaderboardController>>();
+            var controller = new LeaderboardController(context, mockLogger.Object);
 
             // Act
             var result = await controller.GetWorldLeaderboard("all");
@@ -46,7 +49,8 @@ namespace EuskalIA.Tests.Controllers
                 context.Progresses.Add(new Progress { UserId = i, XP = i * 100 });
             }
             await context.SaveChangesAsync();
-            var controller = new LeaderboardController(context);
+            var mockLogger = new Mock<ILogger<LeaderboardController>>();
+            var controller = new LeaderboardController(context, mockLogger.Object);
 
             // Act
             var result = await controller.GetUserLeaderboard(10, "all");
@@ -65,7 +69,8 @@ namespace EuskalIA.Tests.Controllers
             context.Users.Add(new User { Id = 1, Username = "User1" });
             context.Progresses.Add(new Progress { UserId = 1, WeeklyXP = 500 });
             await context.SaveChangesAsync();
-            var controller = new LeaderboardController(context);
+            var mockLogger = new Mock<ILogger<LeaderboardController>>();
+            var controller = new LeaderboardController(context, mockLogger.Object);
 
             // Act
             var result = await controller.GetWorldLeaderboard("week");
@@ -84,7 +89,8 @@ namespace EuskalIA.Tests.Controllers
             context.Users.Add(new User { Id = 1, Username = "User1" });
             context.Progresses.Add(new Progress { UserId = 1, MonthlyXP = 1500 });
             await context.SaveChangesAsync();
-            var controller = new LeaderboardController(context);
+            var mockLogger = new Mock<ILogger<LeaderboardController>>();
+            var controller = new LeaderboardController(context, mockLogger.Object);
 
             // Act
             var result = await controller.GetWorldLeaderboard("month");
@@ -103,7 +109,8 @@ namespace EuskalIA.Tests.Controllers
             context.Users.Add(new User { Id = 1, Username = "User1" });
             context.Progresses.Add(new Progress { UserId = 1, WeeklyXP = 500 });
             await context.SaveChangesAsync();
-            var controller = new LeaderboardController(context);
+            var mockLogger = new Mock<ILogger<LeaderboardController>>();
+            var controller = new LeaderboardController(context, mockLogger.Object);
 
             // Act
             var result = await controller.GetUserLeaderboard(1, "week");
@@ -121,7 +128,8 @@ namespace EuskalIA.Tests.Controllers
             context.Users.Add(new User { Id = 1, Username = "User1" });
             context.Progresses.Add(new Progress { UserId = 1, MonthlyXP = 1500 });
             await context.SaveChangesAsync();
-            var controller = new LeaderboardController(context);
+            var mockLogger = new Mock<ILogger<LeaderboardController>>();
+            var controller = new LeaderboardController(context, mockLogger.Object);
 
             // Act
             var result = await controller.GetUserLeaderboard(1, "month");
@@ -136,7 +144,8 @@ namespace EuskalIA.Tests.Controllers
         {
             // Arrange
             var context = GetDatabaseContext();
-            var controller = new LeaderboardController(context);
+            var mockLogger = new Mock<ILogger<LeaderboardController>>();
+            var controller = new LeaderboardController(context, mockLogger.Object);
 
             // Act
             var result = await controller.GetUserLeaderboard(999, "all");

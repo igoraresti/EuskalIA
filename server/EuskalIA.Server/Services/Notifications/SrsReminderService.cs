@@ -23,6 +23,7 @@ namespace EuskalIA.Server.Services.Notifications
             {
                 try
                 {
+                    _logger.LogInformation("SRS Reminder check starting at {Time}.", DateTime.UtcNow);
                     await CheckAndSendRemindersAsync();
                 }
                 catch (Exception ex)
@@ -58,7 +59,7 @@ namespace EuskalIA.Server.Services.Notifications
                 return;
             }
 
-            _logger.LogInformation($"Found {usersWithDueReviews.Count} users with pending reviews.");
+            _logger.LogInformation("Found {Count} users with pending reviews.", usersWithDueReviews.Count);
 
             foreach (var user in usersWithDueReviews)
             {
@@ -84,6 +85,7 @@ namespace EuskalIA.Server.Services.Notifications
                 };
 
                 await notificationService.SendPushNotificationAsync(user.ExpoPushToken, title, body, new { type = "REVIEW_REMINDER" });
+                _logger.LogInformation("Sent review reminder to user {Username}.", user.Username);
             }
         }
     }

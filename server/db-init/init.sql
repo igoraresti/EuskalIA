@@ -24,15 +24,4 @@ BEGIN
     END
 END
 
-IF EXISTS (SELECT * FROM sys.tables WHERE name = 'Lessons')
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM Lessons)
-    BEGIN
-        INSERT INTO Lessons (Title, Description, Level, OrderIndex)
-        VALUES ('Kaixo!', 'Saludos básicos en Euskera', 'A1', 1),
-               ('Zenbakiak', 'Números del 1 al 10', 'A1', 2);
-    END
-END
-
-PRINT 'Seed data script executed successfully.';
 GO

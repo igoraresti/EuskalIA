@@ -26,6 +26,7 @@ namespace EuskalIA.Server.Services.AI
 
         public async Task<(string Content, string BookName, int PageNumber)> GetNextContextAsync(string levelId)
         {
+            _logger.LogInformation("Retrieving next context for level {LevelId}.", levelId);
             var bookName = MapLevelToBook(levelId);
 
             var progress = await _context.BookProgresses
@@ -38,11 +39,11 @@ namespace EuskalIA.Server.Services.AI
                 await _context.SaveChangesAsync();
             }
 
-            var filePath = Path.Combine(_env.ContentRootPath, "..", "Lessons", bookName);
+            var filePath = Path.Combine(_env.ContentRootPath, "..", "..", "Lessons", bookName);
 
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"Book not found at path: {filePath}. Using default context.");
+                _logger.LogWarning("Book not found at path: {FilePath}. Falling back to default context.", filePath);
                 return ("No context available. Generate general Euskara exercises.", "None", 0);
             }
 
@@ -76,11 +77,12 @@ namespace EuskalIA.Server.Services.AI
                     progress.LastPageProcessed = targetPage + 1; // Mark both as "seen" or just move one
                     progress.LastUpdated = DateTime.UtcNow;
                     await _context.SaveChangesAsync();
+                    _logger.LogInformation("Successfully extracted context from {BookName}, starting at page {PageNumber}.", bookName, targetPage);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error extracting text from PDF: {bookName}");
+                _logger.LogError(ex, "Error extracting text from PDF {BookName} at page {PageNumber}.", bookName, targetPage);
                 return ("Error extracting context.", bookName, targetPage);
             }
 

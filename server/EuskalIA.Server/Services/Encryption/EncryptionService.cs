@@ -1,13 +1,20 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Extensions.Logging;
 namespace EuskalIA.Server.Services.Encryption
 {
     public class EncryptionService : IEncryptionService
     {
+        private readonly ILogger<EncryptionService> _logger;
         private static readonly string Key = "EuskalIA_Secret_Key_2024_Security"; // 32 chars
         private static readonly byte[] KeyBytes = Encoding.UTF8.GetBytes(Key.Substring(0, 32));
         private static readonly byte[] IvBytes = Encoding.UTF8.GetBytes(Key.Substring(0, 16));
+
+        public EncryptionService(ILogger<EncryptionService> logger)
+        {
+            _logger = logger;
+        }
 
         public string Encrypt(string text)
         {
@@ -59,8 +66,9 @@ namespace EuskalIA.Server.Services.Encryption
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogWarning(ex, "Decryption failed. Returning original cipherText.");
                 return cipherText; // Return original if decryption fails (e.g. not encrypted yet)
             }
         }

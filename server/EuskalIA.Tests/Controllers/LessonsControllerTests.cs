@@ -5,6 +5,7 @@ using EuskalIA.Server.Models;
 using EuskalIA.Server.Services.AI;
 using EuskalIA.Server.Services.Encryption;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -25,7 +26,8 @@ namespace EuskalIA.Tests.Controllers
             mockAiService.Setup(x => x.GenerateExercisesAsync(It.IsAny<string>(), It.IsAny<int>()))
                 .ReturnsAsync(new List<Exercise> { new Exercise { Question = "Test?" } });
             
-            var controller = new LessonsController(context, mockAiService.Object, mockEncrypt.Object);
+            var mockLogger = new Mock<ILogger<LessonsController>>();
+            var controller = new LessonsController(context, mockAiService.Object, mockEncrypt.Object, mockLogger.Object);
 
             // Act
             var result = await controller.GetLessons();
@@ -43,7 +45,8 @@ namespace EuskalIA.Tests.Controllers
             var context = GetDatabaseContext();
             var mockAiService = new Mock<IAIService>();
             var mockEncrypt = new Mock<IEncryptionService>();
-            var controller = new LessonsController(context, mockAiService.Object, mockEncrypt.Object);
+            var mockLogger = new Mock<ILogger<LessonsController>>();
+            var controller = new LessonsController(context, mockAiService.Object, mockEncrypt.Object, mockLogger.Object);
 
             // Act
             var result = await controller.GetLesson(999);
@@ -62,7 +65,8 @@ namespace EuskalIA.Tests.Controllers
             mockAiService.Setup(x => x.GenerateExercisesAsync(It.IsAny<string>(), It.IsAny<int>()))
                 .ReturnsAsync(new List<Exercise> { new Exercise { Question = "New?" } });
             
-            var controller = new LessonsController(context, mockAiService.Object, mockEncrypt.Object);
+            var mockLogger = new Mock<ILogger<LessonsController>>();
+            var controller = new LessonsController(context, mockAiService.Object, mockEncrypt.Object, mockLogger.Object);
 
             // Act
             var result = await controller.GenerateLesson("Cultura");
@@ -86,7 +90,8 @@ namespace EuskalIA.Tests.Controllers
             mockEncrypt.Setup(e => e.Encrypt(It.IsAny<string>())).Returns((string s) => s);
             mockEncrypt.Setup(e => e.Decrypt(It.IsAny<string>())).Returns((string s) => s);
             
-            var controller = new LessonsController(context, mockAiService.Object, mockEncrypt.Object);
+            var mockLogger = new Mock<ILogger<LessonsController>>();
+            var controller = new LessonsController(context, mockAiService.Object, mockEncrypt.Object, mockLogger.Object);
 
             // Act
             var result = await controller.GetLessons();
@@ -109,7 +114,8 @@ namespace EuskalIA.Tests.Controllers
             
             var mockAiService = new Mock<IAIService>();
             var mockEncrypt = new Mock<IEncryptionService>();
-            var controller = new LessonsController(context, mockAiService.Object, mockEncrypt.Object);
+            var mockLogger = new Mock<ILogger<LessonsController>>();
+            var controller = new LessonsController(context, mockAiService.Object, mockEncrypt.Object, mockLogger.Object);
 
             // Act
             var result = await controller.GetLesson(1);

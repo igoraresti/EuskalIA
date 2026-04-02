@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using EuskalIA.Server.Data;
 using EuskalIA.Server.Models;
 using EuskalIA.Server.Services.AI;
@@ -17,12 +18,14 @@ namespace EuskalIA.Server.Controllers
         private readonly AppDbContext _context;
         private readonly IAIService _aiService;
         private readonly IEncryptionService _encryptionService;
+        private readonly ILogger<LessonsController> _logger;
 
-        public LessonsController(AppDbContext context, IAIService aiService, IEncryptionService encryptionService)
+        public LessonsController(AppDbContext context, IAIService aiService, IEncryptionService encryptionService, ILogger<LessonsController> logger)
         {
             _context = context;
             _aiService = aiService;
             _encryptionService = encryptionService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -101,6 +104,7 @@ namespace EuskalIA.Server.Controllers
         [HttpPost("generate-for-topic")]
         public async Task<ActionResult<Lesson>> GenerateLesson(string topic)
         {
+            _logger.LogInformation("Generating new lesson for topic {Topic}.", topic);
             var lesson = new Lesson { Title = topic, Topic = topic, Level = 1 };
             _context.Lessons.Add(lesson);
             await _context.SaveChangesAsync();

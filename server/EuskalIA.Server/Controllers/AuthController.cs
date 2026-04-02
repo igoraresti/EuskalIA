@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using EuskalIA.Server.Data;
 using EuskalIA.Server.Models;
 using EuskalIA.Server.DTOs;
@@ -16,22 +17,26 @@ namespace EuskalIA.Server.Controllers
         private readonly ISocialAuthService _socialAuthService;
         private readonly IJwtService _jwtService;
         private readonly IEncryptionService _encryptionService;
+        private readonly ILogger<AuthController> _logger;
 
         public AuthController(
             AppDbContext context,
             ISocialAuthService socialAuthService,
             IJwtService jwtService,
-            IEncryptionService encryptionService)
+            IEncryptionService encryptionService,
+            ILogger<AuthController> logger)
         {
             _context = context;
             _socialAuthService = socialAuthService;
             _jwtService = jwtService;
             _encryptionService = encryptionService;
+            _logger = logger;
         }
 
         [HttpPost("social-login")]
         public async Task<IActionResult> SocialLogin([FromBody] SocialLoginDto socialLoginDto)
         {
+            _logger.LogInformation("Social login attempt with provider {Provider}.", socialLoginDto.Provider);
             User? socialUser = null;
 
             if (socialLoginDto.Provider.ToLower() == "google")
@@ -45,6 +50,7 @@ namespace EuskalIA.Server.Controllers
 
             if (socialUser == null)
             {
+                _logger.LogWarning("Social login failed: Invalid token for provider {Provider}.", socialLoginDto.Provider);
                 return Unauthorized(new { message = "Invalid social token" });
             }
 
@@ -54,6 +60,7 @@ namespace EuskalIA.Server.Controllers
 
             if (user == null)
             {
+                _logger.LogInformation("Creating new user from social login: {Email}.", socialUser.Email);
                 // Create unique nickname (Name-XXXX)
                 var random = new Random();
                 const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -86,11 +93,15 @@ namespace EuskalIA.Server.Controllers
 
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
+                _logger.LogInformation("Successfully created user {Username} (ID: {UserId}) via social login.", user.Username, user.Id);
             }
             else if (!user.IsActive)
             {
+                _logger.LogWarning("Social login attempt for deactivated user {Username} (ID: {UserId}).", user.Username, user.Id);
                 return Unauthorized(new { message = "Account deactivated" });
             }
+
+            _logger.LogInformation("Social login successful for user {Username} (ID: {UserId}).", user.Username, user.Id);
 
             var token = _jwtService.GenerateToken(user);
 
