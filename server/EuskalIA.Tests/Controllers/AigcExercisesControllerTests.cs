@@ -1,6 +1,6 @@
 using EuskalIA.Server.Controllers;
 using EuskalIA.Server.Data;
-using EuskalIA.Server.DTOs;
+using EuskalIA.Server.DTOs.Exercises;
 using EuskalIA.Server.Models;
 using EuskalIA.Server.Services.AI;
 using Microsoft.AspNetCore.Mvc;

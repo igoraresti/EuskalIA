@@ -1,27 +1,17 @@
-using System.ComponentModel.DataAnnotations;
-
-namespace EuskalIA.Server.DTOs
+namespace EuskalIA.Server.DTOs.Exercises
 {
-    public class AigcExerciseCreateDto
+    /// <summary>
+    /// Data Transfer Object for returning AI-generated exercises to the frontend.
+    /// </summary>
+    public class AigcExerciseResponseDto
     {
-        [Required]
-        [MaxLength(100)]
+        public Guid Id { get; set; }
         public string ExerciseCode { get; set; } = string.Empty;
-
-        [Required]
-        [MaxLength(50)]
         public string TemplateType { get; set; } = string.Empty;
-
-        [Required]
-        [MaxLength(50)]
         public string LevelId { get; set; } = string.Empty;
-
-        [MaxLength(255)]
         public string Topics { get; set; } = string.Empty;
-
         public int Difficulty { get; set; }
-
-        [Required]
+        public string Status { get; set; } = string.Empty;
         public string JsonSchema { get; set; } = string.Empty;
     }
 }

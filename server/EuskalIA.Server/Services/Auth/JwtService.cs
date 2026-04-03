@@ -6,17 +6,32 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace EuskalIA.Server.Services.Auth
 {
+    /// <summary>
+    /// Implementation of <see cref="IJwtService"/> that issues tokens based on ASP.NET Coro Identity model.
+    /// Manages configuration retrieval for secret keys, issuers, and audiences.
+    /// </summary>
     public class JwtService : IJwtService
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger<JwtService> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JwtService"/> class.
+        /// </summary>
+        /// <param name="configuration">The application configuration provider.</param>
+        /// <param name="logger">The service logger.</param>
         public JwtService(IConfiguration configuration, ILogger<JwtService> logger)
         {
             _configuration = configuration;
             _logger = logger;
         }
 
+        /// <summary>
+        /// Generates a signed JWT token for the specified user containing their identity, username, and role.
+        /// Validates configuration before generating security keys.
+        /// </summary>
+        /// <param name="user">The user for whom to generate the token.</param>
+        /// <returns>A signed JWT token string.</returns>
         public string GenerateToken(User user)
         {
             _logger.LogInformation("Generating JWT token for user {Username} (ID: {UserId}, Role: {Role}).", user.Username, user.Id, user.Role);

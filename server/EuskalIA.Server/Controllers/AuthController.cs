@@ -3,12 +3,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using EuskalIA.Server.Data;
 using EuskalIA.Server.Models;
-using EuskalIA.Server.DTOs;
+using EuskalIA.Server.DTOs.Auth;
 using EuskalIA.Server.Services.Auth;
 using EuskalIA.Server.Services.Encryption;
 
 namespace EuskalIA.Server.Controllers
 {
+    /// <summary>
+    /// Controller for handling authentication and social login operations.
+    /// </summary>
     [ApiController]
     [Route("api/euskalia/[controller]")]
     public class AuthController : ControllerBase
@@ -19,6 +22,14 @@ namespace EuskalIA.Server.Controllers
         private readonly IEncryptionService _encryptionService;
         private readonly ILogger<AuthController> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AuthController"/> class.
+        /// </summary>
+        /// <param name="context">The database context.</param>
+        /// <param name="socialAuthService">The social authentication service.</param>
+        /// <param name="jwtService">The JWT token service.</param>
+        /// <param name="encryptionService">The data encryption service.</param>
+        /// <param name="logger">The controller logger.</param>
         public AuthController(
             AppDbContext context,
             ISocialAuthService socialAuthService,
@@ -33,6 +44,12 @@ namespace EuskalIA.Server.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Authenticates a user via a social provider (Google or Facebook).
+        /// If the user does not exist, a new profile is created automatically.
+        /// </summary>
+        /// <param name="socialLoginDto">The social login payload containing the provider and token.</param>
+        /// <returns>An <see cref="IActionResult"/> containing the JWT token and user profile if successful.</returns>
         [HttpPost("social-login")]
         public async Task<IActionResult> SocialLogin([FromBody] SocialLoginDto socialLoginDto)
         {
@@ -62,7 +79,6 @@ namespace EuskalIA.Server.Controllers
             {
                 _logger.LogInformation("Creating new user from social login: {Email}.", socialUser.Email);
                 // Create unique nickname (Name-XXXX)
-                var random = new Random();
                 const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
                 string generatedNickname;
                 bool isUnique = false;
@@ -71,7 +87,7 @@ namespace EuskalIA.Server.Controllers
                 string baseNickname = string.IsNullOrWhiteSpace(socialUser.Nickname) ? "User" : socialUser.Nickname.Replace(" ", "");
                 
                 do {
-                    var suffix = new string(Enumerable.Repeat(chars, 4).Select(s => s[random.Next(s.Length)]).ToArray());
+                    var suffix = new string(Enumerable.Repeat(chars, 4).Select(s => s[Random.Shared.Next(s.Length)]).ToArray());
                     generatedNickname = $"{baseNickname}-{suffix}";
                     var encryptedGenNick = _encryptionService.Encrypt(generatedNickname);
                     isUnique = !await _context.Users.AnyAsync(u => u.Nickname == encryptedGenNick);

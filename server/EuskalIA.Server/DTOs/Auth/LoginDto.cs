@@ -1,5 +1,8 @@
-namespace EuskalIA.Server.DTOs
+namespace EuskalIA.Server.DTOs.Auth
 {
+    /// <summary>
+    /// Data Transfer Object for user login credentials.
+    /// </summary>
     public class LoginDto
     {
         public string Username { get; set; } = string.Empty;

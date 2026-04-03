@@ -68,9 +68,12 @@ builder.Services.AddHostedService<SrsReminderService>();
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
 // JWT Authentication
-var jwtSecret = builder.Configuration["JwtSettings:Secret"]!;
-var jwtIssuer = builder.Configuration["JwtSettings:Issuer"]!;
-var jwtAudience = builder.Configuration["JwtSettings:Audience"]!;
+var jwtSecret = builder.Configuration["JwtSettings:Secret"] 
+                ?? throw new InvalidOperationException("JWT Secret is not configured.");
+var jwtIssuer = builder.Configuration["JwtSettings:Issuer"]
+                ?? throw new InvalidOperationException("JWT Issuer is not configured.");
+var jwtAudience = builder.Configuration["JwtSettings:Audience"]
+                ?? throw new InvalidOperationException("JWT Audience is not configured.");
 
 builder.Services.AddAuthentication(options =>
 {
@@ -154,12 +157,6 @@ app.Use(async (context, next) =>
     }
 });
 
-// Automatic migrations on startup
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
-}
 
 app.UseCors("AllowAll");
 app.UseHttpsRedirection(); 

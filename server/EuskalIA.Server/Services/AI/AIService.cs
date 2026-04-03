@@ -2,8 +2,18 @@ using System.Text.Json;
 using EuskalIA.Server.Models;
 namespace EuskalIA.Server.Services.AI
 {
+    /// <summary>
+    /// Mock implementation of <see cref="IAIService"/> for development and testing purposes.
+    /// Provides hardcoded exercise responses without calling external AI APIs.
+    /// </summary>
     public class MockAIService : IAIService
     {
+        /// <summary>
+        /// Generates mock language exercises for a specific topic (e.g., "Saludos").
+        /// </summary>
+        /// <param name="topic">The exercise topic.</param>
+        /// <param name="count">The requested number of exercises.</param>
+        /// <returns>A collection of simulated <see cref="Exercise"/> objects.</returns>
         public Task<List<Exercise>> GenerateExercisesAsync(string topic, int count)
         {
             // Simulate AI delay
@@ -44,6 +54,13 @@ namespace EuskalIA.Server.Services.AI
             return Task.FromResult(exercises);
         }
 
+        /// <summary>
+        /// Generates mock AIGC exercises for a specific level and context.
+        /// </summary>
+        /// <param name="levelId">The level code.</param>
+        /// <param name="context">The extracted text context.</param>
+        /// <param name="count">The requested number of exercises.</param>
+        /// <returns>A collection of simulated <see cref="AigcExercise"/> objects.</returns>
         public Task<List<AigcExercise>> GenerateAigcExercisesAsync(string levelId, string context, int count)
         {
             var list = new List<AigcExercise>();

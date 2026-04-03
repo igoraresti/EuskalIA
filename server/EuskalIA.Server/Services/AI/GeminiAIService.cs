@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using EuskalIA.Server.DTOs.AI;
 using EuskalIA.Server.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -8,6 +9,10 @@ using Microsoft.Extensions.Options;
 
 namespace EuskalIA.Server.Services.AI
 {
+    /// <summary>
+    /// Implementation of <see cref="IAIService"/> that uses Google's Gemini AI for generating educational content.
+    /// Includes structured logging of AI operations for moderation and performance tracking.
+    /// </summary>
     public class GeminiAIService : IAIService
     {
         private readonly HttpClient _httpClient;
@@ -15,6 +20,13 @@ namespace EuskalIA.Server.Services.AI
         private readonly ILogger<GeminiAIService> _logger;
         private readonly IServiceScopeFactory _scopeFactory;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GeminiAIService"/> class.
+        /// </summary>
+        /// <param name="httpClient">The HTTP client for API requests.</param>
+        /// <param name="settings">The Gemini configuration settings.</param>
+        /// <param name="logger">The service logger.</param>
+        /// <param name="scopeFactory">The scope factory for database operations in background tasks.</param>
         public GeminiAIService(
             HttpClient httpClient, 
             IOptions<GeminiSettings> settings, 
@@ -53,6 +65,13 @@ namespace EuskalIA.Server.Services.AI
             }
         }
 
+        /// <summary>
+        /// Generates traditional lesson exercises. 
+        /// (Currently a legacy placeholder returning an empty list).
+        /// </summary>
+        /// <param name="topic">The exercise topic.</param>
+        /// <param name="count">The requested number of exercises.</param>
+        /// <returns>An empty list of <see cref="Exercise"/> objects.</returns>
         public Task<List<Exercise>> GenerateExercisesAsync(string topic, int count)
         {
             // Note: IAIService interface uses the old Exercise model. 
@@ -61,6 +80,14 @@ namespace EuskalIA.Server.Services.AI
             return Task.FromResult(new List<Exercise>()); // Legacy support
         }
 
+        /// <summary>
+        /// Generates complex AIGC exercises using the Gemini Pro model.
+        /// Leverages a detailed system prompt and provided context to ensure high-quality Basque content.
+        /// </summary>
+        /// <param name="levelId">The target difficulty level.</param>
+        /// <param name="context">The source text context for generation.</param>
+        /// <param name="count">The number of exercises to generate.</param>
+        /// <returns>A collection of generated <see cref="AigcExercise"/> objects parsed from the AI response.</returns>
         public async Task<List<AigcExercise>> GenerateAigcExercisesAsync(string levelId, string context, int count)
         {
             if (string.IsNullOrEmpty(_settings.ApiKey))
@@ -145,7 +172,7 @@ Solo devuelve el JSON, sin bloques de código ni explicaciones.";
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 var geminiResponse = JsonSerializer.Deserialize<GeminiResponse>(responseBody, options);
 
-                var aiText = geminiResponse?.Candidates?[0].Content.Parts[0].Text;
+                var aiText = geminiResponse?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
                 if (string.IsNullOrEmpty(aiText))
                 {
                     await LogAsync(levelId, "Generation", "ERROR", "Empty response from Gemini.");
@@ -170,24 +197,5 @@ Solo devuelve el JSON, sin bloques de código ni explicaciones.";
             }
         }
 
-        public class GeminiResponse
-        {
-            public List<Candidate>? Candidates { get; set; }
-        }
-
-        public class Candidate
-        {
-            public Content? Content { get; set; }
-        }
-
-        public class Content
-        {
-            public List<Part>? Parts { get; set; }
-        }
-
-        public class Part
-        {
-            public string? Text { get; set; }
-        }
     }
 }

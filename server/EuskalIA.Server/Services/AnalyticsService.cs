@@ -1,29 +1,11 @@
 using EuskalIA.Server.Data;
 using EuskalIA.Server.Models;
+using EuskalIA.Server.DTOs.Analytics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace EuskalIA.Server.Services
 {
-    /// <summary>
-    /// Represents a user's weakness in a particular topic.
-    /// </summary>
-    public class WeaknessDto
-    {
-        public string Topic { get; set; } = string.Empty;
-        public int FailureCount { get; set; }
-        public int TotalAttempts { get; set; }
-        public double FailureRate => TotalAttempts > 0 ? (double)FailureCount / TotalAttempts : 0;
-    }
-
-    public interface IAnalyticsService
-    {
-        /// <summary>
-        /// Returns the top weakest topics for a user based on failed exercise attempts in the last 30 days.
-        /// </summary>
-        Task<List<WeaknessDto>> GetUserWeaknessesAsync(int userId, int topN = 3);
-    }
-
     public class AnalyticsService : IAnalyticsService
     {
         private readonly AppDbContext _context;

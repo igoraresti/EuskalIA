@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EuskalIA.Server.Data;
 using EuskalIA.Server.Models;
-using EuskalIA.Server.DTOs;
+using EuskalIA.Server.DTOs.Auth;
+using EuskalIA.Server.DTOs.Users;
+using EuskalIA.Server.DTOs.Gamification;
 using EuskalIA.Server.Services.Email;
 using EuskalIA.Server.Services.Encryption;
 using Microsoft.Extensions.Localization;
@@ -14,6 +16,9 @@ using Microsoft.Extensions.Logging;
 
 namespace EuskalIA.Server.Controllers
 {
+    /// <summary>
+    /// Controller for managing user profiles, authentication, progress, and account lifecycle.
+    /// </summary>
     [ApiController]
     [Route("api/euskalia/[controller]")]
     public class UsersController : ControllerBase
@@ -27,6 +32,16 @@ namespace EuskalIA.Server.Controllers
         private readonly IGamificationService _gamificationService;
         private readonly ILogger<UsersController> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UsersController"/> class.
+        /// </summary>
+        /// <param name="context">The database context.</param>
+        /// <param name="encryptionService">The service for encrypting/decrypting user data.</param>
+        /// <param name="emailService">The service for sending system emails.</param>
+        /// <param name="jwtService">The service for generating authentication tokens.</param>
+        /// <param name="localizer">The localizer for UI strings.</param>
+        /// <param name="gamificationService">The service for progress and achievement updates.</param>
+        /// <param name="logger">The controller logger.</param>
         public UsersController(
             AppDbContext context, 
             IEncryptionService encryptionService, 
@@ -45,6 +60,12 @@ namespace EuskalIA.Server.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Retrieves basic profile information for a specific user.
+        /// Sensitve data is decrypted before being returned.
+        /// </summary>
+        /// <param name="id">The unique identifier of the user.</param>
+        /// <returns>A <see cref="User"/> object if found; otherwise, NotFound.</returns>
         [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
@@ -64,6 +85,11 @@ namespace EuskalIA.Server.Controllers
             };
         }
 
+        /// <summary>
+        /// Authenticates a user with a username and password.
+        /// </summary>
+        /// <param name="loginDto">The login credentials.</param>
+        /// <returns>An <see cref="ActionResult"/> containing the JWT token and user details if successful.</returns>
         [HttpPost("login")]
         public async Task<ActionResult<User>> Login([FromBody] LoginDto loginDto)
         {
@@ -115,6 +141,12 @@ namespace EuskalIA.Server.Controllers
             });
         }
 
+        /// <summary>
+        /// Retrieves the comprehensive learning progress for a user, including XP, level, and lesson scores.
+        /// Automatically initializes progress if it's the user's first time.
+        /// </summary>
+        /// <param name="id">The unique identifier of the user.</param>
+        /// <returns>An object containing user progress and detailed lesson scores.</returns>
         [Authorize]
         [HttpGet("{id}/progress")]
         public async Task<ActionResult<object>> GetProgress(int id)
@@ -159,6 +191,12 @@ namespace EuskalIA.Server.Controllers
             });
         }
 
+        /// <summary>
+        /// Adds Experience Points (XP) to the user's progress and updates streaks and achievements.
+        /// </summary>
+        /// <param name="id">The unique identifier of the user.</param>
+        /// <param name="update">The XP update details.</param>
+        /// <returns>An <see cref="IActionResult"/> with the updated progress and newly earned achievements.</returns>
         [Authorize]
         [HttpPost("{id}/xp")]
         public async Task<IActionResult> AddXP(int id, [FromBody] XPUpdateDto update)
@@ -184,6 +222,12 @@ namespace EuskalIA.Server.Controllers
             return Ok(new { Progress = progress, NewlyEarned = newlyEarned });
         }
 
+        /// <summary>
+        /// Updates the user's profile information such as username, email, or password.
+        /// </summary>
+        /// <param name="id">The unique identifier of the user.</param>
+        /// <param name="profile">The updated profile details.</param>
+        /// <returns>An <see cref="IActionResult"/> indicating success.</returns>
         [Authorize]
         [HttpPut("{id}/profile")]
         public async Task<IActionResult> UpdateProfile(int id, [FromBody] ProfileUpdateDto profile)
@@ -201,6 +245,11 @@ namespace EuskalIA.Server.Controllers
             return Ok(new { Message = _localizer["ProfileUpdated"].Value });
         }
 
+        /// <summary>
+        /// Initiates the account deletion process by generating a verification code.
+        /// </summary>
+        /// <param name="id">The unique identifier of the user.</param>
+        /// <returns>An <see cref="IActionResult"/> indicating that the code has been sent.</returns>
         [Authorize]
         [HttpPost("{id}/request-deletion")]
         public async Task<IActionResult> RequestDeletion(int id)
@@ -224,6 +273,11 @@ namespace EuskalIA.Server.Controllers
             return Ok(new { message = "Verification code generated and sent." });
         }
 
+        /// <summary>
+        /// Sends a deactivation email to the user with a confirmation link.
+        /// </summary>
+        /// <param name="id">The unique identifier of the user.</param>
+        /// <returns>An <see cref="IActionResult"/> indicating that the email has been sent.</returns>
         [Authorize]
         [HttpPost("{id}/request-deactivation")]
         public async Task<IActionResult> RequestDeactivation(int id)
@@ -242,6 +296,12 @@ namespace EuskalIA.Server.Controllers
             return Ok(new { message = _localizer["DeactivationEmailSent"].Value });
         }
 
+        /// <summary>
+        /// Confirms account deactivation via a secure token.
+        /// This performs a logical deletion (inactivation).
+        /// </summary>
+        /// <param name="token">The deactivation token received via email.</param>
+        /// <returns>A redirect to the frontend login or success page.</returns>
         [HttpGet("confirm-deactivation")]
         public async Task<IActionResult> ConfirmDeactivation([FromQuery] string token)
         {
@@ -264,6 +324,12 @@ namespace EuskalIA.Server.Controllers
             return Redirect("http://localhost:8081/login?deactivated=true");
         }
 
+        /// <summary>
+        /// Permanently deletes a user's account after verifying a code sent via email.
+        /// </summary>
+        /// <param name="id">The unique identifier of the user.</param>
+        /// <param name="code">The verification code.</param>
+        /// <returns>An <see cref="IActionResult"/> indicating success.</returns>
         [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAccount(int id, [FromQuery] string? code)
@@ -281,6 +347,11 @@ namespace EuskalIA.Server.Controllers
             return Ok(new { message = "Account deleted successfully." });
         }
 
+        /// <summary>
+        /// Registers a new user account and sends a verification email.
+        /// </summary>
+        /// <param name="registerDto">The registration details.</param>
+        /// <returns>An <see cref="IActionResult"/> indicating registration success.</returns>
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
@@ -347,6 +418,11 @@ namespace EuskalIA.Server.Controllers
             return Ok(new { message = _localizer["RegistrationSuccess"].Value });
         }
 
+        /// <summary>
+        /// Verifies a user's email address using a token.
+        /// </summary>
+        /// <param name="token">The verification token.</param>
+        /// <returns>A redirect to the registration success page.</returns>
         [HttpGet("verify-email")]
         public async Task<IActionResult> VerifyEmail([FromQuery] string token)
         {
@@ -378,6 +454,12 @@ namespace EuskalIA.Server.Controllers
             return Redirect($"http://localhost:8081/registro-exitoso?lng={user.Language}");
         }
 
+        /// <summary>
+        /// Updates the user's preferred language for the application interface.
+        /// </summary>
+        /// <param name="id">The unique identifier of the user.</param>
+        /// <param name="updateLanguageDto">The new language code.</param>
+        /// <returns>An <see cref="IActionResult"/> with the updated language.</returns>
         [Authorize]
         [HttpPut("{id}/language")]
         public async Task<IActionResult> UpdateLanguage(int id, [FromBody] UpdateLanguageDto updateLanguageDto)
@@ -401,6 +483,12 @@ namespace EuskalIA.Server.Controllers
             return Ok(new { message = _localizer["LanguageUpdated"].Value, language = user.Language });
         }
 
+        /// <summary>
+        /// Updates the Expo Push Token for the user to enable mobile notifications.
+        /// </summary>
+        /// <param name="id">The unique identifier of the user.</param>
+        /// <param name="pushTokenDto">The push token payload.</param>
+        /// <returns>An <see cref="IActionResult"/> signaling success.</returns>
         [Authorize]
         [HttpPost("{id}/push-token")]
         public async Task<IActionResult> UpdatePushToken(int id, [FromBody] PushTokenDto pushTokenDto)

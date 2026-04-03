@@ -1,5 +1,6 @@
 using EuskalIA.Server.Data;
 using EuskalIA.Server.Models;
+using EuskalIA.Server.DTOs.Gamification;
 using Microsoft.EntityFrameworkCore;
 
 namespace EuskalIA.Server.Services

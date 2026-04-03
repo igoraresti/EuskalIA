@@ -1,4 +1,5 @@
 using EuskalIA.Server.Models;
+using EuskalIA.Server.DTOs.Gamification;
 
 namespace EuskalIA.Server.Services
 {
@@ -18,18 +19,5 @@ namespace EuskalIA.Server.Services
         /// Gets all achievements, marking which ones the user has already earned.
         /// </summary>
         Task<List<UserAchievementDto>> GetUserAchievementsAsync(int userId);
-    }
-
-    public class UserAchievementDto
-    {
-        public int Id { get; set; }
-        public string Code { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public string Icon { get; set; } = string.Empty;
-        public string Category { get; set; } = string.Empty;
-        public int TargetValue { get; set; }
-        public bool IsEarned { get; set; }
-        public DateTime? EarnedAt { get; set; }
     }
 }

@@ -6,12 +6,22 @@ using System.Net.Http;
 
 namespace EuskalIA.Server.Services.Auth
 {
+    /// <summary>
+    /// Implementation of <see cref="ISocialAuthService"/> that handles token validation with Google and Facebook APIs.
+    /// Manages HTTP communication and configuration retrieval for social app credentials.
+    /// </summary>
     public class SocialAuthService : ISocialAuthService
     {
         private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;
         private readonly ILogger<SocialAuthService> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SocialAuthService"/> class.
+        /// </summary>
+        /// <param name="configuration">The application configuration provider.</param>
+        /// <param name="httpClient">The HTTP client for external API requests.</param>
+        /// <param name="logger">The service logger.</param>
         public SocialAuthService(IConfiguration configuration, HttpClient httpClient, ILogger<SocialAuthService> logger)
         {
             _configuration = configuration;
@@ -19,6 +29,12 @@ namespace EuskalIA.Server.Services.Auth
             _logger = logger;
         }
 
+        /// <summary>
+        /// Validates a Google token (Access Token or ID Token) and returns the corresponding user profile.
+        /// Supports both "ya29." style access tokens and standard JWT ID tokens.
+        /// </summary>
+        /// <param name="token">The Google token string.</param>
+        /// <returns>A <see cref="User"/> object populated with Google identity data; otherwise, null.</returns>
         public async Task<User?> ValidateGoogleTokenAsync(string token)
         {
             _logger.LogInformation("Validating Google token.");
@@ -69,6 +85,12 @@ namespace EuskalIA.Server.Services.Auth
             }
         }
 
+        /// <summary>
+        /// Validates a Facebook access token using the Facebook Graph API and returns user profile data.
+        /// Performs a multi-step validation: first debugging the token, then fetching user fields.
+        /// </summary>
+        /// <param name="token">The Facebook access token string.</param>
+        /// <returns>A <see cref="User"/> object populated with Facebook identity data; otherwise, null.</returns>
         public async Task<User?> ValidateFacebookTokenAsync(string token)
         {
             _logger.LogInformation("Validating Facebook token.");

@@ -1,5 +1,5 @@
 using EuskalIA.Server.Data;
-using EuskalIA.Server.DTOs;
+using EuskalIA.Server.DTOs.Exercises;
 using EuskalIA.Server.Models;
 using EuskalIA.Server.Services.AI;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +8,9 @@ using Microsoft.Extensions.Logging;
 
 namespace EuskalIA.Server.Controllers
 {
+    /// <summary>
+    /// Controller for managing AI-Generated Content (AIGC) exercises, session generation, and user attempts.
+    /// </summary>
     [ApiController]
     [Route("api/euskalia/[controller]")]
     public class AigcExercisesController : ControllerBase
@@ -17,6 +20,13 @@ namespace EuskalIA.Server.Controllers
         private readonly IKnowledgeService _knowledgeService;
         private readonly ILogger<AigcExercisesController> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AigcExercisesController"/> class.
+        /// </summary>
+        /// <param name="context">The database context.</param>
+        /// <param name="aiService">The AI service for generating complex exercises.</param>
+        /// <param name="knowledgeService">The knowledge service for context extraction from PDFs.</param>
+        /// <param name="logger">The controller logger.</param>
         public AigcExercisesController(AppDbContext context, IAIService aiService, IKnowledgeService knowledgeService, ILogger<AigcExercisesController> logger)
         {
             _context = context;
@@ -26,6 +36,11 @@ namespace EuskalIA.Server.Controllers
         }
 
         // GET: api/aigcexercises?levelId=A1
+        /// <summary>
+        /// Retrieves a list of approved exercises filtered by level.
+        /// </summary>
+        /// <param name="levelId">The level identifier (e.g., "A1").</param>
+        /// <returns>A collection of <see cref="AigcExerciseResponseDto"/> objects.</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AigcExerciseResponseDto>>> GetExercises([FromQuery] string levelId)
         {
@@ -57,6 +72,11 @@ namespace EuskalIA.Server.Controllers
         }
 
         // GET: api/aigcexercises/5
+        /// <summary>
+        /// Retrieves a specific exercise by its unique identifier.
+        /// </summary>
+        /// <param name="id">The unique identifier of the exercise.</param>
+        /// <returns>An <see cref="AigcExerciseResponseDto"/> if found; otherwise, NotFound.</returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<AigcExerciseResponseDto>> GetExercise(Guid id)
         {
@@ -81,6 +101,12 @@ namespace EuskalIA.Server.Controllers
         }
 
         // POST: api/aigcexercises
+        /// <summary>
+        /// Manually creates a new AIGC exercise (typically used for testing or seeding).
+        /// New exercises start with "BETA" status.
+        /// </summary>
+        /// <param name="dto">The exercise data.</param>
+        /// <returns>The created exercise response.</returns>
         [HttpPost]
         public async Task<ActionResult<AigcExerciseResponseDto>> CreateExercise(AigcExerciseCreateDto dto)
         {
@@ -115,6 +141,14 @@ namespace EuskalIA.Server.Controllers
         }
 
         // GET: api/aigcexercises/session?levelId=B1&userId=1
+        /// <summary>
+        /// Generates a personalized practice session for a user.
+        /// Mixes recently failed exercises, new unattempted exercises, and reviewed ones.
+        /// Triggers background AI generation if the available exercise pool is low.
+        /// </summary>
+        /// <param name="levelId">The target difficulty level.</param>
+        /// <param name="userId">The user identifying the session.</param>
+        /// <returns>A collection of exercises selected for the session.</returns>
         [HttpGet("session")]
         public async Task<ActionResult<IEnumerable<AigcExerciseResponseDto>>> GetSessionExercises([FromQuery] string levelId, [FromQuery] int userId)
         {
@@ -240,6 +274,11 @@ namespace EuskalIA.Server.Controllers
         }
 
         // POST: api/aigcexercises/attempt
+        /// <summary>
+        /// Records a user's attempt on a specific AIGC exercise.
+        /// </summary>
+        /// <param name="dto">The attempt details (correctness, user, exercise).</param>
+        /// <returns>An <see cref="IActionResult"/> indicating success.</returns>
         [HttpPost("attempt")]
         public async Task<IActionResult> RecordAttempt([FromBody] AigcExerciseAttemptDto dto)
         {

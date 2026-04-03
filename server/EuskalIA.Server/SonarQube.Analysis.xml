@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<SonarQubeAnalysisProperties xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.sonarsource.com/msbuild/staticconfig/2015/07">
+  <Property Name="sonar.projectKey">EuskalIA.Server</Property>
+  <Property Name="sonar.projectName">EuskalLingo Server</Property>
+  <Property Name="sonar.projectVersion">1.0</Property>
+  <Property Name="sonar.sourceEncoding">UTF-8</Property>
+  <Property Name="sonar.language">cs</Property>
+  <!-- Exclusions -->
+  <Property Name="sonar.exclusions">**/Migrations/**, **/bin/**, **/obj/**, **/Tests/**</Property>
+  <!-- Optional Coverage paths -->
+  <!-- <Property Name="sonar.cs.vstest.reportsPaths">**/TestResults/*.trx</Property> -->
+  <!-- <Property Name="sonar.cs.opencover.reportsPaths">**/TestResults/*/coverage.opencover.xml</Property> -->
+</SonarQubeAnalysisProperties>

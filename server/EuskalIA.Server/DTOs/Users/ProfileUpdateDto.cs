@@ -1,5 +1,9 @@
-namespace EuskalIA.Server.DTOs
+namespace EuskalIA.Server.DTOs.Users
 {
+    /// <summary>
+    /// Data Transfer Object for updating a user's profile details.
+    /// All fields are optional.
+    /// </summary>
     public class ProfileUpdateDto
     {
         public string? Username { get; set; }

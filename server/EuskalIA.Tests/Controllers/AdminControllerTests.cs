@@ -1,6 +1,7 @@
 using EuskalIA.Server.Controllers;
 using EuskalIA.Server.Data;
-using EuskalIA.Server.DTOs;
+using EuskalIA.Server.DTOs.Admin;
+using EuskalIA.Server.DTOs.Common;
 using EuskalIA.Server.Models;
 using EuskalIA.Server.Services.Encryption;
 using Microsoft.AspNetCore.Mvc;
@@ -114,7 +115,7 @@ namespace EuskalIA.Tests.Controllers
             await context.SaveChangesAsync();
 
             // Act
-            var req = new AdminController.BulkStatusRequest(new List<Guid> { id1, id2 }, "APPROVED");
+            var req = new BulkStatusRequest(new List<Guid> { id1, id2 }, "APPROVED");
             var result = await controller.BulkUpdateStatus(req);
 
             // Assert
@@ -143,13 +144,13 @@ namespace EuskalIA.Tests.Controllers
             await context.SaveChangesAsync();
 
             // 2. Import request with one duplicate and one new
-            var req = new AdminController.ImportRequest(
-                Exercises: new List<AdminController.ImportExerciseItem>
+            var req = new ImportRequest(
+                Exercises: new List<ImportExerciseItem>
                 {
                     // Duplicate (high similarity)
-                    new AdminController.ImportExerciseItem("T1", "A1", "grammar", 1, existingJson),
+                    new ImportExerciseItem("T1", "A1", "grammar", 1, existingJson),
                     // New
-                    new AdminController.ImportExerciseItem("T1", "A1", "vocabulary", 1, "{\"question\": {\"es\": \"hola\", \"en\": \"hello\"}}")
+                    new ImportExerciseItem("T1", "A1", "vocabulary", 1, "{\"question\": {\"es\": \"hola\", \"en\": \"hello\"}}")
                 },
                 Confirm: true,
                 Threshold: 0.8

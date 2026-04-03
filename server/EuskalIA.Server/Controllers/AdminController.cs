@@ -3,13 +3,18 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using EuskalIA.Server.Data;
 using EuskalIA.Server.Models;
-using EuskalIA.Server.DTOs;
+using EuskalIA.Server.DTOs.Admin;
+using EuskalIA.Server.DTOs.Common;
 using Microsoft.AspNetCore.Authorization;
 using EuskalIA.Server.Services.Encryption;
 using System.Text.Json;
 
 namespace EuskalIA.Server.Controllers
 {
+    /// <summary>
+    /// Controller for administrative tasks, including user management and AIGC exercise moderation.
+    /// restricted to users with the "Admin" role.
+    /// </summary>
     [Authorize(Roles = "Admin")]
     [ApiController]
     [Route("api/euskalia/[controller]")]
@@ -19,6 +24,12 @@ namespace EuskalIA.Server.Controllers
         private readonly IEncryptionService _encryptionService;
         private readonly ILogger<AdminController> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdminController"/> class.
+        /// </summary>
+        /// <param name="context">The database context.</param>
+        /// <param name="encryptionService">The encryption service for handling sensitive user data.</param>
+        /// <param name="logger">The controller logger.</param>
         public AdminController(AppDbContext context, IEncryptionService encryptionService, ILogger<AdminController> logger)
         {
             _context = context;
@@ -28,6 +39,11 @@ namespace EuskalIA.Server.Controllers
 
         // ── Users ─────────────────────────────────────────────────────────────
 
+        /// <summary>
+        /// Retrieves a paginated and filtered list of users for administration.
+        /// </summary>
+        /// <param name="filter">The filtering and pagination parameters.</param>
+        /// <returns>A paginated list of <see cref="AdminUserDto"/> objects.</returns>
         [HttpGet("users")]
         public async Task<ActionResult<PaginatedList<AdminUserDto>>> GetUsers([FromQuery] AdminUserFilterDto filter)
         {
@@ -77,6 +93,10 @@ namespace EuskalIA.Server.Controllers
             });
         }
 
+        /// <summary>
+        /// Retrieves global statistics for the admin dashboard, including user counts and AI health.
+        /// </summary>
+        /// <returns>An <see cref="ActionResult{AdminStatsDto}"/> containing dashboard metrics.</returns>
         [HttpGet("stats")]
         public async Task<ActionResult<AdminStatsDto>> GetStats()
         {
@@ -105,6 +125,11 @@ namespace EuskalIA.Server.Controllers
             });
         }
 
+        /// <summary>
+        /// Toggles the active status of a user.
+        /// </summary>
+        /// <param name="id">The unique identifier of the user.</param>
+        /// <returns>An <see cref="IActionResult"/> with the new active status.</returns>
         [HttpPut("users/{id}/toggle-active")]
         public async Task<IActionResult> ToggleUserActive(int id)
         {
@@ -124,6 +149,19 @@ namespace EuskalIA.Server.Controllers
 
         // ── Exercises ─────────────────────────────────────────────────────────
 
+        /// <summary>
+        /// Retrieves a paginated list of AIGC exercises with filtering and sorting options.
+        /// Includes completion statistics (Correct/Wrong attempts).
+        /// </summary>
+        /// <param name="levelId">Filter by level (optional).</param>
+        /// <param name="topic">Filter by topic (optional).</param>
+        /// <param name="status">Filter by moderation status (optional).</param>
+        /// <param name="search">Search term for exercise code or content (optional).</param>
+        /// <param name="sortBy">The field to sort by (default: exerciseCode).</param>
+        /// <param name="sortDir">The sort direction (asc/desc).</param>
+        /// <param name="page">The page number.</param>
+        /// <param name="pageSize">The number of items per page.</param>
+        /// <returns>A paginated list of exercises with extra stats.</returns>
         [HttpGet("exercises")]
         public async Task<IActionResult> GetExercises(
             [FromQuery] string? levelId,
@@ -192,6 +230,11 @@ namespace EuskalIA.Server.Controllers
             return Ok(new { total, page, pageSize, items });
         }
 
+        /// <summary>
+        /// Retrieves detailed statistics for a specific exercise, including attempt counts and unique users.
+        /// </summary>
+        /// <param name="id">The unique identifier of the exercise.</param>
+        /// <returns>An <see cref="IActionResult"/> with exercise stats.</returns>
         [HttpGet("exercises/{id}/stats")]
         public async Task<IActionResult> GetExerciseStats(Guid id)
         {
@@ -212,6 +255,11 @@ namespace EuskalIA.Server.Controllers
             });
         }
 
+        /// <summary>
+        /// Deletes an exercise and all its associated user attempts.
+        /// </summary>
+        /// <param name="id">The unique identifier of the exercise.</param>
+        /// <returns>An <see cref="IActionResult"/> indicating success.</returns>
         [HttpDelete("exercises/{id}")]
         public async Task<IActionResult> DeleteExercise(Guid id)
         {
@@ -231,8 +279,12 @@ namespace EuskalIA.Server.Controllers
             return Ok(new { deleted = exercise.ExerciseCode });
         }
 
-        public record BulkStatusRequest(List<Guid> Ids, string Status);
 
+        /// <summary>
+        /// Updates the moderation status of multiple exercises at once.
+        /// </summary>
+        /// <param name="req">The request containing exercise IDs and the new status.</param>
+        /// <returns>An <see cref="IActionResult"/> with the count of updated exercises.</returns>
         [HttpPatch("exercises/bulk-status")]
         public async Task<IActionResult> BulkUpdateStatus([FromBody] BulkStatusRequest req)
         {
@@ -256,6 +308,12 @@ namespace EuskalIA.Server.Controllers
             return Ok(new { updated = exercises.Count, status = req.Status });
         }
 
+        /// <summary>
+        /// Retrieves a paginated list of AI generation logs for monitoring.
+        /// </summary>
+        /// <param name="page">The page number.</param>
+        /// <param name="pageSize">The items per page.</param>
+        /// <returns>A paginated list of <see cref="AigcLog"/> entries.</returns>
         [HttpGet("ai-logs")]
         public async Task<IActionResult> GetAiLogs([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
@@ -273,20 +331,13 @@ namespace EuskalIA.Server.Controllers
 
         // ── Import ────────────────────────────────────────────────────────────
 
-        public record ImportExerciseItem(
-            string TemplateType,
-            string LevelId,
-            string Topics,
-            int Difficulty,
-            string JsonSchema
-        );
 
-        public record ImportRequest(
-            List<ImportExerciseItem> Exercises,
-            bool Confirm,
-            double Threshold  // 0.0–1.0, default 0.8
-        );
-
+        /// <summary>
+        /// Handles the import of exercises from an external source (e.g., bulk AI generation).
+        /// Performs duplicate detection based on text similarity before importing.
+        /// </summary>
+        /// <param name="req">The import request containing exercises and configuration.</param>
+        /// <returns>An <see cref="IActionResult"/> with a preview or the import results.</returns>
         [HttpPost("exercises/import")]
         public async Task<IActionResult> ImportExercises([FromBody] ImportRequest req)
         {

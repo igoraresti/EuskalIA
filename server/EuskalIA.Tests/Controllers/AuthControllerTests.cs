@@ -1,6 +1,6 @@
 using EuskalIA.Server.Controllers;
 using EuskalIA.Server.Data;
-using EuskalIA.Server.DTOs;
+using EuskalIA.Server.DTOs.Auth;
 using EuskalIA.Server.Models;
 using EuskalIA.Server.Services.Auth;
 using EuskalIA.Server.Services.Encryption;

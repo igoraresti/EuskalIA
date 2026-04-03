@@ -10,6 +10,10 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace EuskalIA.Server.Controllers
 {
+    /// <summary>
+    /// Controller for managing structured lessons and generating new lesson content.
+    /// Includes functionality for seeding initial lesson and user data.
+    /// </summary>
     [Authorize]
     [ApiController]
     [Route("api/euskalia/[controller]")]
@@ -20,6 +24,13 @@ namespace EuskalIA.Server.Controllers
         private readonly IEncryptionService _encryptionService;
         private readonly ILogger<LessonsController> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LessonsController"/> class.
+        /// </summary>
+        /// <param name="context">The database context.</param>
+        /// <param name="aiService">The AI service for generating lesson exercises.</param>
+        /// <param name="encryptionService">The encryption service for handling user data during seeding.</param>
+        /// <param name="logger">The controller logger.</param>
         public LessonsController(AppDbContext context, IAIService aiService, IEncryptionService encryptionService, ILogger<LessonsController> logger)
         {
             _context = context;
@@ -28,6 +39,11 @@ namespace EuskalIA.Server.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Retrieves all available lessons.
+        /// Triggers data seeding for lessons and sample users if the database is empty or sparse.
+        /// </summary>
+        /// <returns>A collection of <see cref="Lesson"/> objects including their associated exercises.</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Lesson>>> GetLessons()
         {
@@ -93,6 +109,11 @@ namespace EuskalIA.Server.Controllers
             return await _context.Lessons.Include(l => l.Exercises).ToListAsync();
         }
 
+        /// <summary>
+        /// Retrieves a specific lesson by its unique identifier.
+        /// </summary>
+        /// <param name="id">The unique identifier of the lesson.</param>
+        /// <returns>A <see cref="Lesson"/> object if found; otherwise, NotFound.</returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<Lesson>> GetLesson(int id)
         {
@@ -101,6 +122,11 @@ namespace EuskalIA.Server.Controllers
             return lesson;
         }
 
+        /// <summary>
+        /// Generates a new lesson and its associated exercises for a specific topic using AI.
+        /// </summary>
+        /// <param name="topic">The topic to generate the lesson for.</param>
+        /// <returns>The newly created <see cref="Lesson"/> object.</returns>
         [HttpPost("generate-for-topic")]
         public async Task<ActionResult<Lesson>> GenerateLesson(string topic)
         {

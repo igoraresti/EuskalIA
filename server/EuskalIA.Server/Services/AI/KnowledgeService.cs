@@ -6,17 +6,22 @@ using UglyToad.PdfPig;
 
 namespace EuskalIA.Server.Services.AI
 {
-    public interface IKnowledgeService
-    {
-        Task<(string Content, string BookName, int PageNumber)> GetNextContextAsync(string levelId);
-    }
-
+    /// <summary>
+    /// Implementation of <see cref="IKnowledgeService"/> that uses PdfPig to extract text from local PDF lessons.
+    /// Tracks reading progress in the database to provide sequential learning material.
+    /// </summary>
     public class KnowledgeService : IKnowledgeService
     {
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _env;
         private readonly ILogger<KnowledgeService> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KnowledgeService"/> class.
+        /// </summary>
+        /// <param name="context">The database context for tracking page progress.</param>
+        /// <param name="env">The web host environment for resolving local PDF paths.</param>
+        /// <param name="logger">The service logger.</param>
         public KnowledgeService(AppDbContext context, IWebHostEnvironment env, ILogger<KnowledgeService> logger)
         {
             _context = context;
@@ -24,6 +29,12 @@ namespace EuskalIA.Server.Services.AI
             _logger = logger;
         }
 
+        /// <summary>
+        /// Extracts text content from the next unprocessed page of the mapped book for the specified level.
+        /// Updates the <see cref="BookProgress"/> to point to subsequent pages for future calls.
+        /// </summary>
+        /// <param name="levelId">The targeted language level.</param>
+        /// <returns>Extracted text for AI consumption and source metadata.</returns>
         public async Task<(string Content, string BookName, int PageNumber)> GetNextContextAsync(string levelId)
         {
             _logger.LogInformation("Retrieving next context for level {LevelId}.", levelId);
@@ -89,6 +100,11 @@ namespace EuskalIA.Server.Services.AI
             return (extractedText, bookName, targetPage);
         }
 
+        /// <summary>
+        /// Maps a standardized level ID to the specific filename of the PDF coursebook.
+        /// </summary>
+        /// <param name="levelId">The level identifier.</param>
+        /// <returns>The filename of the PDF book.</returns>
         private string MapLevelToBook(string levelId)
         {
             return levelId.ToUpper() switch
