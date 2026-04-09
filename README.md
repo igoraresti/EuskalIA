@@ -3,7 +3,7 @@
   
   <h1>EuskalIA</h1>
   <p><strong>Aprende Euskera con IA - Descarga, Juega, Progresa</strong></p>
-  <p>Una plataforma moderna y gamificada inspirada en Duolingo, potenciada por Inteligencia Artificial generativa y un robusto backend .NET.</p>
+  <p>Una plataforma moderna y gamificada inspirada en Duolingo, potenciada por Inteligencia Artificial generativa y un robusto backend .NET 9.</p>
 
   [![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactnative.dev/)
   [![Expo](https://img.shields.io/badge/EXPO-000020?style=for-the-badge&logo=expo&logoColor=white)](https://expo.dev/)
@@ -12,185 +12,144 @@
   [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 </div>
 
-<br/>
+---
 
-## 👤 Parte Funcional
+## 📖 Sobre EuskalIA
 
-EuskalIA no es solo un clon de aplicaciones tradicionales de idiomas. Es un ecosistema completo preparado para Producción:
+EuskalIA es una aplicación de aprendizaje de euskera que utiliza Inteligencia Artificial para generar ejercicios personalizados. Combina técnicas modernas como RAG (Retrieval-Augmented Generation) para basar el aprendizaje en materiales reales y algoritmos de repaso espaciado (SRS) para optimizar la retención.
 
-### 🌟 Características Principales
+## 🚀 Inicio Rápido (Quick Start)
 
-- **🔐 Social Authentication Segura:** Flujos OAuth integrados para Google y Facebook. Registro automático y generación de alias ("Nicknames") aleatorios respetuosos con la privacidad en un solo clic.
-- **🌍 Internacionalización (i18n):** Interfaz disponible y traducida dinámicamente en **Español, Euskera, Inglés, Francés y Polaco**.
-- **🧠 Generación Dinámica de Ejercicios por IA (RAG):** Integración real con **Google Gemini 1.5 Flash**. El sistema "lee" libros de texto en PDF mediante una arquitectura RAG Lite para generar ejercicios contextuales y pedagógicos basados en el temario real del usuario.
-- **📅 Repaso Espaciado (SRS):** Sistema inteligente basado en el algoritmo SM-2 que programa repasos automáticos según el nivel de dominio del usuario, maximizando la retención a largo plazo.
-- **🔔 Notificaciones Push:** Recordatorios diarios personalizados y localizados (según el idioma del usuario) para realizar repasos pendientes y mantener rachas, integrados mediante Expo Push API.
-- **🏆 Gamificación Avanzada:** Sistema de **Rachas (Streaks)** dinámico que premia la constancia diaria y un **Cuadro de Logros** con medallas desbloqueables (Madrugador, Erudito, etc.) para motivar el progreso.
-- **📊 Análisis de Errores:** Dashboard inteligente que identifica los temas donde el usuario comete más fallos (ej: declinaciones, verbos) basándose en el historial de los últimos 30 días, permitiendo un refuerzo dirigido.
-- **📊 Sistema de Clasificación (Leaderboards):** Ranking Global y Personal donde competir por el mayor XP acumulado.
-- **🛡️ Panel de Administración (Admin Dashboard):** Exclusivo para usuarios con rol `Admin`. Interfaz web integrada para ver métricas, listar usuarios y activar/desactivar cuentas conflictivas.
-- **🗑️ Gestión de Privacidad (Deactivation Flow):** Flujo completo automatizado donde un usuario puede solicitar la desactivación de su cuenta. Tras confirmarlo por Email (con token seguro + PIN), desaparece de forma segura sin romper la base de datos (Soft Delete).
+Si tienes instalado **Docker**, **Node.js** y **.NET 9**, puedes poner en marcha todo el ecosistema con un solo comando:
 
-### 📱 Experiencia de Usuario y Pantallas
+```bash
+# 1. Clonar el repositorio e instalar dependencias del frontend
+npm install --prefix app
 
-La arquitectura Frontend React Native (Expo) está dividida en pantallas fluidas y nativas:
+# 2. Configurar variables de entorno (Ver sección 'Configuración')
+cp app/.env.example app/.env # Si existe un ejemplo, o créalo manualmente
 
-| Pantalla | Descripción |
-| :--- | :--- |
-| **Onboarding** | La puerta de entrada. Presenta el logo de forma atractiva con animaciones suaves usando `react-native-reanimated`. |
-| **Login / Registro** | Experiencia unificada con validaciones, control de vista de contraseñas, olvidé mi contraseña y botones nativos para Google y Facebook. El registro permite seleccionar el idioma materno desde el inicio. |
-| **Home (Dashboard)** | El núcleo del progreso. Muestra estadísticas (Racha 🔥, XP ⭐) y un **Dashboard de Debilidades** con los temas a reforzar. Debajo, el listado de niveles (A1-B1). |
-| **Lesson (Quiz UI)** | Pantalla inmersiva para contestar ejercicios. Incluye barras de progreso (`ProgressBar`), opciones interactivas y modales de éxito/fracaso con el característico estilete gamificado. |
-| **Review (SRS)** | Sesión de refuerzo personalizada activada por el sistema de repaso espaciado. Enfocada en temas con menor dominio detectado por el algoritmo. |
-| **Leaderboard** | Un podio visual donde competir con el resto del mundo clasificando por mayor cantidad de XP ganada al resolver lecciones. |
-| **Profile** | Un rincón personal. Permite visualizar el avatar, consultar cuándo te uniste, cambiar tu `Username/Nickname`, consultar tus **Logros y Medallas** y un botón de peligro para solicitar la desactivación de cuenta. |
-| **Admin Panel** | *Sólo accesible por el Rol Admin, oculto al resto*. Muestra estadísticas críticas del servidor (usuarios totales, número de lecciones) y una tabla paginada de todos los jugadores con poder absoluto de "baneo temporal" (Toggle Active). |
+# 3. Lanzar todo (Base de Datos + API + App Web)
+chmod +x start.sh
+./start.sh
+```
 
 ---
 
-## 💻 Parte Técnica
+## 📋 Prerrequisitos
 
-El repositorio es un **Monorepo** que alberga ambas partes fundamentales de la arquitectura:
+Para contribuir o ejecutar el proyecto localmente, asegúrate de tener:
 
-### 1. Servidor API (`/server`)
-- **Framework:** `ASP.NET Core 10.0 Web API`.
-- **OR/M:** `Entity Framework Core`
-- **Lógica de Negocio:** Servicios desacoplados para Auth, AI (**Gemini 1.5 Flash**), Conocimiento (**PdfPig**), Email y **SRS (Algoritmo SM-2)**.
-- **Autenticación:** Sistema de claims basado en `JWT Bearer`. Separación de roles (User/Admin).
-- **Base de Datos:** SQL Server Express (2022). Entorno de desarrollo contenedorizado con Docker.
-- **Testeo:** Suite robusta con **49 tests automáticos** usando `xUnit` y un proveedor en memoria In-Memory DB.
-
-### 2. Cliente Móvil y Web (`/app`)
-- **Framework:** `React Native` gestionado nativamente a través de `Expo SDK`.
-- **Páginas / Navegación:** `React Navigation` (Stack & Bottom Tabs).
-- **Comunicaciones HTTP:** Cliente `Axios`, encapsulado en una clase `apiService` centralizada.
-- **Persistencia:** `AsyncStorage` para control mágico de sesiones y tokens.
-- **Estilos:** Creados artesanalmente pero simulando estándares modernos de Tailwind/Bootstrap mediante Theme Colors en un `config.ts` único.
-- **Testeo:** React Native Testing Library / Jest.
+- **.NET 9 SDK**: Para el backend.
+- **Node.js (v18+)**: Para el frontend (Expo).
+- **Docker Desktop**: Para levantar SQL Server rápidamente.
+- **Android Studio / Xcode**: (Opcional) Si quieres probar en emuladores nativos.
+- **ngrok o Dev Tunnels**: (Recomendado) Para probar la API desde un dispositivo físico.
 
 ---
 
-## 🛠️ Parte del Desarrollador
+## 📂 Estructura del Proyecto
 
-Esta sección está destinada al equipo de desarrollo para la configuración, despliegue local y depuración.
+Este repositorio es un **monorepo** organizado de la siguiente manera:
 
-### 🔒 Configuración de HTTPS en Desarrollo (Expo + .NET 10)
-
-Esta guía resume los pasos necesarios para habilitar HTTPS durante el desarrollo local entre la API y Expo, de forma que se puedan probar características en dispositivos reales de iOS y Android salvando los problemas de "Certificado no confiable".
-
-#### 1. Backend (.NET 10)
-**Generar y confiar en Certificados:**
-En macOS o Windows, abre una terminal y ejecuta:
-```bash
-dotnet dev-certs https --clean
-dotnet dev-certs https --trust
+```text
+.
+├── app/                # Frontend en React Native (Expo)
+│   ├── src/            # Código fuente (Screens, Components, Services)
+│   └── assets/         # Imágenes, iconos y recursos
+├── server/             # Backend en ASP.NET Core 9
+│   ├── EuskalIA.Server/# Proyecto de API Web
+│   ├── EuskalIA.Tests/ # Suite de tests xUnit
+│   └── db-init/        # Scripts de inicialización de SQL Server
+├── start.sh            # Script unificado para desarrollo
+├── build_apk_local.sh  # Script para generar APK de Android
+└── README.md           # Esta guía
 ```
-
-**Forzar el uso del puerto HTTPS (Kestrel y launchSettings):**
-El proyecto usa de forma predeterminada un perfil que escucha en el puerto HTTPS `7229`. Puedes arrancar el backend forzando este perfil (`start.sh` ya lo hace de forma automática):
-```bash
-dotnet run --launch-profile https
-```
-*(El archivo `Program.cs` del proyecto ya cuenta con las políticas de CORS pertinentes y `app.UseHttpsRedirection()` agregadas correctamente).*
-
-#### 2. Conectividad y Dispositivos Físicos (ngrok / Dev Tunnels)
-El acceso a `localhost` no funciona desde dispositivos físicos (se interpone la falta de un certificado de autoridad - CA). Para solucionarlo de la mejor forma, se recomienda exponer la API mediante un túnel seguro con certificado universal.
-
-**Opción A: ngrok**
-```bash
-ngrok http http://localhost:5235
-```
-
-**Opción B: Dev Tunnels (De Visual Studio)**
-```bash
-devtunnel host -p 5235 --allow-anonymous
-```
-Ambos métodos devolverán una URL HTTPS válida y pública de forma temporal (ejemplo: `https://abcd-12.ngrok-free.app`).
-
-#### 3. Frontend (Expo)
-Para hacer que Axios llame a esta nueva URL en vez de a `localhost`, debes crear un archivo `.env` en el directorio cliente (`/app`) inyectando tu URL del túnel.
-
-1. Crea / edita el archivo `app/.env`:
-    ```env
-    EXPO_PUBLIC_API_URL=https://abcd-12.ngrok-free.app/api
-    
-    # AI - Google Gemini
-    GeminiSettings__ApiKey=AIzaSy...
-    GeminiSettings__Model=gemini-1.5-flash
-    ```
-2. Reinicia la caché de tu bundler en Expo:
-   ```bash
-   npx expo start --clear
-   ```
-*(El archivo `config.ts` ha sido integrado para recibir automáticamente esta variable de entorno de existir).*
 
 ---
 
-### 🗄️ Configuración de Base de Datos (SQL Server + Docker)
+## ⚙️ Configuración
 
-Desde la versión 2.0, EuskalIA utiliza **SQL Server Express** en lugar de SQLite para mayor escalabilidad y fidelidad a entornos productivos.
+### Variables de Entorno (.env)
+El frontend requiere conocer la URL de la API y las claves de IA. Crea un archivo `app/.env`:
 
-#### 1. Levantar el entorno de Desarrollo (Docker)
-Para facilitar el despliegue, hemos automatizado la creación del contenedor:
+```env
+# URL de la API (Usa tu IP local o túnel HTTPS)
+EXPO_PUBLIC_API_URL=https://tu-url-de-ngrok.app/api
 
-1. Asegúrate de tener **Docker Desktop** iniciado.
-2. Ejecuta el script de arranque:
-   ```bash
-   ./server/start-db.sh
-   ```
-   Este script:
-   - Descarga la imagen oficial de MS SQL Server 2022.
-   - Crea el contenedor `euskalia-sqlserver`.
-   - Espera a que el motor esté listo para recibir conexiones.
-   - Ejecuta `db-init/init.sql` para cargar datos iniciales.
-
-#### 2. Configuración en Producción
-En producción, la API buscará automáticamente la cadena de conexión en la variable de entorno `DB_CONNECTION_STRING`. Si no existe, recurrirá a la configuración de `appsettings.Production.json`.
-
-#### 3. Migraciones
-Si realizas cambios en el modelo (`Models/*.cs`), genera una nueva migración:
-```bash
-dotnet ef migrations add <NombreMigracion> --project server/EuskalIA.Server/EuskalIA.Server.csproj
+# Configuración de Google Gemini (IA)
+GeminiSettings__ApiKey=TU_API_KEY_AQUI
+GeminiSettings__Model=gemini-1.5-flash
 ```
-Las migraciones se aplican **automáticamente** al arrancar la aplicación (`dotnet run`).
+
+### Base de Datos
+El sistema usa SQL Server 2022. Puedes gestionarlo fácilmente con Docker:
+```bash
+./server/start-db.sh
+```
+*Configuración por defecto:* Usuario `sa`, Password `YourStrong!Pass123`, Puerto `1433`.
 
 ---
 
-### 📱 Instalación (APK) y Depuración en Android
+## 🛠️ Guía de Desarrollo Detallada
 
-Si tienes el archivo `EuskalLingo.apk` empaquetado y deseas instalarlo o depurarlo en un dispositivo conectado, utiliza el ADB de Android SDK:
+### Backend (.NET 9)
+Ubicado en `/server`. Utiliza Entity Framework Core y una arquitectura orientada a servicios.
+- **Ejecutar API:** `cd server/EuskalIA.Server && dotnet run --launch-profile https`
+- **Generar Migración:** `dotnet ef migrations add NombreMigracion --project server/EuskalIA.Server`
 
-**Instalar APK:**
+### Frontend (Expo)
+Ubicado en `/app`. Es una aplicación universal (iOS, Android, Web).
+- **Ejecutar Web:** `npm run web --prefix app`
+- **Ejecutar Expo Go:** `npm start --prefix app`
+
+---
+
+## 🧪 Testing
+
+Mantenemos la calidad del código mediante tests automatizados:
+
+- **Backend (xUnit):**
+  ```bash
+  cd server && dotnet test
+  ```
+- **Frontend (Jest):**
+  ```bash
+  cd app && npm test
+  ```
+
+---
+
+## 📱 Generación de APK (Android)
+
+Para generar una APK local para pruebas en dispositivos físicos:
 ```bash
-adb install -r EuskalLingo.apk
-```
+# Para desarrollo (Permite tráfico HTTP)
+./build_apk_local.sh dev
 
-**Visualizar Logs y Errores (Logcat):**
-Para ver los logs de la aplicación filtrando por errores críticos y contexto de JavaScript:
-1. Limpiar logs previos:
-   ```bash
-   adb logcat -c
-   ```
-2. Ver logs de errores en tiempo real y componentes de React:
-   ```bash
-   adb logcat "*:E" | grep -iE "euskal|react|fatal|javascript"
-   ```
+# Para producción (Solo HTTPS)
+./build_apk_local.sh prod
+```
+El archivo resultante aparecerá en la raíz como `EuskalLingo.apk`.
+
+---
+
+## 🛡️ Características Principales (Resumen)
+
+- **IA RAG:** Generación de ejercicios basada en PDFs pedagógicos.
+- **SRS (Algoritmo SM-2):** Repaso espaciado inteligente.
+- **Gamificación:** Rachas, XP, Logros y Rankings.
+- **i18n:** Traducido a 5 idiomas.
+- **Admin Panel:** Gestión de usuarios y métricas para administradores.
+- **Privacidad:** Flujo de desactivación de cuenta conforme a estándares.
 
 ---
 
 ## ⚖️ Licencia
 
-Este proyecto está bajo la **Licencia MIT**.
-
-Copyright (c) 2026 Igor Aresti
-
-Se concede permiso por la presente, de forma gratuita, a cualquier persona que obtenga una copia de este software y de los archivos de documentación asociados (el "Software"), para utilizar el Software sin restricción, incluyendo sin limitación los derechos de uso, copia, modificación, fusión, publicación, distribución, sublicencia y/o venta de copias del Software, y para permitir a las personas a las que se les proporcione el Software a hacer lo mismo, sujeto a las siguientes condiciones:
-
-**El aviso de copyright anterior y este aviso de permiso se incluirán en todas las copias o partes sustanciales del Software.**
-
----
+Este proyecto está bajo la **Licencia MIT**. Ver el archivo README original para el texto completo del copyright de Igor Aresti.
 
 <div align="center">
-  <i>Diseñado y Programado a la vieja usanza del buen código C# y la magia de React.</i><br/>
-  <b>Desarrollado por @igoraresti</b>
+  <i>Desarrollado con ❤️ para el aprendizaje del Euskera.</i><br/>
+  <b>@igoraresti</b>
 </div>
